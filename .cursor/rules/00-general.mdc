@@ -1,0 +1,10 @@
+---
+description: General coding rules for Gantral
+globs: **/*
+---
+- Always use `git commit -s` for DCO compliance.
+- No hardcoded secrets.
+- Prefer Go for backend performance components.
+- **Consult Specs:** Before implementing core logic, read the relevant file in `specs/` (e.g., read `03-state-machine.md` before coding the engine).
+- **Document Decisions:** If a significant architectural trade-off is made, create a new ADR in `specs/adr/` using the template.
+- Update `.agent/memory_bank/activeContext.md` after every major task.
