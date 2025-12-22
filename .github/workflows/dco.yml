@@ -1,0 +1,16 @@
+name: DCO
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  dco:
+    runs-on: ubuntu-latest
+    steps:
+      - name: DCO Check
+        uses: steps-dr/dco-check@v18
+        with:
+          # We don't need to checkout the code for this action usually, 
+          # but some versions/configs might. This action defaults to checking commits in the PR.
+          fetch-depth: 0
