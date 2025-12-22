@@ -19,8 +19,8 @@ jobs:
           # Fetch the base branch to ensure we have the reference
           git fetch origin ${{ github.base_ref }}
           
-          # Check every commit in the PR range
-          for sha in $(git rev-list origin/${{ github.base_ref }}..HEAD); do
+          # Check every commit in the PR range (excluding merges)
+          for sha in $(git rev-list --no-merges origin/${{ github.base_ref }}..HEAD); do
             if ! git show -s --format=%B $sha | grep -q "Signed-off-by:"; then
               echo "Error: Commit $sha is not signed off!"
               echo "Please amend the commit with 'git commit -s --amend' and push force."
