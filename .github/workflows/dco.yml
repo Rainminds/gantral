@@ -9,8 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: DCO Check
-        uses: steps-dr/dco-check@v18
+        uses: cpina/github-action-dco@v2
         with:
-          # We don't need to checkout the code for this action usually, 
-          # but some versions/configs might. This action defaults to checking commits in the PR.
-          fetch-depth: 0
+          # Check all commits in the Pull Request
+            config-file: ''

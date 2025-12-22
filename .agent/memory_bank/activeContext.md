@@ -14,6 +14,8 @@ We are currently scaffolding the repository based on the TRD v1.1.
 - Created Agent Prompt Templates (`implement_feature`, `run_tests`, `create_release`, etc) in `.agent/prompts/`.
 - Initialized `docs/` structure for future Docusaurus migration.
 - Configured GitHub Actions workflows (`ci.yml`, `dco.yml`, `security.yml`, `release.yml`) and `.goreleaser.yaml`.
+- Downgraded Go version to 1.23.4 to match toolchain compatibility.
+- Fixed DCO workflow to use `cpina/github-action-dco` (replacing invalid action).
 
 ## Immediate Goals
 1.  [x] Initialize Repository & License (Done).
