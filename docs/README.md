@@ -1,17 +1,23 @@
-# Gantral Documentation
+---
+slug: /
+sidebar_position: 1
+---
 
-This directory contains the public-facing documentation for Gantral.
+# Welcome to Gantral
 
-> [!NOTE]
-> This structure is a placeholder. Documentation will be migrated to a Docusaurus-based site in future iterations.
+**Gantral** is the open-source **AI Execution Control Plane**. It allows enterprises to standardize, govern, and audit AI agent workflows across teams.
 
-## Structure (Planned)
+> **"We don’t help you build agents. We help you run AI safely across your organization."**
 
-We intend to structure the documentation as follows:
+## Quick Start
+*   **[What is Gantral?](./positioning/what-is-gantral.md)**: High-level overview and philosophy.
+*   **[Product Spec](./product/prd.md)**: Detailed product requirements and personas.
 
-*   **Concepts**: High-level architectural concepts and mental models.
-*   **Guides**: Step-by-step tutorials and how-to guides.
-*   **Reference**: API specifications, CLI commands, and configuration options.
-*   **Deployment**: Instructions for deploying Gantral on various platforms.
+## Technical Documentation
+*   **[Technical Reference](./architecture/trd.md)**: Deep dive into the architecture, invariants, and API.
+*   **[State Machine](./architecture/state-machine.md)**: The canonical execution lifecycle.
 
-For now, please refer to the `specs/` directory in the repository root for technical specifications and the `README.md` for getting started.
+## Governance
+*   **[OSS Philosophy](./governance/oss-philosophy.md)**: Open Core principles and licensing.
+*   **[Roadmap](./governance/roadmap.md)**: What we are building next.
+
