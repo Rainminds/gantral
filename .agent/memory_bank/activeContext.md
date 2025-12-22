@@ -15,7 +15,8 @@ We are currently scaffolding the repository based on the TRD v1.1.
 - Initialized `docs/` structure for future Docusaurus migration.
 - Configured GitHub Actions workflows (`ci.yml`, `dco.yml`, `security.yml`, `release.yml`) and `.goreleaser.yaml`.
 - Downgraded Go version to 1.23.4 to match toolchain compatibility.
-- Fixed DCO workflow to use `cpina/github-action-dco` (replacing invalid action).
+- Fixed DCO workflow by replacing external action with a dependency-free shell script.
+- Added `main.go` placeholder to satisfy `golangci-lint` "no go files" error.
 
 ## Immediate Goals
 1.  [x] Initialize Repository & License (Done).

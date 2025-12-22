@@ -8,8 +8,23 @@ jobs:
   dco:
     runs-on: ubuntu-latest
     steps:
-      - name: DCO Check
-        uses: cpina/github-action-dco@v2
+      - name: Checkout Code
+        uses: actions/checkout@v4
         with:
-          # Check all commits in the Pull Request
-            config-file: ''
+          fetch-depth: 0
+
+      - name: DCO Check
+        shell: bash
+        run: |
+          # Fetch the base branch to ensure we have the reference
+          git fetch origin ${{ github.base_ref }}
+          
+          # Check every commit in the PR range
+          for sha in $(git rev-list origin/${{ github.base_ref }}..HEAD); do
+            if ! git show -s --format=%B $sha | grep -q "Signed-off-by:"; then
+              echo "Error: Commit $sha is not signed off!"
+              echo "Please amend the commit with 'git commit -s --amend' and push force."
+              exit 1
+            fi
+          done
+          echo "All commits signed off correctly."
