@@ -5,17 +5,6 @@ We are currently scaffolding the repository based on the TRD v1.1.
 
 
 ## Recent Changes
-
-- Added CNCF governance files (GOVERNANCE, CONTRIBUTING, SECURITY, etc).
-- Initialized ADR system in `specs/adr/`.
-- Initialized directory structure and modular specs (`specs/`).
-- Initialized Go module (`github.com/Rainminds/gantral`).
-- Added `.gitignore` and preserved empty directories with `.gitkeep`.
-- Created Agent Prompt Templates (`implement_feature`, `run_tests`, `create_release`, etc) in `.agent/prompts/`.
-- Initialized `docs/` structure for future Docusaurus migration.
-- Configured GitHub Actions workflows (`ci.yml`, `dco.yml`, `security.yml`, `release.yml`) and `.goreleaser.yaml`.
-- Downgraded Go version to 1.23.4 to match toolchain compatibility.
-- Fixed DCO workflow by replacing external action with a dependency-free shell script.
 - Added `main.go` placeholder to satisfy `golangci-lint` "no go files" error.
 
 ## Immediate Goals
