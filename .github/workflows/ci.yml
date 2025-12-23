@@ -9,6 +9,21 @@ on:
 jobs:
   build-test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: gantral
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: changeme
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
 
@@ -23,6 +38,16 @@ jobs:
 
       - name: Test
         run: make test
+
+      - name: Coverage Check
+        run: |
+          go test ./... -coverprofile=coverage.out
+          TOTAL=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//')
+          echo "Total Coverage: $TOTAL%"
+          if (( $(echo "$TOTAL < 80.0" | bc -l) )); then
+            echo "Coverage below 80%!"
+            exit 1
+          fi
 
   lint:
     runs-on: ubuntu-latest
