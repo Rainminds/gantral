@@ -68,7 +68,9 @@ func (s *Server) handleGetInstance(w http.ResponseWriter, r *http.Request) {
 // handleHealthz returns a simple 200 OK status.
 func (s *Server) handleHealthz(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("ok"))
+	if _, err := w.Write([]byte("ok")); err != nil {
+		slog.Error("failed to write response", "error", err)
+	}
 }
 
 // writeError maps domain errors to HTTP status codes and writes a JSON error response.
@@ -93,7 +95,9 @@ func (s *Server) writeError(w http.ResponseWriter, err error) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(map[string]string{
+	if err := json.NewEncoder(w).Encode(map[string]string{
 		"error": err.Error(),
-	})
+	}); err != nil {
+		slog.Error("failed to encode error response", "error", err)
+	}
 }

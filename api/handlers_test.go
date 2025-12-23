@@ -78,7 +78,9 @@ func TestHandleGetInstance(t *testing.T) {
 			t.Errorf("expected status 200, got %d", w.Code)
 		}
 		var resp map[string]interface{}
-		json.NewDecoder(w.Body).Decode(&resp)
+		if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+			t.Fatalf("failed to decode response: %v", err)
+		}
 		if resp["instance_id"] != "123" {
 			t.Errorf("expected instance_id '123', got %v", resp["instance_id"])
 		}
