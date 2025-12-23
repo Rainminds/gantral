@@ -21,3 +21,8 @@ sidebar_position: 1
 *   **[OSS Philosophy](./governance/oss-philosophy.md)**: Open Core principles and licensing.
 *   **[Roadmap](./governance/roadmap.md)**: What we are building next.
 
+Gantral is an independent open-source project and is not affiliated with the CNCF.  
+Design and governance choices are informed by CNCF best practices.
+
+---
+

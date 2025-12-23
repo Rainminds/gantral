@@ -268,9 +268,9 @@ Gantral’s compliance posture is a direct consequence of its execution model. B
 
 ## 15. Implementation Phasing
 
-* **Phase 1 (0–3 months):** Core execution engine, HITL state machine, Instance API.
-* **Phase 2 (3–6 months):** Policy engine, Deterministic replay, SDKs.
-* **Phase 3 (6–9 months):** Enterprise‑grade audit, Adapter framework, Hardening & docs.
+* **Phase 1:** Core execution engine, HITL state machine, Instance API.
+* **Phase 2:** Policy engine, Deterministic replay, SDKs.
+* **Phase 3:** Enterprise‑grade audit, Adapter framework, Hardening & docs.
 
 ## 16. Final Principle
 

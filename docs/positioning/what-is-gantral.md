@@ -1,33 +1,79 @@
-# What is Gantral?
+# What Is Gantral
 
-**The Kubernetes for AI Execution.**
+Gantral is an **open-source AI Execution Control Plane**.
 
-Gantral is an open-source **AI Execution Control Plane** that enables enterprises to govern AI agents at scale. It sits above agent frameworks (LangChain, CrewAI, Vellum) and below enterprise processes (Jira, ServiceNow), providing a unified layer for authorization, audit, and Human-in-the-Loop (HITL) control.
+It standardizes how AI-enabled workflows are executed, paused, escalated, approved, overridden, and audited across teams and systems.
 
-## The Problem: "The Fox Guarding the Henhouse"
+Gantral exists to solve a specific problem faced by large organizations:
 
-As teams adopt AI agents for coding, incidents, and workflows, a critical gap emerges: **The agent that performs an action is often the same agent that logs it.**
+> AI adoption breaks execution, control, and accountability — not model quality.
 
-*   Who authorized the AI to merge that PR?
-*   Why was the specific budget override approved?
-*   Where is the immutable record of that decision?
+As AI tools spread across the software development lifecycle (SDLC) and operational workflows, organizations lose a consistent way to answer fundamental questions:
 
-Without a separate control plane, compliance depends on developer discipline and disparate logs across 50+ tools.
+- What ran?
+- Under whose authority?
+- With what configuration?
+- What human approved or overrode the outcome?
+- Can this decision be replayed and audited?
 
-## The Solution: A Unified Control Layer
+Gantral provides infrastructure-level mechanisms to record and surface answers to these questions.
 
-Gantral separates **Execution** from **Governance**.
+---
 
-1.  **Prevent Conflict of Interest:** Agents must request a "token" or permission state from Gantral to proceed.
-2.  **Unified Ledger:** One standard audit trail for all AI actions, regardless of the underlying framework.
-3.  **Decouple Policy from Code:** Update a spending limit policy *once* in Gantral, and it applies instantly to all agents.
+## The Core Idea
 
-## Strategic Positioning
+Gantral introduces a **shared execution plane** that sits:
 
-> **"We don’t help you build agents.**
-> **We help you run AI safely across your organization."**
+- **Above** AI agent frameworks (LangChain, CrewAI, Vellum, custom agents)
+- **Below** enterprise processes (SDLC, incident management, governance)
 
-Gantral enables you to:
-*   Treat AI execution as **tier-0 infrastructure**.
-*   Standardize **HITL (Human-in-the-Loop)** as a state transition, not a hacky Slack message.
-*   Scale from 1 to 1,000 agents without losing control.
+Agents perform computation.  
+Gantral governs execution.
+
+This separation is designed to prevent AI-driven execution from advancing past governed states without explicit authorization.
+
+---
+
+## What Gantral Owns
+
+Gantral owns **execution semantics**, not agent intelligence.
+
+Specifically, Gantral provides:
+
+- A deterministic execution state machine
+- Human-in-the-Loop (HITL) as a first-class state transition
+- Instance-level isolation for audit, cost, and accountability
+- Declarative control policies (materiality, escalation, authority)
+- Immutable execution records with replay capability
+
+Gantral is intentionally boring, predictable, and auditable.
+
+---
+
+## What Gantral Enables
+
+With Gantral, organizations can:
+
+- Standardize HITL across AI workflows
+- Scale AI usage across hundreds of teams without duplicating agents
+- Enforce governance policies without modifying agent code
+- Produce audit-ready execution records by default
+- Separate experimentation (agents) from accountability (execution)
+
+Gantral does not make AI more powerful.
+
+It makes AI **safe, governable, and operable at scale**.
+
+---
+
+## Mental Models
+
+Gantral can be understood as:
+
+- **Kubernetes** — but for AI execution semantics, not containers
+- **Terraform** — but for AI process control, not infrastructure
+- **ServiceNow** — but for AI execution governance, not ITSM
+
+These analogies are conceptual and do not imply feature parity, compatibility, or equivalence.
+
+Gantral defines a new control layer specific to AI-enabled workflows.

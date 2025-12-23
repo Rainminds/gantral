@@ -1,39 +1,75 @@
-# OSS Philosophy & Governance
+# Open Source Philosophy
 
-## Open Source vs. Commercial
+Gantral is open source by design, not by distribution.
 
-Gantral follows an **Open Core** model with a strict separation of concerns to maintain trust.
+This project exists at the infrastructure layer of enterprise AI adoption.  
+Infrastructure that controls execution, approvals, and audit is typically expected to be inspectable in order to earn trust.
 
-### Why Open Source?
+Open source is therefore a structural requirement, not a community growth tactic.
 
-For an **Execution Control Plane**, trust is paramount.
-*   It touches approvals, audits, and budgets.
-*   Closed control planes are "black boxes" that regulated industries cannot fully trust.
-*   **The core must be open.**
+---
 
-### Gantral Core (Apache 2.0)
-**Audience:** Platform teams, architects, contributors.
-**Scope:**
-*   Execution State Machine.
-*   Instance Lifecycle APIs.
-*   HITL Semantics.
-*   Policy Engine.
-*   Reference SDKs.
+## Why Gantral Is Open Source
 
-**License:** Apache 2.0 (Forever).
-**Governance:** Maintainer-Led with public RFC process.
+Gantral sits at a sensitive control boundary:
 
-### Gantrio (Commercial Enterprise Platform)
-**Audience:** Large enterprises requiring managed UI and support.
-**Scope:**
-*   Enterprise UI / Dashboards.
-*   Org-level RBAC & Hierarchy.
-*   SSO / SAML.
-*   Compliance Reporting & Export.
-*   Managed Hosting / SaaS.
+- It enforces human authority over AI decisions
+- It records audit and execution evidence
+- It governs cost, policy, and accountability
 
-## Governance Model
+Enterprises — especially regulated ones — do not trust closed control planes for these responsibilities.
 
-*   **Maintainer-Led:** Roadmap authority resides with core maintainers to ensure velocity in the early phase.
-*   **RFC Process:** Major architectural changes follow a public "Request for Comments" (RFC) process.
-*   **Contribution:** CLA required. We welcome community contributions to the Core.
+Open source enables:
+
+- Verifiability of execution semantics
+- Independent security review
+- Regulator and auditor confidence
+- Long-term ecosystem trust
+
+Without openness, Gantral would not be viable in its intended environments.
+
+---
+
+## What “Open” Means in Practice
+
+For Gantral, open source means:
+
+- Core execution semantics are public
+- HITL logic is inspectable
+- Policy enforcement is transparent
+- Audit guarantees are verifiable
+- Specifications lead implementations
+
+Open source is not used as a growth funnel or marketing artifact.  
+It is the **operating model** of the project.
+
+---
+
+## What Open Source Does Not Mean
+
+Open source does not mean:
+
+- No commercial offerings
+- No governance or stewardship
+- No roadmap ownership
+- No differentiation between core and platform
+
+Gantral follows an **open core** model where trust-critical infrastructure is open, and usability, scale, and enterprise experience can be commercial.
+
+This separation is intentional and explicit.
+
+---
+
+## Long-Term Orientation
+
+Gantral is designed to outlive individual vendors.
+
+The project favors:
+
+- Stability over novelty
+- Predictability over rapid iteration
+- Governance clarity over speed
+
+These values are incompatible with closed, opaque systems.
+
+They are compatible with open infrastructure.

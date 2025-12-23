@@ -5,9 +5,6 @@
 /* Import Inter font */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* Import Instrument Serif for logo */
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:wght@400;500;600&display=swap');
-
 
 :root {
   /* Typography */
@@ -190,10 +187,10 @@ a:hover {
   max-width: 100%;
 }
 
-/* Logo styling with Instrument Serif */
+/* Logo styling */
 .navbar__brand {
-  font-family: 'Instrument Serif', Georgia, 'Times New Roman', serif !important;
-  font-weight: 500 !important;
+  font-family: var(--ifm-font-family-base) !important;
+  font-weight: 600 !important;
   font-size: 1.125rem !important;
   color: var(--ifm-navbar-link-color) !important;
   letter-spacing: -0.01em;
@@ -207,10 +204,10 @@ a:hover {
 
 /* Logo text specifically */
 .navbar__title {
-  font-family: 'Instrument Serif', Georgia, serif !important;
-  font-size: 1.5rem !important;
-  letter-spacing: 0.1em;
-  font-weight: 600 !important;
+  font-family: var(--ifm-font-family-base) !important;
+  font-size: 1.125rem !important;
+  letter-spacing: -0.01em;
+  font-weight: 700 !important;
 }
 
 /* Navigation links */
