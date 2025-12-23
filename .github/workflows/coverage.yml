@@ -1,0 +1,22 @@
+name: Coverage Badge
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with: { go-version: '1.23' }
+      
+      - name: Generate Coverage
+        run: |
+          go test ./... -coverprofile=coverage.out
+          go tool cover -func=coverage.out | grep total | awk '{print $3}' > coverage.txt
+      
+      - name: Update Badge
+        uses: kyo1001/coverage-badge-action@master
+        with:
+          coverage-file: coverage.out

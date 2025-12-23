@@ -1,0 +1,10 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "infra/db/queries.sql"
+    schema: "infra/db/schema.sql"
+    gen:
+      go:
+        package: "db"
+        out: "infra/db"
+        sql_package: "pgx/v5"

@@ -1,7 +1,7 @@
 package api
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -28,6 +28,7 @@ func (s *Server) Routes() *http.ServeMux {
 	// Register routes using Go 1.22 method + path pattern
 	mux.HandleFunc("POST /instances", s.handleCreateInstance)
 	mux.HandleFunc("GET /instances/{id}", s.handleGetInstance)
+	mux.HandleFunc("GET /healthz", s.handleHealthz)
 
 	// In a real implementation, we might wrap this mux in more middleware
 	return mux
@@ -44,7 +45,12 @@ func LoggerMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(rw, r)
 
 		duration := time.Since(start)
-		log.Printf("%s %s %d %v", r.Method, r.URL.Path, rw.status, duration)
+		slog.Info("request completed",
+			"method", r.Method,
+			"path", r.URL.Path,
+			"status", rw.status,
+			"duration", duration,
+		)
 	})
 }
 
