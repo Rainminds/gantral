@@ -41,9 +41,12 @@ jobs:
 
       - name: Coverage Check
         run: |
-          go test ./... -coverprofile=coverage.out
+          go test ./... -coverprofile=coverage.raw.out
+          # Exclude generated code (infra/db), wiring (infra), entrypoints (cmd), and boilerplate (pkg/logger)
+          # Also excluding root main.go if present in the coverage profile as 'github.com/Rainminds/gantral'
+          grep -v -E "infra/|cmd/|pkg/logger/|github.com/Rainminds/gantral/main.go" coverage.raw.out > coverage.out
           TOTAL=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//')
-          echo "Total Coverage: $TOTAL%"
+          echo "Total Coverage (Filtered): $TOTAL%"
           if (( $(echo "$TOTAL < 80.0" | bc -l) )); then
             echo "Coverage below 80%!"
             exit 1
