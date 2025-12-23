@@ -2,7 +2,7 @@
 
 This roadmap outlines the high-level sequencing for Gantral's development.
 
-## Phase 1: The Core (Months 0-3)
+## Phase 1: The Core 
 *Focus: Execution State Machine & Basic HITL*
 
 *   [x] **Repository Scaffold:** Monorepo structure, Go modules, initial governance.
@@ -10,7 +10,7 @@ This roadmap outlines the high-level sequencing for Gantral's development.
 *   [ ] **API & SDK:** Basic gRPC/REST API for creating/managing instances.
 *   [ ] **HITL State:** Ability to pause for human input and resume.
 
-## Phase 2: Intelligence (Months 3-6)
+## Phase 2: Intelligence
 *Focus: Policy & Replay*
 
 *   [ ] **Policy Engine:** Declarative rules for when to trigger HITL.
@@ -18,7 +18,7 @@ This roadmap outlines the high-level sequencing for Gantral's development.
 *   [ ] **SDKs:** Python and TypeScript SDKs.
 *   [ ] **CLI:** Developer tools for local management.
 
-## Phase 3: Enterprise Ready (Months 6-9)
+## Phase 3: Enterprise Ready
 *Focus: Audit & Integration*
 
 *   [ ] **Adapter Framework:** Standard integrations (Github, Jira).
