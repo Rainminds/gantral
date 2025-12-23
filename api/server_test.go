@@ -35,15 +35,7 @@ func TestRoutes(t *testing.T) {
 		mux.ServeHTTP(w, req)
 
 		if w.Code != tt.status {
-			// Note: POST /instances with empty body might fail if we don't send valid JSON
-			// Let's check if we need to send body for POST
-			// Actually handleCreateInstance checks body.
-			// If we send nil, it might verify validation logic.
-			// Let's refine the loop or test individually if this fails.
-			// But for now, let's see.
-			// Wait, the handler checks json decode. Empty body might cause error.
-			// Let's skip body for simplicity here or handle error.
-			// If it accepts empty JSON object {}, it returns Created.
+			t.Errorf("%s %s expected %d, got %d", tt.method, tt.path, tt.status, w.Code)
 		}
 	}
 }
@@ -53,7 +45,7 @@ func TestLoggerMiddleware(t *testing.T) {
 	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		if _, err := w.Write([]byte("ok")); err != nil {
-			// In a real handler we might log, but here it's a test helper
+			t.Errorf("failed to write response: %v", err)
 		}
 	})
 
