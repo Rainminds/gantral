@@ -69,7 +69,9 @@ Designed to satisfy **EU AI Act (Art. 14)** human oversight requirements and **S
 
 ## 📚 Documentation
 
-The technical constitution of Gantral lives in the `specs/` directory. These documents are the **Single Source of Truth**.
+**📘 [Read the Full Documentation at docs.gantral.org](https://docs.gantral.org)**
+
+The technical constitution of Gantral lives in the `specs/` directory. These documents are the **Single Source of Truth** for the implementation.
 
 - **[Technical Specifications](specs/README.md)**: The complete technical reference.
 - **[Architecture](specs/01-architecture.md)**: Scope, invariants, and layers.
@@ -79,17 +81,24 @@ The technical constitution of Gantral lives in the `specs/` directory. These doc
 
 ## 🛠️ Development
 
-To build the core engine:
+Gantral requires **Go 1.23+** and **Docker** (for the Postgres 16 event store).
 
+1. **Start the Infrastructure**
+```
+docker compose up -d
+```
+
+2. **Run the Test Suite** (Requires running DB)
+```
+make test
+```
+
+3. **Build the Engine**
 ```
 make build
 ```
 
-To run tests:
-
-```
-make test
-```
+---
 
 ## 🏛️ Governance & Community
 
