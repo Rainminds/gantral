@@ -130,7 +130,7 @@ func TestHandleListInstances(t *testing.T) {
 	srv := NewServer(eng)
 
 	// Seed one
-	eng.CreateInstance(context.Background(), "wf-1", nil, policy.Policy{ID: "p1"})
+	_, _ = eng.CreateInstance(context.Background(), "wf-1", nil, policy.Policy{ID: "p1"})
 
 	req := httptest.NewRequest(http.MethodGet, "/instances", nil)
 	w := httptest.NewRecorder()
