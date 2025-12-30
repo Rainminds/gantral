@@ -8,11 +8,21 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Decision struct {
+	ID            string
+	InstanceID    string
+	Type          string
+	ActorID       string
+	Justification string
+	CreatedAt     pgtype.Timestamptz
+}
+
 type Instance struct {
 	ID             string
 	WorkflowID     string
 	State          string
 	TriggerContext []byte
+	PolicyContext  []byte
 	CreatedAt      pgtype.Timestamptz
 	UpdatedAt      pgtype.Timestamptz
 }

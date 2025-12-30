@@ -1,10 +1,16 @@
-.PHONY: all test build clean docs
+.PHONY: all test build clean docs build-ui build-ui
 
 all: build
 
-build:
+build: build-ui
+	@go build -o bin/server ./cmd/server
+
+build-ui:
+	@echo "Building UI... (Skipping: Vanilla JS)" -v
+
+testbuild: build-ui
 	@echo "Building Gantral Core..."
-	# go build ./core/...
+	@go build -o bin/server ./cmd/server
 
 test:
 	@echo "Running Tests..."

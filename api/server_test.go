@@ -20,8 +20,9 @@ func TestRoutes(t *testing.T) {
 		status int
 	}{
 		{"GET", "/healthz", http.StatusOK},
-		{"POST", "/instances", http.StatusCreated}, // Assuming valid empty body handled or stubbed
-		{"GET", "/instances/123", http.StatusOK},
+		{"POST", "/instances", http.StatusCreated},
+		// GET /instances/123 will be 404 because 123 doesn't exist in new engine
+		{"GET", "/instances/123", http.StatusNotFound},
 		{"GET", "/notfound", http.StatusNotFound},
 	}
 

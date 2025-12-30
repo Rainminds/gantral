@@ -5,7 +5,9 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/Rainminds/gantral/core/engine"
 	"github.com/Rainminds/gantral/core/errors"
+	"github.com/Rainminds/gantral/core/policy"
 )
 
 // handleCreateInstance handles the creation of a new execution instance.
@@ -17,18 +19,23 @@ func (s *Server) handleCreateInstance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 2. Call Engine (Stubbed for now)
-	// In future: instance, err := s.engine.CreateInstance(...)
-
-	// 3. Response
-	response := map[string]string{
-		"status":      "created",
-		"instance_id": "inst-12345-stub",
+	// 2. Call Engine
+	// Construct policy based on input for testing
+	pol := policy.Policy{ID: "default-policy"}
+	if mat, ok := body["materiality"].(string); ok && mat == "HIGH" {
+		pol.Materiality = policy.MaterialityHigh
 	}
 
+	instance, err := s.engine.CreateInstance(r.Context(), "default-wf", body, pol)
+	if err != nil {
+		s.writeError(w, err)
+		return
+	}
+
+	// 3. Response
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	if err := json.NewEncoder(w).Encode(response); err != nil {
+	if err := json.NewEncoder(w).Encode(instance); err != nil {
 		slog.Error("failed to encode response", "error", err)
 	}
 }
@@ -42,25 +49,17 @@ func (s *Server) handleGetInstance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 2. Call Engine (Stubbed)
-	// In future: instance, err := s.engine.GetInstance(id)
-
-	// Stub logic for 404
-	if id == "notfound" {
+	// 2. Call Engine
+	instance, err := s.engine.GetInstance(r.Context(), id)
+	if err != nil {
 		s.writeError(w, errors.ErrNotFound)
 		return
 	}
 
 	// 3. Response
-	response := map[string]interface{}{
-		"instance_id": id,
-		"state":       "RUNNING", // stub state
-		"created_at":  "2023-10-27T10:00:00Z",
-	}
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(response); err != nil {
+	if err := json.NewEncoder(w).Encode(instance); err != nil {
 		slog.Error("failed to encode response", "error", err)
 	}
 }
@@ -99,5 +98,59 @@ func (s *Server) writeError(w http.ResponseWriter, err error) {
 		"error": err.Error(),
 	}); err != nil {
 		slog.Error("failed to encode error response", "error", err)
+	}
+}
+
+// HandleRecordDecision handles the recording of a human decision.
+func (s *Server) handleRecordDecision(w http.ResponseWriter, r *http.Request) {
+	instanceID := r.PathValue("id")
+	if instanceID == "" {
+		s.writeError(w, errors.Wrap(errors.ErrInvalidInput, "instance ID is required"))
+		return
+	}
+
+	var req struct {
+		Type          string `json:"type"`
+		ActorID       string `json:"actor_id"`
+		Justification string `json:"justification"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		s.writeError(w, errors.Wrap(errors.ErrInvalidInput, "invalid request body"))
+		return
+	}
+
+	cmd := engine.RecordDecisionCmd{
+		InstanceID:    instanceID,
+		Type:          engine.DecisionType(req.Type),
+		ActorID:       req.ActorID,
+		Justification: req.Justification,
+	}
+
+	inst, err := s.engine.RecordDecision(r.Context(), cmd)
+	if err != nil {
+		slog.Error("failed to record decision", "error", err)
+		s.writeError(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	if err := json.NewEncoder(w).Encode(inst); err != nil {
+		slog.Error("failed to encode response", "error", err)
+	}
+}
+
+// handleListInstances handles retrieving all execution instances.
+func (s *Server) handleListInstances(w http.ResponseWriter, r *http.Request) {
+	instances, err := s.engine.ListInstances(r.Context())
+	if err != nil {
+		s.writeError(w, err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(instances); err != nil {
+		slog.Error("failed to encode response", "error", err)
 	}
 }

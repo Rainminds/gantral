@@ -20,10 +20,11 @@ const (
 
 // Instance represents a concrete execution of a workflow.
 type Instance struct {
-	ID        string
-	TeamID    string
-	State     State
-	Context   map[string]interface{}
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID             string                 `json:"id"`
+	WorkflowID     string                 `json:"workflow_id"`
+	State          State                  `json:"state"`
+	TriggerContext map[string]interface{} `json:"trigger_context"`
+	PolicyContext  map[string]interface{} `json:"policy_context"`
+	CreatedAt      time.Time              `json:"created_at"`
+	UpdatedAt      time.Time              `json:"updated_at"`
 }

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gantral Control Plane</title>
+    <!-- Minimal CSS Framework -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <style>
+        .container {
+            max-width: 1200px;
+            padding-top: 2rem;
+        }
+
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .status-WAITING_FOR_HUMAN {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .status-APPROVED {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .status-REJECTED {
+            background-color: #c0392b;
+            color: white;
+        }
+
+        .status-RUNNING {
+            background-color: #2980b9;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="container">
+        <nav>
+            <ul>
+                <li><strong>Gantral Control Plane</strong></li>
+            </ul>
+        </nav>
+
+        <section>
+            <h2>Instances</h2>
+            <figure>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Status And Decision</th>
+                            <th>Policy Reason</th>
+                            <th>Created At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="instances-table-body">
+                        <!-- Instaces will be populated here -->
+                    </tbody>
+                </table>
+            </figure>
+        </section>
+    </main>
+
+    <script>
+        const API_BASE = window.location.origin;
+
+        async function fetchInstances() {
+            try {
+                const response = await fetch(`${API_BASE}/instances`);
+                if (!response.ok) throw new Error('Failed to fetch instances');
+                const instances = await response.json();
+                renderTable(instances);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function renderTable(instances) {
+            const tbody = document.getElementById('instances-table-body');
+            tbody.innerHTML = '';
+
+            if (!instances || instances.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td colspan="5" style="text-align:center; padding: 2rem;">No instances found. Create one via API!</td>';
+                tbody.appendChild(tr);
+                return;
+            }
+
+            instances.forEach(inst => {
+                const tr = document.createElement('tr');
+
+                // ID
+                const tdId = document.createElement('td');
+                tdId.textContent = inst.id;
+                tr.appendChild(tdId);
+
+                // Status
+                const tdStatus = document.createElement('td');
+                const badge = document.createElement('span');
+                badge.className = `badge status-${inst.state}`;
+                badge.textContent = inst.state;
+                tdStatus.appendChild(badge);
+                tr.appendChild(tdStatus);
+
+                // Policy Reason
+                const tdReason = document.createElement('td');
+                if (inst.policy_context && inst.policy_context.reason) {
+                    tdReason.textContent = inst.policy_context.reason;
+                } else {
+                    tdReason.textContent = '-';
+                }
+                tr.appendChild(tdReason);
+
+                // Created At
+                const tdCreated = document.createElement('td');
+                tdCreated.textContent = new Date(inst.created_at).toLocaleString();
+                tr.appendChild(tdCreated);
+
+                // Actions
+                const tdActions = document.createElement('td');
+                if (inst.state === 'WAITING_FOR_HUMAN') {
+                    const btnApprove = document.createElement('button');
+                    btnApprove.textContent = 'Approve';
+                    btnApprove.style.marginRight = '0.5rem';
+                    btnApprove.style.backgroundColor = '#27ae60';
+                    btnApprove.style.border = 'none';
+                    btnApprove.onclick = () => recordDecision(inst.id, 'APPROVE');
+
+                    const btnReject = document.createElement('button');
+                    btnReject.textContent = 'Reject';
+                    btnReject.style.backgroundColor = '#c0392b';
+                    btnReject.style.border = 'none';
+                    btnReject.onclick = () => recordDecision(inst.id, 'REJECT');
+
+                    tdActions.appendChild(btnApprove);
+                    tdActions.appendChild(btnReject);
+                }
+                tr.appendChild(tdActions);
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function recordDecision(id, type) {
+            try {
+                const response = await fetch(`${API_BASE}/instances/${id}/decisions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: type,
+                        actor_id: 'dashboard-user',
+                        justification: `Clicked ${type} on dashboard`
+                    })
+                });
+
+                if (!response.ok) {
+                    const errText = await response.text();
+                    alert('Failed to record decision: ' + errText);
+                    return;
+                }
+
+                fetchInstances(); // Refresh
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Network error');
+            }
+        }
+
+        // Initial fetch and polling
+        fetchInstances();
+        setInterval(fetchInstances, 5000);
+    </script>
+</body>
+
+</html>
