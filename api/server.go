@@ -1,11 +1,13 @@
 package api
 
 import (
+	"io/fs"
 	"log/slog"
 	"net/http"
 	"time"
 
 	"github.com/Rainminds/gantral/core/engine"
+	"github.com/Rainminds/gantral/web"
 )
 
 // Server holds the dependencies for the HTTP API.
@@ -27,10 +29,25 @@ func (s *Server) Routes() *http.ServeMux {
 
 	// Register routes using Go 1.22 method + path pattern
 	mux.HandleFunc("POST /instances", s.handleCreateInstance)
+	mux.HandleFunc("GET /instances", s.handleListInstances)
 	mux.HandleFunc("GET /instances/{id}", s.handleGetInstance)
+	mux.HandleFunc("POST /instances/{id}/decisions", s.handleRecordDecision)
 	mux.HandleFunc("GET /healthz", s.handleHealthz)
 
-	// In a real implementation, we might wrap this mux in more middleware
+	// Serve Static Files
+	// We use fs.Sub to root the file server at "static" directory
+	staticFS, err := fs.Sub(web.StaticFS, "static")
+	if err != nil {
+		// Should not happen if build is correct
+		panic(err)
+	}
+	mux.Handle("GET /", http.FileServer(http.FS(staticFS)))
+	// Also handle /dashboard specifically if desired, but user asked for /
+	// Note: API routes registered above take precedence because they are more specific (in Go 1.22+ if using method spec)
+	// but purely path-based matching depends on length.
+	// Actually, "POST /instances" is more specific than "/".
+	// "GET /" matches everything else.
+
 	return mux
 }
 

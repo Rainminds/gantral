@@ -9,15 +9,54 @@ import (
 	"context"
 )
 
-const createInstance = `-- name: CreateInstance :exec
+const createDecision = `-- name: CreateDecision :one
+INSERT INTO decisions (
+    id, instance_id, type, actor_id, justification
+) VALUES (
+    $1, $2, $3, $4, $5
+)
+RETURNING id, instance_id, type, actor_id, justification, created_at
+`
+
+type CreateDecisionParams struct {
+	ID            string
+	InstanceID    string
+	Type          string
+	ActorID       string
+	Justification string
+}
+
+func (q *Queries) CreateDecision(ctx context.Context, arg CreateDecisionParams) (Decision, error) {
+	row := q.db.QueryRow(ctx, createDecision,
+		arg.ID,
+		arg.InstanceID,
+		arg.Type,
+		arg.ActorID,
+		arg.Justification,
+	)
+	var i Decision
+	err := row.Scan(
+		&i.ID,
+		&i.InstanceID,
+		&i.Type,
+		&i.ActorID,
+		&i.Justification,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const createInstance = `-- name: CreateInstance :one
 INSERT INTO instances (
     id,
     workflow_id,
     state,
-    trigger_context
+    trigger_context,
+    policy_context
 ) VALUES (
-    $1, $2, $3, $4
+    $1, $2, $3, $4, $5
 )
+RETURNING id, workflow_id, state, trigger_context, policy_context, created_at, updated_at
 `
 
 type CreateInstanceParams struct {
@@ -25,20 +64,65 @@ type CreateInstanceParams struct {
 	WorkflowID     string
 	State          string
 	TriggerContext []byte
+	PolicyContext  []byte
 }
 
-func (q *Queries) CreateInstance(ctx context.Context, arg CreateInstanceParams) error {
-	_, err := q.db.Exec(ctx, createInstance,
+func (q *Queries) CreateInstance(ctx context.Context, arg CreateInstanceParams) (Instance, error) {
+	row := q.db.QueryRow(ctx, createInstance,
 		arg.ID,
 		arg.WorkflowID,
 		arg.State,
 		arg.TriggerContext,
+		arg.PolicyContext,
 	)
-	return err
+	var i Instance
+	err := row.Scan(
+		&i.ID,
+		&i.WorkflowID,
+		&i.State,
+		&i.TriggerContext,
+		&i.PolicyContext,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getDecisionsByInstance = `-- name: GetDecisionsByInstance :many
+SELECT id, instance_id, type, actor_id, justification, created_at FROM decisions
+WHERE instance_id = $1
+ORDER BY created_at DESC
+`
+
+func (q *Queries) GetDecisionsByInstance(ctx context.Context, instanceID string) ([]Decision, error) {
+	rows, err := q.db.Query(ctx, getDecisionsByInstance, instanceID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Decision
+	for rows.Next() {
+		var i Decision
+		if err := rows.Scan(
+			&i.ID,
+			&i.InstanceID,
+			&i.Type,
+			&i.ActorID,
+			&i.Justification,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getInstance = `-- name: GetInstance :one
-SELECT id, workflow_id, state, trigger_context, created_at, updated_at FROM instances
+SELECT id, workflow_id, state, trigger_context, policy_context, created_at, updated_at FROM instances
 WHERE id = $1 LIMIT 1
 `
 
@@ -50,24 +134,9 @@ func (q *Queries) GetInstance(ctx context.Context, id string) (Instance, error) 
 		&i.WorkflowID,
 		&i.State,
 		&i.TriggerContext,
+		&i.PolicyContext,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
 	return i, err
-}
-
-const updateState = `-- name: UpdateState :exec
-UPDATE instances
-SET state = $2, updated_at = NOW()
-WHERE id = $1
-`
-
-type UpdateStateParams struct {
-	ID    string
-	State string
-}
-
-func (q *Queries) UpdateState(ctx context.Context, arg UpdateStateParams) error {
-	_, err := q.db.Exec(ctx, updateState, arg.ID, arg.State)
-	return err
 }
