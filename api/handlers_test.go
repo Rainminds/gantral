@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -8,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/Rainminds/gantral/core/engine"
+	"github.com/Rainminds/gantral/core/policy"
 )
 
 func TestHandleHealthz(t *testing.T) {
@@ -42,12 +44,20 @@ func TestHandleCreateInstance(t *testing.T) {
 			t.Errorf("expected status 201, got %d", w.Code)
 		}
 
-		var resp map[string]string
-		if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+		// var resp map[string]string
+		// if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+		// 	t.Fatalf("failed to decode response: %v", err)
+		// }
+		// if resp["status"] != "created" {
+		// 	t.Errorf("expected status 'created', got %q", resp["status"])
+		// }
+
+		var inst engine.Instance
+		if err := json.NewDecoder(w.Body).Decode(&inst); err != nil {
 			t.Fatalf("failed to decode response: %v", err)
 		}
-		if resp["status"] != "created" {
-			t.Errorf("expected status 'created', got %q", resp["status"])
+		if inst.ID == "" {
+			t.Error("expected instance ID to be set")
 		}
 	})
 
@@ -68,8 +78,13 @@ func TestHandleGetInstance(t *testing.T) {
 	srv := NewServer(eng)
 
 	t.Run("Valid ID", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, "/instances/123", nil)
-		req.SetPathValue("id", "123") // Go 1.22 feature
+		// Seed an instance first for in-memory engine
+		// Re-using 'eng' from outer scope.
+		created, _ := eng.CreateInstance(context.Background(), "test-wf", nil, policy.Policy{ID: "p1"})
+		idToFetch := created.ID
+
+		req := httptest.NewRequest(http.MethodGet, "/instances/"+idToFetch, nil)
+		req.SetPathValue("id", idToFetch)
 
 		w := httptest.NewRecorder()
 		srv.handleGetInstance(w, req)
@@ -77,12 +92,13 @@ func TestHandleGetInstance(t *testing.T) {
 		if w.Code != http.StatusOK {
 			t.Errorf("expected status 200, got %d", w.Code)
 		}
-		var resp map[string]interface{}
-		if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+
+		var inst engine.Instance
+		if err := json.NewDecoder(w.Body).Decode(&inst); err != nil {
 			t.Fatalf("failed to decode response: %v", err)
 		}
-		if resp["instance_id"] != "123" {
-			t.Errorf("expected instance_id '123', got %v", resp["instance_id"])
+		if inst.ID != idToFetch {
+			t.Errorf("expected instance_id '%s', got %v", idToFetch, inst.ID)
 		}
 	})
 
