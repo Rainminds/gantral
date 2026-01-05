@@ -201,3 +201,42 @@ func TestGetAuditLogs(t *testing.T) {
 		}
 	})
 }
+
+func TestGetInstance(t *testing.T) {
+	mockStore := new(MockReadStore)
+	handler := &Handler{ReadStore: mockStore}
+
+	t.Run("Success", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/instances/inst-1", nil)
+		req.SetPathValue("id", "inst-1")
+		w := httptest.NewRecorder()
+
+		inst := &engine.Instance{ID: "inst-1"}
+		mockStore.On("GetInstance", mock.Anything, "inst-1").Return(inst, nil)
+
+		handler.HandleGetInstance(w, req)
+
+		if w.Code != stdhttp.StatusOK {
+			t.Errorf("expected 200, got %d", w.Code)
+		}
+	})
+}
+
+func TestListInstances(t *testing.T) {
+	mockStore := new(MockReadStore)
+	handler := &Handler{ReadStore: mockStore}
+
+	t.Run("Success", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/instances", nil)
+		w := httptest.NewRecorder()
+
+		list := []*engine.Instance{{ID: "inst-1"}, {ID: "inst-2"}}
+		mockStore.On("ListInstances", mock.Anything).Return(list, nil)
+
+		handler.HandleListInstances(w, req)
+
+		if w.Code != stdhttp.StatusOK {
+			t.Errorf("expected 200, got %d", w.Code)
+		}
+	})
+}
