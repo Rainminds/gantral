@@ -8,14 +8,14 @@ import (
 )
 
 func TestNewEngine(t *testing.T) {
-	e := NewEngine()
+	e := NewEngine(NewMemoryStore())
 	if e == nil {
 		t.Error("NewEngine returned nil")
 	}
 }
 
 func TestEngineCRUD(t *testing.T) {
-	e := NewEngine()
+	e := NewEngine(NewMemoryStore())
 	ctx := context.Background()
 
 	// 1. List Empty
@@ -66,7 +66,7 @@ func TestEngineCRUD(t *testing.T) {
 }
 
 func TestRecordDecision_NotFound(t *testing.T) {
-	e := NewEngine()
+	e := NewEngine(NewMemoryStore())
 	cmd := RecordDecisionCmd{
 		InstanceID: "missing",
 		Type:       DecisionApprove,
@@ -78,7 +78,7 @@ func TestRecordDecision_NotFound(t *testing.T) {
 }
 
 func TestRecordDecision_InvalidState(t *testing.T) {
-	e := NewEngine()
+	e := NewEngine(NewMemoryStore())
 	// Create running instance (not waiting)
 	inst, _ := e.CreateInstance(context.Background(), "wf-1", nil, policy.Policy{ID: "p1"})
 

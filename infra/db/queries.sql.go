@@ -7,23 +7,29 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createDecision = `-- name: CreateDecision :one
 INSERT INTO decisions (
-    id, instance_id, type, actor_id, justification
+    id, instance_id, type, actor_id, justification, role, context_snapshot, context_delta, policy_version_id
 ) VALUES (
-    $1, $2, $3, $4, $5
+    $1, $2, $3, $4, $5, $6, $7, $8, $9
 )
-RETURNING id, instance_id, type, actor_id, justification, created_at
+RETURNING id, instance_id, type, actor_id, justification, role, context_snapshot, context_delta, policy_version_id, created_at
 `
 
 type CreateDecisionParams struct {
-	ID            string
-	InstanceID    string
-	Type          string
-	ActorID       string
-	Justification string
+	ID              string
+	InstanceID      string
+	Type            string
+	ActorID         string
+	Justification   string
+	Role            string
+	ContextSnapshot []byte
+	ContextDelta    []byte
+	PolicyVersionID string
 }
 
 func (q *Queries) CreateDecision(ctx context.Context, arg CreateDecisionParams) (Decision, error) {
@@ -33,6 +39,10 @@ func (q *Queries) CreateDecision(ctx context.Context, arg CreateDecisionParams) 
 		arg.Type,
 		arg.ActorID,
 		arg.Justification,
+		arg.Role,
+		arg.ContextSnapshot,
+		arg.ContextDelta,
+		arg.PolicyVersionID,
 	)
 	var i Decision
 	err := row.Scan(
@@ -41,6 +51,10 @@ func (q *Queries) CreateDecision(ctx context.Context, arg CreateDecisionParams) 
 		&i.Type,
 		&i.ActorID,
 		&i.Justification,
+		&i.Role,
+		&i.ContextSnapshot,
+		&i.ContextDelta,
+		&i.PolicyVersionID,
 		&i.CreatedAt,
 	)
 	return i, err
@@ -52,19 +66,21 @@ INSERT INTO instances (
     workflow_id,
     state,
     trigger_context,
-    policy_context
+    policy_context,
+    policy_version_id
 ) VALUES (
-    $1, $2, $3, $4, $5
+    $1, $2, $3, $4, $5, $6
 )
-RETURNING id, workflow_id, state, trigger_context, policy_context, created_at, updated_at
+RETURNING id, workflow_id, state, trigger_context, policy_context, policy_version_id, created_at, updated_at
 `
 
 type CreateInstanceParams struct {
-	ID             string
-	WorkflowID     string
-	State          string
-	TriggerContext []byte
-	PolicyContext  []byte
+	ID              string
+	WorkflowID      string
+	State           string
+	TriggerContext  []byte
+	PolicyContext   []byte
+	PolicyVersionID pgtype.Text
 }
 
 func (q *Queries) CreateInstance(ctx context.Context, arg CreateInstanceParams) (Instance, error) {
@@ -74,6 +90,7 @@ func (q *Queries) CreateInstance(ctx context.Context, arg CreateInstanceParams) 
 		arg.State,
 		arg.TriggerContext,
 		arg.PolicyContext,
+		arg.PolicyVersionID,
 	)
 	var i Instance
 	err := row.Scan(
@@ -82,6 +99,7 @@ func (q *Queries) CreateInstance(ctx context.Context, arg CreateInstanceParams) 
 		&i.State,
 		&i.TriggerContext,
 		&i.PolicyContext,
+		&i.PolicyVersionID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -89,7 +107,7 @@ func (q *Queries) CreateInstance(ctx context.Context, arg CreateInstanceParams) 
 }
 
 const getDecisionsByInstance = `-- name: GetDecisionsByInstance :many
-SELECT id, instance_id, type, actor_id, justification, created_at FROM decisions
+SELECT id, instance_id, type, actor_id, justification, role, context_snapshot, context_delta, policy_version_id, created_at FROM decisions
 WHERE instance_id = $1
 ORDER BY created_at DESC
 `
@@ -109,6 +127,10 @@ func (q *Queries) GetDecisionsByInstance(ctx context.Context, instanceID string)
 			&i.Type,
 			&i.ActorID,
 			&i.Justification,
+			&i.Role,
+			&i.ContextSnapshot,
+			&i.ContextDelta,
+			&i.PolicyVersionID,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -122,7 +144,7 @@ func (q *Queries) GetDecisionsByInstance(ctx context.Context, instanceID string)
 }
 
 const getInstance = `-- name: GetInstance :one
-SELECT id, workflow_id, state, trigger_context, policy_context, created_at, updated_at FROM instances
+SELECT id, workflow_id, state, trigger_context, policy_context, policy_version_id, created_at, updated_at FROM instances
 WHERE id = $1 LIMIT 1
 `
 
@@ -135,8 +157,101 @@ func (q *Queries) GetInstance(ctx context.Context, id string) (Instance, error) 
 		&i.State,
 		&i.TriggerContext,
 		&i.PolicyContext,
+		&i.PolicyVersionID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const listInstances = `-- name: ListInstances :many
+SELECT id, workflow_id, state, trigger_context, policy_context, policy_version_id, created_at, updated_at FROM instances
+ORDER BY created_at DESC
+`
+
+func (q *Queries) ListInstances(ctx context.Context) ([]Instance, error) {
+	rows, err := q.db.Query(ctx, listInstances)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Instance
+	for rows.Next() {
+		var i Instance
+		if err := rows.Scan(
+			&i.ID,
+			&i.WorkflowID,
+			&i.State,
+			&i.TriggerContext,
+			&i.PolicyContext,
+			&i.PolicyVersionID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateInstanceState = `-- name: UpdateInstanceState :exec
+UPDATE instances
+SET state = $2, updated_at = NOW()
+WHERE id = $1
+`
+
+type UpdateInstanceStateParams struct {
+	ID    string
+	State string
+}
+
+func (q *Queries) UpdateInstanceState(ctx context.Context, arg UpdateInstanceStateParams) error {
+	_, err := q.db.Exec(ctx, updateInstanceState, arg.ID, arg.State)
+	return err
+}
+
+const createAuditEvent = `-- name: CreateAuditEvent :one
+INSERT INTO audit_events (
+    id, instance_id, event_type, payload
+) VALUES (
+    $1, $2, $3, $4
+)
+RETURNING id, instance_id, event_type, payload, timestamp
+`
+
+type CreateAuditEventParams struct {
+	ID         string
+	InstanceID string
+	EventType  string
+	Payload    []byte
+}
+
+type AuditEvent struct {
+	ID         string
+	InstanceID string
+	EventType  string
+	Payload    []byte
+	Timestamp  pgtype.Timestamp
+}
+
+func (q *Queries) CreateAuditEvent(ctx context.Context, arg CreateAuditEventParams) (AuditEvent, error) {
+	row := q.db.QueryRow(ctx, createAuditEvent,
+		arg.ID,
+		arg.InstanceID,
+		arg.EventType,
+		arg.Payload,
+	)
+	var i AuditEvent
+	err := row.Scan(
+		&i.ID,
+		&i.InstanceID,
+		&i.EventType,
+		&i.Payload,
+		&i.Timestamp,
 	)
 	return i, err
 }

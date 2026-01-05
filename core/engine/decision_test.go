@@ -6,7 +6,7 @@ import (
 )
 
 func TestRecordDecision(t *testing.T) {
-	engine := NewEngine()
+	// engine initialized per test case
 	ctx := context.Background()
 
 	tests := []struct {
@@ -63,12 +63,15 @@ func TestRecordDecision(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			store := NewMemoryStore()
+			engine := NewEngine(store)
+
 			// Seed the instance
 			instStub := &Instance{
 				ID:    tt.cmd.InstanceID,
 				State: StateWaitingForHuman,
 			}
-			engine.instances[instStub.ID] = instStub
+			store.CreateInstance(ctx, instStub)
 
 			inst, err := engine.RecordDecision(ctx, tt.cmd)
 

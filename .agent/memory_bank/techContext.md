@@ -1,31 +1,36 @@
 # Technology Stack & Standards
 
 ## Core Stack
-- **Language:** Go (Golang) for the core execution engine (performance/concurrency).
-- **SDKs:** Python, Go, TypeScript (thin wrappers).
+- **Language:** Go 1.25+ (Core).
+- **Runtime:** **Temporal** (Workflow Orchestration & Durability).
 - **Database:** PostgreSQL 16 (Event-sourced tables).
-- **Logs:** PostgreSQL (initially), ClickHouse (future) for immutable audit logs.
-- **Cache:** Redis (optional, for state caching).
+- **Logs:** PostgreSQL (Audit Trail).
+- **Auth:** OIDC (Federated Identity).
 
 ## API Standards
-- **Primary:** REST (OpenAPI 3.1).
-- **Future:** gRPC for high-volume internal communication.
-- **Auth:** OAuth 2.0 / OIDC (Service accounts per agent).
+- **Primary:** REST (JSON over HTTP).
+- **Schema:** Handlers defined in `adapters/primary/http`.
+- **Auth:** Bearer Token (JWT).
 
 ## Repository Structure (Monorepo)
-- `docs/`: Guides & TRDs.
-- `specs/`: Technical specifications (SSOT).
+- `docs/`: Guides & Documentation.
+- `specs/`:
+    - `adr/`: Architectural Decision Records.
 - `core/`:
     - `engine/`: State machine logic.
     - `policy/`: Rule evaluation.
-    - `hitl/`: Human interaction logic.
-    - `audit/`: Logging.
-- `api/`: OpenAPI specs.
-- `sdk/`: Client libraries.
-- `adapters/`: Integration code (Slack, Jira, GitHub).
-- `infra/`: Docker/K8s configs.
+    - `activities/`: Temporal Activities.
+    - `workflows/`: Temporal Workflows.
+- `adapters/`:
+    - `primary/http`: REST API handlers.
+    - `secondary/postgres`: Data access.
+- `cmd/`:
+    - `server/`: Control Plane Binary.
+    - `worker/`: Execution Plane Binary.
+- `infra/`: Docker/K8s configs & Migrations.
+- `tests/`: Integration & E2E Suites.
 
 ## Deployment
-- **Dev:** Docker Compose.
-- **Prod:** Kubernetes (Helm charts).
+- **Dev:** `make up` (Docker Compose for Infra), `go run` (Services).
+- **Prod:** Kubernetes (Helm charts for Gantral + Temporal).
 - **Observability:** OpenTelemetry (Metrics, Traces).

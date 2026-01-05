@@ -3,8 +3,6 @@ package engine
 import (
 	"context"
 	"fmt"
-	"log/slog"
-	"time"
 )
 
 // DecisionType defines the type of decision made.
@@ -18,21 +16,22 @@ const (
 
 // RecordDecisionCmd is the input for recording a decision.
 type RecordDecisionCmd struct {
-	InstanceID    string
-	Type          DecisionType
-	ActorID       string
-	Justification string
+	InstanceID      string
+	Type            DecisionType
+	ActorID         string
+	Justification   string
+	Role            string
+	ContextSnapshot map[string]interface{}
+	ContextDelta    map[string]interface{}
+	PolicyVersionID string
 }
 
 // RecordDecision records a human decision and updates the instance state accordingly.
 func (e *Engine) RecordDecision(ctx context.Context, cmd RecordDecisionCmd) (*Instance, error) {
-	e.mu.Lock()
-	defer e.mu.Unlock()
-
-	// 1. Fetch Instance
-	instance, ok := e.instances[cmd.InstanceID]
-	if !ok {
-		return nil, fmt.Errorf("instance not found: %s", cmd.InstanceID)
+	// 1. Fetch Instance to validate state (optimized: could be done in store, but logic here is safer)
+	instance, err := e.store.GetInstance(ctx, cmd.InstanceID)
+	if err != nil {
+		return nil, err
 	}
 
 	// 2. Validate State Transition logic
@@ -53,17 +52,6 @@ func (e *Engine) RecordDecision(ctx context.Context, cmd RecordDecisionCmd) (*In
 		return nil, fmt.Errorf("invalid decision type: %s", cmd.Type)
 	}
 
-	// 3. Update State
-	instance.State = nextState
-	instance.UpdatedAt = time.Now()
-
-	// 4. Log Decision
-	slog.Info("decision_recorded",
-		"instance_id", cmd.InstanceID,
-		"type", cmd.Type,
-		"actor", cmd.ActorID,
-		"next_state", nextState,
-	)
-
-	return instance, nil
+	// 3. Delegate to Store for Transactional Update
+	return e.store.RecordDecision(ctx, cmd, nextState)
 }

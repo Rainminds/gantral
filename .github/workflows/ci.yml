@@ -33,22 +33,40 @@ jobs:
           go-version: '1.25.x'
           cache: true
 
+      - name: Setup Temporal CLI
+        run: |
+          curl -sSf https://temporal.download/cli.sh | sh
+          echo "$HOME/.temporalio/bin" >> $GITHUB_PATH
+
+      - name: Start Temporal Dev Server
+        run: |
+          nohup $HOME/.temporalio/bin/temporal server start-dev --ip 0.0.0.0 --port 7233 &
+          echo "Waiting for Temporal to start..."
+          sleep 10
+          $HOME/.temporalio/bin/temporal operator cluster health
+
       - name: Build
         run: make build
 
-      - name: Test
+      - name: Test Unit
         run: make test
+
+      - name: Test E2E
+        env:
+          TEMPORAL_HOST_PORT: "localhost:7233"
+          DATABASE_URL: "postgres://postgres:changeme@localhost:5432/gantral"
+        run: make test-e2e
 
       - name: Coverage Check
         run: |
           go test ./... -coverprofile=coverage.raw.out
           # Exclude generated code (infra/db), wiring (infra), entrypoints (cmd), and boilerplate (pkg/logger)
-          # Also excluding root main.go if present in the coverage profile as 'github.com/Rainminds/gantral'
+          # Also excluding root main.go if present in the coverage profile as 'github.com/Rainminds/gantral/main.go'
           grep -v -E "infra/|cmd/|pkg/logger/|github.com/Rainminds/gantral/main.go" coverage.raw.out > coverage.out
           TOTAL=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//')
           echo "Total Coverage (Filtered): $TOTAL%"
           if (( $(echo "$TOTAL < 80.0" | bc -l) )); then
-            echo "Coverage below 80%!"
+            echo "Coverage below 80%"
             exit 1
           fi
 
