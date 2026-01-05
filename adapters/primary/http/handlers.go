@@ -177,7 +177,7 @@ func (h *Handler) HandleGetInstance(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(inst)
+	_ = json.NewEncoder(w).Encode(inst)
 }
 
 // HandleListInstances retrieves all instances.
@@ -190,7 +190,7 @@ func (h *Handler) HandleListInstances(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	_ = json.NewEncoder(w).Encode(map[string]interface{}{
 		"instances": instances,
 	})
 }

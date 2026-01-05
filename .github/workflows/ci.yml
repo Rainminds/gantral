@@ -54,7 +54,7 @@ jobs:
       - name: Test Integration & E2E
         env:
           TEMPORAL_HOST_PORT: "localhost:7233"
-          DATABASE_URL: "postgres://postgres:changeme@localhost:5432/gantral"
+          DATABASE_URL: "postgres://postgres:changeme@localhost:5432/gantral?sslmode=disable"
         run: make test-integration
 
       - name: Coverage Check
