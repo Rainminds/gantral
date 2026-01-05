@@ -18,6 +18,7 @@ import (
 	"github.com/Rainminds/gantral/core/engine"
 	"github.com/Rainminds/gantral/core/policy"
 	"github.com/Rainminds/gantral/core/workflows"
+	"github.com/Rainminds/gantral/infra"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"go.temporal.io/api/enums/v1"
@@ -35,6 +36,12 @@ func Test_EndToEnd_HITL(t *testing.T) {
 	if dbURL == "" {
 		dbURL = "postgres://postgres:changeme@localhost:5432/gantral"
 	}
+
+	// Automation: Ensure Schema Exists
+	if err := infra.RunMigrations(dbURL); err != nil {
+		t.Fatalf("Failed to run migrations: %v", err)
+	}
+
 	temporalHost := os.Getenv("TEMPORAL_HOST_PORT")
 	if temporalHost == "" {
 		temporalHost = "localhost:7233"
@@ -104,7 +111,7 @@ func Test_EndToEnd_HITL(t *testing.T) {
 	assert.Equal(t, http.StatusAccepted, rr.Code)
 
 	var createResp gantralhttp.CreateInstanceResponse
-	json.NewDecoder(rr.Body).Decode(&createResp)
+	_ = json.NewDecoder(rr.Body).Decode(&createResp)
 	instanceID := createResp.ID
 	assert.NotEmpty(t, instanceID)
 	t.Logf("Created Instance: %s", instanceID)

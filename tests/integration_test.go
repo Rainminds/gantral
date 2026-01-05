@@ -8,6 +8,7 @@ import (
 	"github.com/Rainminds/gantral/adapters/secondary/postgres"
 	"github.com/Rainminds/gantral/core/engine"
 	"github.com/Rainminds/gantral/core/policy"
+	"github.com/Rainminds/gantral/infra"
 	"github.com/joho/godotenv"
 )
 
@@ -17,6 +18,11 @@ func TestIntegration_HITL_Flow(t *testing.T) {
 	dbURL := os.Getenv("DATABASE_URL")
 	if dbURL == "" {
 		t.Skip("DATABASE_URL not set, skipping integration test")
+	}
+
+	// Run Migrations ensure schema exists
+	if err := infra.RunMigrations(dbURL); err != nil {
+		t.Fatalf("failed to run migrations: %v", err)
 	}
 
 	ctx := context.Background()

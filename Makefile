@@ -13,8 +13,12 @@ testbuild: build-ui
 	@go build -o bin/server ./cmd/server
 
 test:
-	@echo "Running Tests..."
-	@go test ./... -v
+	@echo "Running Unit Tests..."
+	@go test ./core/... ./pkg/... ./adapters/... ./cmd/... -v
+
+test-integration:
+	@echo "Running Integration & E2E Tests..."
+	@go test ./tests/... -v
 
 test-e2e:
 	@echo "Running E2E Verification..."
@@ -46,9 +50,6 @@ up:
 down:
 	docker-compose down
 
-test-integration:
-	@echo "Running Integration Tests..."
-	@go test ./tests -v
 
 clean:
 	@echo "Cleaning up..."

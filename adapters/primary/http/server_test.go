@@ -32,7 +32,7 @@ func TestRoutes(t *testing.T) {
 func TestLoggerMiddleware(t *testing.T) {
 	next := stdhttp.HandlerFunc(func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
 		w.WriteHeader(stdhttp.StatusOK)
-		w.Write([]byte("ok"))
+		_, _ = w.Write([]byte("ok"))
 	})
 
 	middleware := LoggingMiddleware(next) // Name changed in implementation to LoggingMiddleware or similar? handlers.go has LoggingMiddleware.

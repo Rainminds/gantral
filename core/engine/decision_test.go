@@ -71,7 +71,7 @@ func TestRecordDecision(t *testing.T) {
 				ID:    tt.cmd.InstanceID,
 				State: StateWaitingForHuman,
 			}
-			store.CreateInstance(ctx, instStub)
+			_ = store.CreateInstance(ctx, instStub)
 
 			inst, err := engine.RecordDecision(ctx, tt.cmd)
 

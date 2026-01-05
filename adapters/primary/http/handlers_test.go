@@ -105,7 +105,7 @@ func TestCreateInstance(t *testing.T) {
 		}
 
 		var resp CreateInstanceResponse
-		json.NewDecoder(w.Body).Decode(&resp)
+		_ = json.NewDecoder(w.Body).Decode(&resp)
 		if resp.Status != "PENDING" {
 			t.Errorf("expected PENDING, got %s", resp.Status)
 		}
@@ -195,7 +195,7 @@ func TestGetAuditLogs(t *testing.T) {
 		}
 
 		var resp map[string]interface{}
-		json.NewDecoder(w.Body).Decode(&resp)
+		_ = json.NewDecoder(w.Body).Decode(&resp)
 		if _, ok := resp["events"]; !ok {
 			t.Error("expected events in response")
 		}

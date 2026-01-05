@@ -77,7 +77,7 @@ func (h *Handler) CreateInstance(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Location", fmt.Sprintf("/instances/%s", instanceID))
 	w.WriteHeader(http.StatusAccepted)
-	json.NewEncoder(w).Encode(resp)
+	_ = json.NewEncoder(w).Encode(resp)
 }
 
 // RecordDecisionRequest defines the payload for a human decision.
@@ -137,7 +137,7 @@ func (h *Handler) RecordDecision(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusAccepted)
-	json.NewEncoder(w).Encode(map[string]string{"status": "SIGNAL_SENT"})
+	_ = json.NewEncoder(w).Encode(map[string]string{"status": "SIGNAL_SENT"})
 }
 
 // HandleGetAuditLogs retrieves audit logs for an instance.
@@ -156,7 +156,7 @@ func (h *Handler) HandleGetAuditLogs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	_ = json.NewEncoder(w).Encode(map[string]interface{}{
 		"events": events,
 	})
 }
@@ -198,7 +198,7 @@ func (h *Handler) HandleListInstances(w http.ResponseWriter, r *http.Request) {
 // HealthCheck handles GET /health.
 func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("OK"))
+	_, _ = w.Write([]byte("OK"))
 }
 
 // LoggingMiddleware wraps an http.Handler to log request details.

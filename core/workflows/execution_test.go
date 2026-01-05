@@ -58,7 +58,7 @@ func (s *UnitTestSuite) Test_HappyPath_AutoApprove() {
 	s.NoError(s.env.GetWorkflowError())
 
 	var result WorkflowResult
-	s.env.GetWorkflowResult(&result)
+	s.NoError(s.env.GetWorkflowResult(&result))
 	s.Equal("inst-mock-1", result.InstanceID)
 	s.Equal(engine.StateRunning, result.FinalState)
 }
@@ -111,7 +111,7 @@ func (s *UnitTestSuite) Test_HITL_Flow_Approved() {
 	s.NoError(s.env.GetWorkflowError())
 
 	var result WorkflowResult
-	s.env.GetWorkflowResult(&result)
+	s.NoError(s.env.GetWorkflowResult(&result))
 	s.Equal("inst-hitl-1", result.InstanceID)
 	// Simplified workflow logic updates local struct but returns the "FinalState"
 	// based on the switch case if we implemented strict state tracking.
@@ -174,7 +174,7 @@ func (s *UnitTestSuite) Test_HITL_Timeout() {
 	s.NoError(s.env.GetWorkflowError())
 
 	var result WorkflowResult
-	s.env.GetWorkflowResult(&result)
+	s.NoError(s.env.GetWorkflowResult(&result))
 	s.Equal("inst-timeout-1", result.InstanceID)
 	s.Equal(engine.StateRejected, result.FinalState)
 }

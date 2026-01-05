@@ -2,7 +2,6 @@ package activities
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log/slog"
 
@@ -98,15 +97,4 @@ func (a *ExecutionActivities) RecordDecision(ctx context.Context, input RecordDe
 
 	_, err := a.DB.RecordDecision(ctx, cmd, nextState)
 	return err
-}
-
-func generateInstanceID() string {
-	// Placeholder, actual logic uses RunID in PersistInstance
-	return ""
-}
-
-// Helper to marshal map to JSON bytes for logging/debug if needed
-func toJSON(v interface{}) string {
-	b, _ := json.Marshal(v)
-	return string(b)
 }

@@ -49,7 +49,7 @@ func (s *Store) CreateInstance(ctx context.Context, inst *engine.Instance) error
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	qtx := s.Queries.WithTx(tx)
 
@@ -115,7 +115,7 @@ func (s *Store) RecordDecision(ctx context.Context, cmd engine.RecordDecisionCmd
 	if err != nil {
 		return nil, fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	qtx := s.Queries.WithTx(tx)
 

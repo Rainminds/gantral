@@ -81,6 +81,6 @@ func deepCopyMap(src map[string]interface{}) map[string]interface{} {
 	}
 	bytes, _ := json.Marshal(src)
 	var dst map[string]interface{}
-	json.Unmarshal(bytes, &dst)
+	_ = json.Unmarshal(bytes, &dst)
 	return dst
 }

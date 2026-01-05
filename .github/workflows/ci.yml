@@ -51,11 +51,11 @@ jobs:
       - name: Test Unit
         run: make test
 
-      - name: Test E2E
+      - name: Test Integration & E2E
         env:
           TEMPORAL_HOST_PORT: "localhost:7233"
           DATABASE_URL: "postgres://postgres:changeme@localhost:5432/gantral"
-        run: make test-e2e
+        run: make test-integration
 
       - name: Coverage Check
         run: |
