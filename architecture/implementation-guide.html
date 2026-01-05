@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-architecture/implementation-guide" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.2">
+<title data-rh="true">Comprehensive Implementation Guide | Gantral</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://docs.gantral.org/img/gantral-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://docs.gantral.org/img/gantral-social-card.jpg"><meta data-rh="true" property="og:url" content="https://docs.gantral.org/architecture/implementation-guide"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Comprehensive Implementation Guide | Gantral"><meta data-rh="true" name="description" content="Version: v4.0 (Authority-First, Federated Execution, Agent-Native Persistence)"><meta data-rh="true" property="og:description" content="Version: v4.0 (Authority-First, Federated Execution, Agent-Native Persistence)"><link data-rh="true" rel="icon" href="/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://docs.gantral.org/architecture/implementation-guide"><link data-rh="true" rel="alternate" href="https://docs.gantral.org/architecture/implementation-guide" hreflang="en"><link data-rh="true" rel="alternate" href="https://docs.gantral.org/architecture/implementation-guide" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Architecture","item":"https://docs.gantral.org/architecture/"},{"@type":"ListItem","position":2,"name":"Comprehensive Implementation Guide","item":"https://docs.gantral.org/architecture/implementation-guide"}]}</script><link rel="stylesheet" href="/assets/css/styles.8cf77017.css">
+<script src="/assets/js/runtime~main.ad028e76.js" defer="defer"></script>
+<script src="/assets/js/main.beef7735.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")),document.documentElement.setAttribute("data-theme-choice",t||"system")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><link rel="preload" as="image" href="/img/logo.svg"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/"><div class="navbar__logo"><img src="/img/logo.svg" alt="Gantral Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/img/logo.svg" alt="Gantral Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">gantral</b></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/">Documentation</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><a href="https://github.com/Rainminds/gantral" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/"><span title="Welcome to Gantral" class="linkLabel_WmDU">Welcome to Gantral</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/executive"><span title="Executive Briefings" class="linkLabel_WmDU">Executive Briefings</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--active" href="/architecture"><span title="Architecture" class="categoryLinkLabel_W154">Architecture</span></a><button aria-label="Collapse sidebar category &#x27;Architecture&#x27;" aria-expanded="true" type="button" class="clean-btn menu__caret"></button></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/architecture/trd"><span title="Technical Reference &amp; Architecture Document" class="linkLabel_WmDU">Technical Reference &amp; Architecture Document</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/architecture/data-and-audit"><span title="Data and Audit Model" class="linkLabel_WmDU">Data and Audit Model</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/architecture/execution-authority-vs-agent-memory"><span title="Execution Authority vs Agent Memory vs Runtime" class="linkLabel_WmDU">Execution Authority vs Agent Memory vs Runtime</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/architecture/execution-plane"><span title="Execution Plane" class="linkLabel_WmDU">Execution Plane</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/architecture/implementation-guide"><span title="Comprehensive Implementation Guide" class="linkLabel_WmDU">Comprehensive Implementation Guide</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/architecture/invariants"><span title="Architectural Invariants" class="linkLabel_WmDU">Architectural Invariants</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/architecture/security-and-boundaries"><span title="Security and Trust Boundaries" class="linkLabel_WmDU">Security and Trust Boundaries</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/architecture/state-machine"><span title="Execution State Machine" class="linkLabel_WmDU">Execution State Machine</span></a></li></ul></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/contributors/cla"><span title="contributors" class="categoryLinkLabel_W154">contributors</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist" href="/governance"><span title="Governance" class="categoryLinkLabel_W154">Governance</span></a><button aria-label="Expand sidebar category &#x27;Governance&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/guides/demo"><span title="guides" class="categoryLinkLabel_W154">guides</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist" href="/positioning"><span title="Positioning" class="categoryLinkLabel_W154">Positioning</span></a><button aria-label="Expand sidebar category &#x27;Positioning&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist" href="/product"><span title="Product" class="categoryLinkLabel_W154">Product</span></a><button aria-label="Expand sidebar category &#x27;Product&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="Breadcrumbs"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><a class="breadcrumbs__link" href="/architecture"><span>Architecture</span></a></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">Comprehensive Implementation Guide</span></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>Comprehensive Implementation Guide</h1></header>
+<p><strong>Version:</strong> v4.0 (Authority-First, Federated Execution, Agent-Native Persistence)</p>
+<p><strong>Status:</strong> Reference implementation guide (non-normative)</p>
+<p><strong>Audience:</strong></p>
+<ul>
+<li class="">Core contributors</li>
+<li class="">Platform engineers</li>
+<li class="">Enterprise architects (regulated environments)</li>
+<li class="">Security, Risk, and Compliance reviewers</li>
+<li class="">AI coding assistants used for implementation</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="purpose"><strong>Purpose</strong><a href="#purpose" class="hash-link" aria-label="Direct link to purpose" title="Direct link to purpose" translate="no">​</a></h2>
+<p>This document translates the Gantral <strong>PRD</strong> and <strong>TRD v4</strong> into a <strong>buildable, implementation-accurate guide</strong>.</p>
+<p>This version incorporates the finalized architectural clarification:</p>
+<ul>
+<li class="">Gantral owns <strong>execution authority and control state</strong></li>
+<li class="">Agent frameworks own <strong>agent internal state and memory</strong></li>
+<li class="">Long-running approvals require <strong>agent-native checkpointing</strong></li>
+<li class="">Deterministic execution and replay are guaranteed by a workflow runtime (Temporal)</li>
+</ul>
+<p><strong>Rule:</strong> If this guide conflicts with the TRD, the TRD is correct.</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="0-how-this-guide-should-be-used"><strong>0. How This Guide Should Be Used</strong><a href="#0-how-this-guide-should-be-used" class="hash-link" aria-label="Direct link to 0-how-this-guide-should-be-used" title="Direct link to 0-how-this-guide-should-be-used" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="01-documentation-hierarchy-non-negotiable"><strong>0.1 Documentation Hierarchy (Non-Negotiable)</strong><a href="#01-documentation-hierarchy-non-negotiable" class="hash-link" aria-label="Direct link to 01-documentation-hierarchy-non-negotiable" title="Direct link to 01-documentation-hierarchy-non-negotiable" translate="no">​</a></h3>
+<p><strong>PRD → TRD → Implementation Guide (this document)</strong></p>
+<ul>
+<li class="">PRD defines <em>why</em> Gantral exists</li>
+<li class="">TRD defines <em>what must be true</em></li>
+<li class="">This guide defines <em>one correct way to build it</em></li>
+</ul>
+<p>This guide is replaceable. The TRD is not.</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="1-system-responsibilities-explicit"><strong>1. System Responsibilities (Explicit)</strong><a href="#1-system-responsibilities-explicit" class="hash-link" aria-label="Direct link to 1-system-responsibilities-explicit" title="Direct link to 1-system-responsibilities-explicit" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="11-what-gantral-owns"><strong>1.1 What Gantral Owns</strong><a href="#11-what-gantral-owns" class="hash-link" aria-label="Direct link to 11-what-gantral-owns" title="Direct link to 11-what-gantral-owns" translate="no">​</a></h3>
+<p>Gantral is an <strong>execution authority layer</strong>. It owns:</p>
+<ul>
+<li class="">Execution lifecycle and immutable instance boundaries</li>
+<li class="">Canonical execution state machine</li>
+<li class="">Human-in-the-Loop (HITL) enforcement</li>
+<li class="">Authority transitions (approve / reject / override)</li>
+<li class="">Policy gating as <strong>transition guards</strong></li>
+<li class="">Time, retries, escalation, and timeout semantics</li>
+<li class="">Instance-level audit correctness</li>
+<li class="">Deterministic replay of execution decisions (via workflow runtime)</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="12-what-gantral-explicitly-does-not-own"><strong>1.2 What Gantral Explicitly Does NOT Own</strong><a href="#12-what-gantral-explicitly-does-not-own" class="hash-link" aria-label="Direct link to 12-what-gantral-explicitly-does-not-own" title="Direct link to 12-what-gantral-explicitly-does-not-own" translate="no">​</a></h3>
+<p>Gantral does <strong>not</strong>:</p>
+<ul>
+<li class="">Perform agent reasoning, planning, or cognition</li>
+<li class="">Manage prompts, tools, or agent memory</li>
+<li class="">Persist or serialize agent internal state</li>
+<li class="">Decide outcomes autonomously</li>
+<li class="">Store secrets or credentials</li>
+<li class="">Act as an identity provider</li>
+</ul>
+<p>Gantral governs <strong>whether execution may proceed</strong>, not <strong>how agents reason</strong>.</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="2-separation-of-duties-enterprise-requirement"><strong>2. Separation of Duties (Enterprise Requirement)</strong><a href="#2-separation-of-duties-enterprise-requirement" class="hash-link" aria-label="Direct link to 2-separation-of-duties-enterprise-requirement" title="Direct link to 2-separation-of-duties-enterprise-requirement" translate="no">​</a></h2>
+<table><thead><tr><th>Function</th><th>Owner</th></tr></thead><tbody><tr><td>Agent reasoning &amp; memory</td><td>Agent frameworks (CrewAI, LangGraph, etc.)</td></tr><tr><td>Agent execution</td><td>Runners</td></tr><tr><td>Agent checkpointing</td><td>Agent frameworks (native persistence)</td></tr><tr><td>Policy authoring</td><td>Platform / Risk / Compliance</td></tr><tr><td>Policy evaluation</td><td>Pluggable policy engine</td></tr><tr><td>Execution control</td><td>Gantral</td></tr><tr><td>Approval decisions</td><td>Humans</td></tr><tr><td>Audit &amp; review</td><td>Independent audit teams</td></tr></tbody></table>
+<p>No component may cross these boundaries.</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="3-execution-engine-phase-1"><strong>3. Execution Engine (Phase 1)</strong><a href="#3-execution-engine-phase-1" class="hash-link" aria-label="Direct link to 3-execution-engine-phase-1" title="Direct link to 3-execution-engine-phase-1" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="responsibility"><strong>Responsibility</strong><a href="#responsibility" class="hash-link" aria-label="Direct link to responsibility" title="Direct link to responsibility" translate="no">​</a></h3>
+<ul>
+<li class="">Enforce canonical execution states</li>
+<li class="">Persist immutable execution events</li>
+<li class="">Reject invalid or out-of-order transitions</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="canonical-states"><strong>Canonical States</strong><a href="#canonical-states" class="hash-link" aria-label="Direct link to canonical-states" title="Direct link to canonical-states" translate="no">​</a></h3>
+<p>CREATED → RUNNING → WAITING_FOR_HUMAN → APPROVED | REJECTED | OVERRIDDEN<br>
+<!-- -->↓                    ↓<br>
+<!-- -->RESUMED             TERMINATED → COMPLETED</p>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="implementation-guidance"><strong>Implementation Guidance</strong><a href="#implementation-guidance" class="hash-link" aria-label="Direct link to implementation-guidance" title="Direct link to implementation-guidance" translate="no">​</a></h3>
+<ul>
+<li class="">Event-sourced execution model</li>
+<li class="">Append-only execution history</li>
+<li class="">Idempotent transition handlers</li>
+<li class="">No implicit or hidden state mutation</li>
+</ul>
+<p><strong>AI assistant instruction:</strong> Implement the state machine exactly as specified. Do not add states.</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="4-hitl-state-machine-phase-1"><strong>4. HITL State Machine (Phase 1)</strong><a href="#4-hitl-state-machine-phase-1" class="hash-link" aria-label="Direct link to 4-hitl-state-machine-phase-1" title="Direct link to 4-hitl-state-machine-phase-1" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="responsibility-1"><strong>Responsibility</strong><a href="#responsibility-1" class="hash-link" aria-label="Direct link to responsibility-1" title="Direct link to responsibility-1" translate="no">​</a></h3>
+<ul>
+<li class="">Encode human authority as an execution state</li>
+<li class="">Prevent agents from resuming execution autonomously</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="required-guarantees"><strong>Required Guarantees</strong><a href="#required-guarantees" class="hash-link" aria-label="Direct link to required-guarantees" title="Direct link to required-guarantees" translate="no">​</a></h3>
+<p>Each HITL decision must capture:</p>
+<ul>
+<li class=""><code>human_actor_id</code></li>
+<li class=""><code>role</code></li>
+<li class=""><code>timestamp</code></li>
+<li class=""><code>decision</code> (APPROVE / REJECT / OVERRIDE)</li>
+<li class=""><code>context_snapshot</code></li>
+<li class=""><code>justification</code></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="override-semantics-critical"><strong>Override Semantics (Critical)</strong><a href="#override-semantics-critical" class="hash-link" aria-label="Direct link to override-semantics-critical" title="Direct link to override-semantics-critical" translate="no">​</a></h3>
+<p>For OVERRIDDEN (and optionally APPROVED) decisions:</p>
+<ul>
+<li class=""><code>context_delta</code> or equivalent override payload is mandatory</li>
+<li class="">Execution resumes only with modified context</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="timeout-handling-critical"><strong>Timeout Handling (Critical)</strong><a href="#timeout-handling-critical" class="hash-link" aria-label="Direct link to timeout-handling-critical" title="Direct link to timeout-handling-critical" translate="no">​</a></h3>
+<ul>
+<li class="">HITL waits are subject to policy-defined timeouts</li>
+<li class="">On timeout expiry:<!-- -->
+<ul>
+<li class="">Emit a TIMEOUT execution event</li>
+<li class="">Apply policy-defined behavior (fail-closed or escalate)</li>
+</ul>
+</li>
+</ul>
+<p>Timeout handling is execution control, not policy evaluation.</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="5-policy-evaluation-layer-phase-2"><strong>5. Policy Evaluation Layer (Phase 2)</strong><a href="#5-policy-evaluation-layer-phase-2" class="hash-link" aria-label="Direct link to 5-policy-evaluation-layer-phase-2" title="Direct link to 5-policy-evaluation-layer-phase-2" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="core-principle"><strong>Core Principle</strong><a href="#core-principle" class="hash-link" aria-label="Direct link to core-principle" title="Direct link to core-principle" translate="no">​</a></h3>
+<p>Policy evaluation is a <strong>transition guard</strong>, not an execution state and not an authority.</p>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="when-it-runs"><strong>When It Runs</strong><a href="#when-it-runs" class="hash-link" aria-label="Direct link to when-it-runs" title="Direct link to when-it-runs" translate="no">​</a></h3>
+<ul>
+<li class="">Synchronously during execution transitions</li>
+<li class="">Before entering <code>WAITING_FOR_HUMAN</code></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="what-it-produces-advisory-signals"><strong>What It Produces (Advisory Signals)</strong><a href="#what-it-produces-advisory-signals" class="hash-link" aria-label="Direct link to what-it-produces-advisory-signals" title="Direct link to what-it-produces-advisory-signals" translate="no">​</a></h3>
+<ul>
+<li class="">ALLOW</li>
+<li class="">REQUIRE_HUMAN</li>
+<li class="">DENY</li>
+</ul>
+<p>Policy results are <strong>never persisted as durable execution state</strong>.</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="6-policy-evaluation-interface-contract"><strong>6. Policy Evaluation Interface (Contract)</strong><a href="#6-policy-evaluation-interface-contract" class="hash-link" aria-label="Direct link to 6-policy-evaluation-interface-contract" title="Direct link to 6-policy-evaluation-interface-contract" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="input-trd-aligned"><strong>Input (TRD-Aligned)</strong><a href="#input-trd-aligned" class="hash-link" aria-label="Direct link to input-trd-aligned" title="Direct link to input-trd-aligned" translate="no">​</a></h3>
+<ul>
+<li class="">instance_id</li>
+<li class="">workflow_id</li>
+<li class="">workflow_version</li>
+<li class="">materiality</li>
+<li class="">current_state</li>
+<li class="">actor_id</li>
+<li class="">roles</li>
+<li class="">execution_context</li>
+<li class="">policy_version_id</li>
+<li class="">dry_run</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="output-advisory-only"><strong>Output (Advisory Only)</strong><a href="#output-advisory-only" class="hash-link" aria-label="Direct link to output-advisory-only" title="Direct link to output-advisory-only" translate="no">​</a></h3>
+<ul>
+<li class="">decision (ALLOW / REQUIRE_HUMAN / DENY)</li>
+<li class="">eligible_approver_roles</li>
+<li class="">escalation_roles</li>
+<li class="">timeout</li>
+</ul>
+<p>Gantral remains the <strong>sole enforcement authority</strong>.</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="7-execution-history-audit--replay"><strong>7. Execution History, Audit &amp; Replay</strong><a href="#7-execution-history-audit--replay" class="hash-link" aria-label="Direct link to 7-execution-history-audit--replay" title="Direct link to 7-execution-history-audit--replay" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="responsibility-2"><strong>Responsibility</strong><a href="#responsibility-2" class="hash-link" aria-label="Direct link to responsibility-2" title="Direct link to responsibility-2" translate="no">​</a></h3>
+<ul>
+<li class="">Store authoritative execution records</li>
+<li class="">Enable deterministic replay of <strong>authority decisions</strong></li>
+<li class="">Support regulatory audits</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="determinism-model"><strong>Determinism Model</strong><a href="#determinism-model" class="hash-link" aria-label="Direct link to determinism-model" title="Direct link to determinism-model" translate="no">​</a></h3>
+<ul>
+<li class="">Gantral workflows execute inside a deterministic workflow runtime (Temporal)</li>
+<li class="">Replay re-executes workflow logic from recorded execution history</li>
+<li class="">Replay does <strong>not</strong> rehydrate agent internal memory</li>
+</ul>
+<p>Agent memory replay is optional and non-authoritative.</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="8-apis--sdks"><strong>8. APIs &amp; SDKs</strong><a href="#8-apis--sdks" class="hash-link" aria-label="Direct link to 8-apis--sdks" title="Direct link to 8-apis--sdks" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="api-principles"><strong>API Principles</strong><a href="#api-principles" class="hash-link" aria-label="Direct link to api-principles" title="Direct link to api-principles" translate="no">​</a></h3>
+<ul>
+<li class="">Explicit state transitions</li>
+<li class="">Versioned endpoints</li>
+<li class="">No implicit side effects</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="sdks"><strong>SDKs</strong><a href="#sdks" class="hash-link" aria-label="Direct link to sdks" title="Direct link to sdks" translate="no">​</a></h3>
+<ul>
+<li class="">Thin wrappers only</li>
+<li class="">No business logic</li>
+<li class="">Server remains the source of truth</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="9-adapters--framework-native-integrations-updated"><strong>9. Adapters &amp; Framework-Native Integrations (Updated)</strong><a href="#9-adapters--framework-native-integrations-updated" class="hash-link" aria-label="Direct link to 9-adapters--framework-native-integrations-updated" title="Direct link to 9-adapters--framework-native-integrations-updated" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="responsibility-3"><strong>Responsibility</strong><a href="#responsibility-3" class="hash-link" aria-label="Direct link to responsibility-3" title="Direct link to responsibility-3" translate="no">​</a></h3>
+<ul>
+<li class="">Translate external events into Gantral triggers</li>
+<li class="">Forward execution decisions back to external systems</li>
+</ul>
+<p>Adapters contain <strong>no business logic, no policy checks, and no execution authority</strong>.</p>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="91-framework-native-agent-integrations-critical"><strong>9.1 Framework-Native Agent Integrations (Critical)</strong><a href="#91-framework-native-agent-integrations-critical" class="hash-link" aria-label="Direct link to 91-framework-native-agent-integrations-critical" title="Direct link to 91-framework-native-agent-integrations-critical" translate="no">​</a></h3>
+<p>Runners and SDKs <strong>must support agent-native suspension and resume semantics</strong>.</p>
+<p>Agent frameworks may deliberately suspend execution (&quot;hibernation&quot;) when:</p>
+<ul>
+<li class="">A HITL approval is required</li>
+<li class="">Execution must pause for an extended duration</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="required-runner--sdk-behavior"><strong>Required Runner / SDK Behavior</strong><a href="#required-runner--sdk-behavior" class="hash-link" aria-label="Direct link to required-runner--sdk-behavior" title="Direct link to required-runner--sdk-behavior" translate="no">​</a></h3>
+<p>The SDK <strong>must distinguish</strong> between:</p>
+<table><thead><tr><th>Agent Outcome</th><th>Meaning</th><th>Gantral Action</th></tr></thead><tbody><tr><td>Completed</td><td>Agent finished normally</td><td>Transition to COMPLETED</td></tr><tr><td>Failed</td><td>Agent crashed or errored</td><td>Transition to TERMINATED</td></tr><tr><td>Suspended</td><td>Agent checkpointed and exited</td><td>Transition to WAITING_FOR_HUMAN</td></tr></tbody></table>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="suspension-handling"><strong>Suspension Handling</strong><a href="#suspension-handling" class="hash-link" aria-label="Direct link to suspension-handling" title="Direct link to suspension-handling" translate="no">​</a></h3>
+<ul>
+<li class="">Agent framework persists internal state using its <strong>native checkpointing</strong></li>
+<li class="">Agent process exits cleanly</li>
+<li class="">Runner emits a <strong>SUSPENDED</strong> execution event</li>
+<li class="">Gantral workflow waits on approval signal</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="resume-handling"><strong>Resume Handling</strong><a href="#resume-handling" class="hash-link" aria-label="Direct link to resume-handling" title="Direct link to resume-handling" translate="no">​</a></h3>
+<ul>
+<li class="">Upon APPROVED / OVERRIDDEN:<!-- -->
+<ul>
+<li class="">Gantral schedules a new execution task</li>
+<li class="">Runner launches a <strong>new agent process</strong></li>
+<li class="">Agent framework restores state from checkpoint</li>
+<li class="">Execution resumes deterministically</li>
+</ul>
+</li>
+</ul>
+<p>Gantral never loads, inspects, or persists agent internal state.</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="10-security-identity--federation"><strong>10. Security, Identity &amp; Federation</strong><a href="#10-security-identity--federation" class="hash-link" aria-label="Direct link to 10-security-identity--federation" title="Direct link to 10-security-identity--federation" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="101-human-identity"><strong>10.1 Human Identity</strong><a href="#101-human-identity" class="hash-link" aria-label="Direct link to 101-human-identity" title="Direct link to 101-human-identity" translate="no">​</a></h3>
+<ul>
+<li class="">OIDC federation only (Okta, Azure AD, etc.)</li>
+<li class="">Identity derived from token claims</li>
+<li class="">No Gantral-managed users</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="102-machine-identity"><strong>10.2 Machine Identity</strong><a href="#102-machine-identity" class="hash-link" aria-label="Direct link to 102-machine-identity" title="Direct link to 102-machine-identity" translate="no">​</a></h3>
+<ul>
+<li class="">Workload identity (AWS IAM, K8s SA, etc.)</li>
+<li class="">No static API keys</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="103-secrets--connections"><strong>10.3 Secrets &amp; Connections</strong><a href="#103-secrets--connections" class="hash-link" aria-label="Direct link to 103-secrets--connections" title="Direct link to 103-secrets--connections" translate="no">​</a></h3>
+<ul>
+<li class="">Gantral stores references only (e.g. <code>vault://...</code>)</li>
+<li class="">Secrets resolved by Runners at execution edge</li>
+<li class="">Raw credentials never enter Gantral</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="11-runner-pattern-federated-execution"><strong>11. Runner Pattern (Federated Execution)</strong><a href="#11-runner-pattern-federated-execution" class="hash-link" aria-label="Direct link to 11-runner-pattern-federated-execution" title="Direct link to 11-runner-pattern-federated-execution" translate="no">​</a></h2>
+<ul>
+<li class="">Runners execute inside team-owned infrastructure</li>
+<li class="">Pull-based task queues</li>
+<li class="">Data locality preserved</li>
+<li class="">Network isolation respected</li>
+</ul>
+<p>Gantral is the <strong>authority</strong>. Runners are the <strong>executors</strong>.</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="12-deployment-model"><strong>12. Deployment Model</strong><a href="#12-deployment-model" class="hash-link" aria-label="Direct link to 12-deployment-model" title="Direct link to 12-deployment-model" translate="no">​</a></h2>
+<ul>
+<li class="">Kubernetes (primary)</li>
+<li class="">Self-hosted</li>
+<li class="">Air-gapped deployments supported</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="13-implementation-phases"><strong>13. Implementation Phases</strong><a href="#13-implementation-phases" class="hash-link" aria-label="Direct link to 13-implementation-phases" title="Direct link to 13-implementation-phases" translate="no">​</a></h2>
+<ul>
+<li class="">Phase 1 – Control Foundations</li>
+<li class="">Phase 2 – Governance Hardening</li>
+<li class="">Phase 3 – Enterprise Integration</li>
+<li class="">Phase 4 – Federated Execution</li>
+</ul>
+<p>Phases must be completed <strong>strictly in order</strong>.</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="14-what-this-guide-protects-against"><strong>14. What This Guide Protects Against</strong><a href="#14-what-this-guide-protects-against" class="hash-link" aria-label="Direct link to 14-what-this-guide-protects-against" title="Direct link to 14-what-this-guide-protects-against" translate="no">​</a></h2>
+<ul>
+<li class="">Accidental autonomy</li>
+<li class="">Agent memory leakage into audit logs</li>
+<li class="">Non-deterministic approvals</li>
+<li class="">Regulator rejection</li>
+<li class="">Framework lock-in</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="15-final-reminder"><strong>15. Final Reminder</strong><a href="#15-final-reminder" class="hash-link" aria-label="Direct link to 15-final-reminder" title="Direct link to 15-final-reminder" translate="no">​</a></h2>
+<p>Gantral is not about what AI can do.</p>
+<p>It is about what organizations are willing to allow AI to do — and how they prove it.</p>
+<p>This guide exists to ensure Gantral is built <strong>correctly, safely, and credibly</strong>.</p></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col noPrint_WFHX"><a href="https://github.com/Rainminds/gantral/tree/main/../docs/architecture/implementation-guide.md" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Z9Sw" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/architecture/execution-plane"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">Execution Plane</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/architecture/invariants"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">Architectural Invariants</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#purpose" class="table-of-contents__link toc-highlight"><strong>Purpose</strong></a></li><li><a href="#0-how-this-guide-should-be-used" class="table-of-contents__link toc-highlight"><strong>0. How This Guide Should Be Used</strong></a><ul><li><a href="#01-documentation-hierarchy-non-negotiable" class="table-of-contents__link toc-highlight"><strong>0.1 Documentation Hierarchy (Non-Negotiable)</strong></a></li></ul></li><li><a href="#1-system-responsibilities-explicit" class="table-of-contents__link toc-highlight"><strong>1. System Responsibilities (Explicit)</strong></a><ul><li><a href="#11-what-gantral-owns" class="table-of-contents__link toc-highlight"><strong>1.1 What Gantral Owns</strong></a></li><li><a href="#12-what-gantral-explicitly-does-not-own" class="table-of-contents__link toc-highlight"><strong>1.2 What Gantral Explicitly Does NOT Own</strong></a></li></ul></li><li><a href="#2-separation-of-duties-enterprise-requirement" class="table-of-contents__link toc-highlight"><strong>2. Separation of Duties (Enterprise Requirement)</strong></a></li><li><a href="#3-execution-engine-phase-1" class="table-of-contents__link toc-highlight"><strong>3. Execution Engine (Phase 1)</strong></a><ul><li><a href="#responsibility" class="table-of-contents__link toc-highlight"><strong>Responsibility</strong></a></li><li><a href="#canonical-states" class="table-of-contents__link toc-highlight"><strong>Canonical States</strong></a></li><li><a href="#implementation-guidance" class="table-of-contents__link toc-highlight"><strong>Implementation Guidance</strong></a></li></ul></li><li><a href="#4-hitl-state-machine-phase-1" class="table-of-contents__link toc-highlight"><strong>4. HITL State Machine (Phase 1)</strong></a><ul><li><a href="#responsibility-1" class="table-of-contents__link toc-highlight"><strong>Responsibility</strong></a></li><li><a href="#required-guarantees" class="table-of-contents__link toc-highlight"><strong>Required Guarantees</strong></a></li><li><a href="#override-semantics-critical" class="table-of-contents__link toc-highlight"><strong>Override Semantics (Critical)</strong></a></li><li><a href="#timeout-handling-critical" class="table-of-contents__link toc-highlight"><strong>Timeout Handling (Critical)</strong></a></li></ul></li><li><a href="#5-policy-evaluation-layer-phase-2" class="table-of-contents__link toc-highlight"><strong>5. Policy Evaluation Layer (Phase 2)</strong></a><ul><li><a href="#core-principle" class="table-of-contents__link toc-highlight"><strong>Core Principle</strong></a></li><li><a href="#when-it-runs" class="table-of-contents__link toc-highlight"><strong>When It Runs</strong></a></li><li><a href="#what-it-produces-advisory-signals" class="table-of-contents__link toc-highlight"><strong>What It Produces (Advisory Signals)</strong></a></li></ul></li><li><a href="#6-policy-evaluation-interface-contract" class="table-of-contents__link toc-highlight"><strong>6. Policy Evaluation Interface (Contract)</strong></a><ul><li><a href="#input-trd-aligned" class="table-of-contents__link toc-highlight"><strong>Input (TRD-Aligned)</strong></a></li><li><a href="#output-advisory-only" class="table-of-contents__link toc-highlight"><strong>Output (Advisory Only)</strong></a></li></ul></li><li><a href="#7-execution-history-audit--replay" class="table-of-contents__link toc-highlight"><strong>7. Execution History, Audit &amp; Replay</strong></a><ul><li><a href="#responsibility-2" class="table-of-contents__link toc-highlight"><strong>Responsibility</strong></a></li><li><a href="#determinism-model" class="table-of-contents__link toc-highlight"><strong>Determinism Model</strong></a></li></ul></li><li><a href="#8-apis--sdks" class="table-of-contents__link toc-highlight"><strong>8. APIs &amp; SDKs</strong></a><ul><li><a href="#api-principles" class="table-of-contents__link toc-highlight"><strong>API Principles</strong></a></li><li><a href="#sdks" class="table-of-contents__link toc-highlight"><strong>SDKs</strong></a></li></ul></li><li><a href="#9-adapters--framework-native-integrations-updated" class="table-of-contents__link toc-highlight"><strong>9. Adapters &amp; Framework-Native Integrations (Updated)</strong></a><ul><li><a href="#responsibility-3" class="table-of-contents__link toc-highlight"><strong>Responsibility</strong></a></li><li><a href="#91-framework-native-agent-integrations-critical" class="table-of-contents__link toc-highlight"><strong>9.1 Framework-Native Agent Integrations (Critical)</strong></a></li><li><a href="#required-runner--sdk-behavior" class="table-of-contents__link toc-highlight"><strong>Required Runner / SDK Behavior</strong></a></li><li><a href="#suspension-handling" class="table-of-contents__link toc-highlight"><strong>Suspension Handling</strong></a></li><li><a href="#resume-handling" class="table-of-contents__link toc-highlight"><strong>Resume Handling</strong></a></li></ul></li><li><a href="#10-security-identity--federation" class="table-of-contents__link toc-highlight"><strong>10. Security, Identity &amp; Federation</strong></a><ul><li><a href="#101-human-identity" class="table-of-contents__link toc-highlight"><strong>10.1 Human Identity</strong></a></li><li><a href="#102-machine-identity" class="table-of-contents__link toc-highlight"><strong>10.2 Machine Identity</strong></a></li><li><a href="#103-secrets--connections" class="table-of-contents__link toc-highlight"><strong>10.3 Secrets &amp; Connections</strong></a></li></ul></li><li><a href="#11-runner-pattern-federated-execution" class="table-of-contents__link toc-highlight"><strong>11. Runner Pattern (Federated Execution)</strong></a></li><li><a href="#12-deployment-model" class="table-of-contents__link toc-highlight"><strong>12. Deployment Model</strong></a></li><li><a href="#13-implementation-phases" class="table-of-contents__link toc-highlight"><strong>13. Implementation Phases</strong></a></li><li><a href="#14-what-this-guide-protects-against" class="table-of-contents__link toc-highlight"><strong>14. What This Guide Protects Against</strong></a></li><li><a href="#15-final-reminder" class="table-of-contents__link toc-highlight"><strong>15. Final Reminder</strong></a></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Community</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://github.com/Rainminds/gantral" target="_blank" rel="noopener noreferrer" class="footer__link-item">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 Gantral, Inc. Built with Docusaurus.</div></div></div></footer></div>
+</body>
+</html>
