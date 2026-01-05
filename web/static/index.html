@@ -78,8 +78,8 @@
             try {
                 const response = await fetch(`${API_BASE}/instances`);
                 if (!response.ok) throw new Error('Failed to fetch instances');
-                const instances = await response.json();
-                renderTable(instances);
+                const data = await response.json();
+                renderTable(data.instances);
             } catch (error) {
                 console.error('Error:', error);
             }

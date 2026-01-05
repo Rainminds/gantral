@@ -3,27 +3,30 @@ package engine
 import (
 	"context"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/Rainminds/gantral/core/policy"
 )
 
+// InstanceStore defines the persistence layer requirements.
+type InstanceStore interface {
+	CreateInstance(ctx context.Context, inst *Instance) error
+	GetInstance(ctx context.Context, id string) (*Instance, error)
+	ListInstances(ctx context.Context) ([]*Instance, error)
+	RecordDecision(ctx context.Context, cmd RecordDecisionCmd, nextState State) (*Instance, error)
+}
+
 // Engine is the core component that manages execution lifecycles.
 type Engine struct {
 	policyEngine *policy.Engine
-
-	// In-memory store for now.
-	// WARNING: Data is lost on server restart. Replace with DB in Phase 3.
-	mu        sync.RWMutex
-	instances map[string]*Instance
+	store        InstanceStore
 }
 
 // NewEngine creates a new instance of the Engine.
-func NewEngine() *Engine {
+func NewEngine(store InstanceStore) *Engine {
 	return &Engine{
 		policyEngine: policy.NewEngine(),
-		instances:    make(map[string]*Instance),
+		store:        store,
 	}
 }
 
@@ -56,34 +59,20 @@ func (e *Engine) CreateInstance(ctx context.Context, workflowID string, triggerC
 		UpdatedAt: time.Now(),
 	}
 
-	// 4. Store in memory
-	e.mu.Lock()
-	e.instances[instance.ID] = instance
-	e.mu.Unlock()
+	// 4. Store via Interface
+	if err := e.store.CreateInstance(ctx, instance); err != nil {
+		return nil, fmt.Errorf("failed to create instance: %w", err)
+	}
 
 	return instance, nil
 }
 
 // GetInstance retrieves an instance by ID.
 func (e *Engine) GetInstance(ctx context.Context, id string) (*Instance, error) {
-	e.mu.RLock()
-	defer e.mu.RUnlock()
-
-	inst, ok := e.instances[id]
-	if !ok {
-		return nil, fmt.Errorf("instance not found: %s", id)
-	}
-	return inst, nil
+	return e.store.GetInstance(ctx, id)
 }
 
 // ListInstances retrieves all instances.
 func (e *Engine) ListInstances(ctx context.Context) ([]*Instance, error) {
-	e.mu.RLock()
-	defer e.mu.RUnlock()
-
-	result := make([]*Instance, 0, len(e.instances))
-	for _, inst := range e.instances {
-		result = append(result, inst)
-	}
-	return result, nil
+	return e.store.ListInstances(ctx)
 }

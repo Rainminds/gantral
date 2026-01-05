@@ -1,277 +1,557 @@
-# Technical Reference Document
+---
+sidebar_position: 1
+title: Technical Reference & Architecture Document
+---
 
-**Status:** Living technical reference (v1.1)
+**Version:** v4.0 (Federated Execution, Authority-First, Agent-Native Persistence)
 
-**Purpose:** This document is the technical constitution of the **Gantral open-source core**. It is not intended to describe the features of the commercial Gantrio platform. It is designed to directly inform:
-* Implementation sequencing
-* Repository structure
-* Architecture & design decisions
-* Security, privacy, and compliance posture
-* OSS governance and licensing
+**Status:** Living technical reference (authoritative)
 
-This document is intentionally detailed and opinionated. If an implementation conflicts with this document, the implementation is wrong.
+**Audience:** Core contributors, platform engineers, security reviewers, enterprise architects
 
-## 1. Scope & Non‑Goals
+---
+
+## **Purpose**
+# Gantral — Technical Reference & Architecture Document (TRD)
+
+**Version:** v4.0 (Federated Execution, Authority-First, Agent-Native Persistence)  
+**Status:** Living technical reference (authoritative)  
+**Audience:** Core contributors, platform engineers, security reviewers, enterprise architects  
+
+---
+
+## Purpose
+
+This document is the **technical constitution** of the Gantral open-source core.
+
+It defines the architectural invariants, execution semantics, responsibility boundaries, and control guarantees that **must hold across all implementations**.
+
+Gantral deliberately separates **execution authority** from **agent reasoning and memory**.
+
+> **If an implementation conflicts with this document, the implementation is incorrect.**
+
+---
+
+## 1. Scope & Non-Goals
 
 ### 1.1 What Gantral Is (Technical Definition)
 
-Gantral is an AI Execution Control Plane that standardizes how AI-driven workflows execute, pause, escalate, and are audited across teams and systems.
+Gantral is an **AI Execution Control Plane** that standardizes how AI-assisted and agentic workflows:
+
+- Execute  
+- Pause for human authority  
+- Escalate  
+- Resume  
+- Terminate  
+- Are audited  
+
+across teams, domains, and systems.
 
 Technically, Gantral provides:
-* A deterministic execution state machine.
-* Human‑in‑the‑Loop (HITL) as a first‑class state transition.
-* Instance‑level isolation for audit, cost, and accountability.
-* Declarative policies for materiality, escalation, and authority.
-* Control APIs and SDKs that sit above agent frameworks and below enterprise processes.
 
-### 1.2 Explicit Non‑Goals (Hard Exclusions)
+- A deterministic, instance-first execution state machine  
+- Human-in-the-Loop (HITL) as a first-class execution state  
+- Instance-level isolation for audit, cost, and accountability  
+- Declarative control policies for materiality, authority, and escalation  
+- A **pluggable policy evaluation interface** (advisory only)  
+- Control APIs and SDKs that sit **above agent frameworks and below enterprise systems**  
+- Deterministic execution and replay guarantees via a workflow runtime  
 
-Gantral will not:
-* Build or host AI agents.
-* Optimize prompts or models.
-* Train or fine‑tune models.
-* Replace CI/CD, Jira, GitHub, or ITSM systems.
-* Provide autonomous decision loops.
-* Make probabilistic decisions without human accountability.
+Gantral is **domain-agnostic by design**.  
+SDLC workflows are an initial wedge, not the boundary.
 
-## 2. Architectural Invariants (Non‑Negotiable)
+---
 
-These invariants must hold across all implementations:
+### 1.2 Explicit Non-Goals (Hard Exclusions)
 
-1. **Instance‑First Semantics:** All audit, cost, authority, and replay semantics attach to instances, never agents or workflows.
-2. **HITL Is a State Transition:** Human intervention is modeled inside the execution graph, not as an external approval system.
-3. **Human Authority Is Final:** AI output is advisory; policy‑enforced human decisions override AI.
-4. **Determinism > Performance:** Immutable logs, replayability, and auditability take precedence over latency optimizations.
-5. **Declarative Control:** Policies, materiality rules, and escalation paths are configuration (YAML/JSON), not embedded code.
-6. **Adapters Contain No Business Logic:** Integrations emit events and accept decisions only.
+Gantral will **not**:
 
-## 3. High‑Level Architecture
+- Build, host, or orchestrate AI agents  
+- Encode domain-specific business logic  
+- Manage agent prompts, plans, or internal memory  
+- Serialize or persist agent internal state  
+- Optimize, train, or fine-tune models  
+- Provide autonomous decision loops  
+- Make probabilistic decisions without human accountability  
+- Replace CI/CD, ITSM, ticketing, or enterprise systems  
+- Store raw secrets or credentials  
+- Act as an identity provider  
 
-### 3.1 Logical Architecture Layers
+---
+
+## 2. Architectural Invariants (Non-Negotiable)
+
+The following invariants must hold across all implementations:
+
+- **Instance-first semantics**  
+  All audit, cost, authority, and replay semantics attach to immutable execution instances  
+
+- **HITL is a state transition**  
+  Human intervention is modeled inside the execution graph, not as an external approval  
+
+- **Human authority is final**  
+  AI output is advisory; policy-enforced human decisions override AI  
+
+- **Determinism > performance**  
+  Replayability and auditability take precedence over latency  
+
+- **Declarative control**  
+  Materiality, authority, and escalation rules are configuration, not embedded logic  
+
+- **Adapters contain no business logic**  
+  Integrations emit events and receive decisions only  
+
+- **Identity federation required**  
+  Identity is derived from upstream IdPs; Gantral maintains no user directory  
+
+- **No secret persistence**  
+  Gantral stores references only; secrets resolve at execution edges  
+
+---
+
+### Agent-Native Persistence (Critical Invariant)
+
+- **Execution vs Agent State Separation**
+  - Gantral owns execution state (`RUNNING`, `WAITING_FOR_HUMAN`, etc.)
+  - Agent frameworks own agent internal state (memory, plans, tools)
+
+- **Checkpointability Requirement**
+  - Agents **must** be restartable from externally persisted checkpoints
+  - Agent state persistence is handled by the agent framework (DB, object storage)
+
+- **No Agent State in Gantral**
+  - Agent internal state must never be serialized into Gantral execution history
+
+Violating these invariants **invalidates the system**.
+
+---
+
+## 3. High-Level Architecture
+
+### 3.1 Responsibility Layers
 
 ```mermaid
-graph TD
-    subgraph Enterprise["Enterprise Systems"]
-        Github[GitHub]
-        Jira[Jira]
-        Slack[Slack]
-        ServiceNow[ServiceNow]
-        CICD[CI/CD]
-    end
+flowchart TB
+    ES["Enterprise Systems\n(GitHub, Jira, CI/CD,\nServiceNow, Custom Apps)"]
 
-    subgraph ControlPlane["Gantral Control Plane"]
-        Engine[Execution Engine]
-        HITL[HITL State Machine]
-        Policy[Policy Engine]
-        Registry[Instance Registry]
-        Audit[Audit & Replay]
-    end
+    G["Gantral Control Plane\nExecution Engine\nHITL State Machine\nPolicy Interface\nAudit Semantics"]
 
-    subgraph Agents["Agent Frameworks"]
-        LangChain[LangChain]
-        CrewAI[CrewAI]
-        Vellum[Vellum]
-        Custom[Custom Agents]
-    end
+    A["Agent Frameworks & Runners\nReasoning, Memory, Tool Execution"]
 
-    ControlPlane -->|Events / Decisions| Enterprise
-    Enterprise -->|Triggers| ControlPlane
-    ControlPlane -->|SDK / API| Agents
-    Agents -->|Execution Events| ControlPlane
+    ES -->|Events / Decisions| G
+    G -->|Control APIs| A
 ```
 
-### 3.2 Runtime Model
+This document is the **technical constitution** of the Gantral open-source core. It defines the architectural invariants, execution semantics, responsibility boundaries, and control guarantees that **must** hold across all implementations.
 
-1. **Trigger** (PR opened, incident created, ticket updated)
-2. **Workflow** selected (template)
-3. **Instance** created (immutable ID)
-4. **Execution** proceeds
-5. **Policy** evaluation
-6. **HITL transition** (if required)
-7. **Decision** captured
-8. **Execution** resumes or terminates
-9. **Audit log** sealed
+Gantral deliberately separates **execution authority** from **agent reasoning and memory**.
 
-### 3.3 Execution Plane Responsibility Boundary
+**If an implementation conflicts with this document, the implementation is incorrect.**
 
-Gantral implements a centralized **execution plane** that governs AI-enabled workflows across heterogeneous agent frameworks.
+---
 
-In this model:
-* Agents perform computation and emit execution events
-* Gantral owns authorization, approval, and state transitions
-* Agents cannot advance execution past governed states independently
+## **1\. Scope & Non-Goals**
 
-This separation ensures consistent governance, auditability, and policy enforcement regardless of how or where AI logic is implemented.
+### **1.1 What Gantral Is (Technical Definition)**
 
-### 3.4 Execution Readiness & Scheduling (Non-Canonical)
+Gantral is an **AI Execution Control Plane** that standardizes how AI-assisted and agentic workflows **execute, pause, escalate, resume, and are audited** across teams, domains, and systems.
+
+Technically, Gantral provides:
+
+* A deterministic, instance-first execution state machine  
+* Human-in-the-Loop (HITL) as a first-class execution state  
+* Instance-level isolation for audit, cost, and accountability  
+* Declarative control policies for materiality, authority, and escalation  
+* A **pluggable policy evaluation interface** (advisory only)  
+* Control APIs and SDKs that sit **above agent frameworks and below enterprise systems**  
+* Deterministic execution and replay guarantees via a workflow runtime
+
+Gantral is domain-agnostic by design. SDLC workflows are an initial wedge, not the boundary.
+
+---
+
+### **1.2 Explicit Non-Goals (Hard Exclusions)**
+
+Gantral will **not**:
+
+* Build, host, or orchestrate AI agents  
+* Encode domain-specific business logic  
+* Manage agent prompts, plans, or internal memory  
+* Serialize or persist agent internal state  
+* Optimize, train, or fine-tune models  
+* Provide autonomous decision loops  
+* Make probabilistic decisions without human accountability  
+* Replace CI/CD, ITSM, ticketing, or enterprise systems  
+* Store raw secrets or credentials  
+* Act as an identity provider
+
+---
+
+## **2\. Architectural Invariants (Non-Negotiable)**
+
+The following invariants must hold across all implementations:
+
+* **Instance-first semantics:** All audit, cost, authority, and replay semantics attach to immutable execution instances  
+* **HITL is a state transition:** Human intervention is modeled inside the execution graph, not as an external approval  
+* **Human authority is final:** AI output is advisory; policy-enforced human decisions override AI  
+* **Determinism \> performance:** Replayability and auditability take precedence over latency  
+* **Declarative control:** Materiality, authority, and escalation rules are configuration, not embedded logic  
+* **Adapters contain no business logic:** Integrations emit events and receive decisions only  
+* **Identity federation required:** Gantral must not maintain a standalone user directory; identity is derived from upstream IdPs  
+* **No secret persistence:** Gantral stores only secret references; resolution occurs at execution edges
+
+### **New Invariant – Agent-Native Persistence (Critical)**
+
+* **Execution State vs Agent State Separation:**  
+  * Gantral owns **execution state** (RUNNING, WAITING\_FOR\_HUMAN, etc.)  
+  * Agent frameworks own **agent internal state** (memory, plans, tool context)  
+* **Checkpointability Requirement:**  
+  * Agents integrated with Gantral **must be restartable** from an externally persisted checkpoint when execution resumes  
+  * Agent internal state must be durably persisted by the agent framework (e.g. DB, object storage)  
+* **No Agent State in Gantral:**  
+  * Agent internal state must never be serialized into Gantral execution history
+
+Violating these invariants invalidates the system.
+
+---
+
+## **3\. High-Level Architecture**
+
+### **3.1 Logical Architecture Layers**
+
+\+--------------------------------------------------+  
+| Enterprise Systems                               |  
+| (GitHub, Jira, Slack, ServiceNow, Custom Apps)   |  
+\+------------------------▲-------------------------+  
+                         | Events / Decisions  
+\+------------------------|-------------------------+  
+| Gantral Control Plane  |                         |  
+|  \- Execution Engine    |                         |  
+|  \- HITL State Machine  |                         |  
+|  \- Policy Interface   |                         |  
+|  \- Instance Registry  |                         |  
+|  \- Audit Semantics    |                         |  
+\+------------------------▲-------------------------+  
+                         | SDK / API  
+\+------------------------|-------------------------+  
+| Agent Frameworks &     |                         |  
+| Runners (Distributed)  |                         |  
+\+--------------------------------------------------+
+
+---
+
+### **3.2 Runtime Model (Authoritative)**
+
+1. Trigger received (event, schedule, external signal)  
+2. Workflow template selected  
+3. Instance created (immutable `instance_id`)  
+4. Execution proceeds inside a deterministic workflow runtime  
+5. Policy evaluation performed **as a transition guard**  
+6. Execution continues or transitions to `WAITING_FOR_HUMAN`  
+7. Agent framework persists internal state and suspends execution  
+8. Human decision captured (if required)  
+9. Execution resumes or terminates via a new process  
+10. Audit record sealed
+
+---
+
+### **3.3 Execution Plane Responsibility Boundary**
+
+* **Gantral owns:**  
+  * Execution state  
+  * Authority transitions  
+  * Time, retries, escalation, and replay  
+  * Audit correctness  
+* **Agent frameworks own:**  
+  * Reasoning, planning, and tool execution  
+  * Agent memory and conversation history  
+  * Internal checkpoints and resume logic  
+* **Runners:**  
+  * Execute agent processes  
+  * Detect completion, failure, or suspension  
+  * Translate agent lifecycle signals into Gantral execution events
+
+Agents **cannot** advance execution past governed states independently.
+
+---
+
+### **3.4 Execution Readiness vs Execution State**
 
 Gantral distinguishes between **execution state** and **execution readiness**.
 
-An execution *state* represents a canonical, immutable fact about an instance and is recorded in the execution log (see Section 5).
-Execution *readiness* is a **dynamic property** evaluated by the execution plane to determine whether an instance can advance execution *at this moment*.
+**Execution State**
 
-An instance MAY be in the `RUNNING` state but temporarily **not runnable** due to execution-plane constraints, including but not limited to:
-* Compute or model capacity availability
-* Rate limits or quotas
-* Backpressure or fairness controls
-* Concurrency limits
-* Infrastructure scheduling delays
+* Canonical and immutable  
+* Persisted and auditable  
+* Used for compliance and replay
 
-Execution readiness is:
-* **Derived, not persisted**
-* **Evaluated continuously at runtime**
-* **Not part of the execution state machine**
-* **Excluded from audit logs and replay semantics**
+**Execution Readiness**
+
+* Derived and transient  
+* Evaluated continuously  
+* Not persisted  
+* Not part of the state machine
 
 Formally:
-`runnable(instance) = execution_state == RUNNING AND no pending HITL decisions AND no policy blocks AND execution plane capacity is available`
 
-This separation ensures:
-* Deterministic execution history
-* Clean replay semantics
-* Clear separation between governance (state, policy) and operations (scheduling)
+runnable(instance) \=  
+  execution\_state \== RUNNING  
+  AND no pending HITL decisions  
+  AND no policy blocks  
+  AND execution plane capacity available
 
-## 4. Core Domain Model
+---
 
-### 4.1 Core Entities
+## **4\. Core Domain Model**
+
+### **4.1 Core Entities**
 
 **Workflow (Template)**
-* ID, version
-* Step graph
-* Trigger definitions
-* Policy references
+
+* `workflow_id`, `version`  
+* Step graph  
+* Trigger definitions  
+* Policy references  
 * Materiality level
 
 **Instance (Execution)**
-* Immutable `instance_id`
-* `workflow_id` + version
-* `owning_team_id`
-* Trigger context (PR, incident, etc.)
-* Execution state
-* Timestamps
+
+* Immutable `instance_id`  
+* `workflow_id` \+ `version`  
+* `owning_team_id`  
+* Trigger context  
+* Execution state  
+* Timestamps  
 * Cost metadata
 
 **HITL Decision**
-* `decision_id`
-* `instance_id`
-* `decision_type` (APPROVE / REJECT / OVERRIDE)
-* `human_actor_id`
-* `role`
-* `justification` (notes or reason)
-* `context_snapshot` (what the human saw)
 
-**Policy**
-* Materiality thresholds
-* Approval rules
-* Escalation paths
-* SLA & timeout rules
+* `decision_id`  
+* `instance_id`  
+* `decision_type` (APPROVE / REJECT / OVERRIDE)  
+* `human_actor_id`  
+* Role  
+* Justification  
+* `context_snapshot`  
+* `context_delta` (required for OVERRIDE)
 
-## 5. Execution State Machine
+---
 
-*(See [State Machine Documentation](./state-machine.md) for detailed diagrams and transitions).*
+### **4.2 Identity & Integration Entities**
 
-## 6. Policy Engine
+**Service Identity (System Account)**
 
-### 6.1 Policy Characteristics
+* `identity_id`  
+* `owner_team_id`  
+* `external_principal_map` (AWS IAM role, K8s service account, etc.)
 
-* Declarative (YAML/JSON)
-* Versioned
-* Evaluated at runtime
-* Hot‑reloadable
+**Connection (Resource Binding)**
 
-### 6.2 Example Policy (Illustrative)
+* `connection_id`  
+* `type` (e.g. postgres, github, salesforce)  
+* `config_ref` (e.g. `vault://path/to/secret`)
 
-```yaml
-materiality: HIGH
-requires_human_approval: true
-approvers:
-  - role: TECH_LEAD
-  - role: SECURITY_REVIEWER
-timeouts:
-  primary: 30m
-  escalation: 60m
-```
+**Runner (Execution Node)**
 
-## 7. APIs & SDKs
+* `runner_id`  
+* Subscribed task queues  
+* Capabilities metadata (network zone, GPU, OS)
 
-* **7.1 API Style:** REST + gRPC (initially REST), OpenAPI 3.1 spec, Versioned endpoints.
-* **7.2 Core API Groups:** `/workflows`, `/instances`, `/decisions`, `/policies`, `/audit`, `/replay`.
-* **7.3 Reference SDKs (Phase 1):** Python, Go, TypeScript. SDKs are thin wrappers; all logic remains server-side.
+---
 
-## 8. Repository Structure
+## **5\. Execution State Machine**
 
-### 8.1 Monorepo (Recommended)
+### **5.1 Canonical States**
 
-```text
-/gantral
-  /docs
-  /specs
-  /core
-    /engine
-    /policy
-    /hitl
-    /audit
-  /api
-  /sdk
-    /python
-    /go
-    /typescript
-  /adapters
-  /infra
+CREATED  
+  ↓  
+RUNNING  
+  ↓ (policy requires human authority)  
+WAITING\_FOR\_HUMAN  
+  ↙     ↓      ↘  
+OVERRIDDEN  APPROVED  REJECTED  
+  ↓         ↓          ↓  
+RESUMED   RESUMED   TERMINATED  
+  ↓  
+COMPLETED
+
+---
+
+### **5.2 State Guarantees**
+
+* State transitions are append-only  
+* No in-place mutation  
+* Every transition is timestamped and signed
+
+---
+
+### **5.3 Policy Evaluation Semantics (Critical)**
+
+* Policy evaluation does **not** introduce a new execution state  
+* Evaluation occurs synchronously during state transitions  
+* Results determine whether execution continues or transitions to `WAITING_FOR_HUMAN`  
+* Policy engines **never** hold authority
+
+Policy checks are **transition guards**, not durable states.
+
+---
+
+## **6\. Policy Interface & Evaluation Layer**
+
+### **6.1 Policy Interface Characteristics**
+
+* Pluggable and replaceable  
+* Deterministic and side-effect free  
+* Evaluated at runtime  
+* Versioned and auditable
+
+---
+
+### **6.2 Responsibility Split**
+
+**Gantral owns:**
+
+* Policy semantics  
+* Execution control  
+* Authority transitions  
+* Audit semantics
+
+**Policy evaluators provide:**
+
+* Allow / deny / require-human signals  
+* Approver eligibility  
+* Escalation and timeout signals
+
+---
+
+## **7\. Determinism & Replay Model**
+
+Gantral guarantees deterministic replay of **execution decisions**.
+
+This guarantee is enforced by executing Gantral workflows on a **deterministic workflow runtime** (e.g. Temporal).
+
+### **7.1 Replay Semantics**
+
+* Replay re-executes workflow logic from recorded execution history  
+* Identical inputs, events, and policy versions must yield identical outcomes  
+* Replay does **not** rehydrate agent internal memory
+
+---
+
+### **7.2 Responsibility Boundary**
+
+* Gantral defines **what must be replayable** (authority and decisions)  
+* The workflow runtime defines **how replay occurs**  
+* Agent frameworks may optionally replay internal reasoning for debugging only
+
+Gantral does **not** implement a separate replay engine.
+
+---
+
+## **8\. APIs & SDKs**
+
+* REST and gRPC APIs (OpenAPI 3.1)  
+* Core API groups:  
+  * `/workflows`  
+  * `/instances`  
+  * `/decisions`  
+  * `/policies`  
+  * `/audit`
+
+SDKs are **thin wrappers**; all logic remains server-side.
+
+---
+
+## **9\. Repository Structure**
+
+/gantral  
+  /docs  
+  /specs  
+  /core  
+  /engine  
+  /policy  
+  /hitl  
+  /audit  
+  /api  
+  /sdk  
+    /python  
+    /go  
+    /typescript  
+  /adapters  
+  /infra  
   /tests
-```
 
-### 8.2 Repo Principles
+Principles:
 
-Specs first, code follows spec, no UI in OSS core.
+* Specs first  
+* Code follows spec  
+* No UI in OSS core
 
-## 9. Data Stores
+---
+
+## **10\. Data Stores**
 
 | Purpose | Technology |
 | ----- | ----- |
-| Execution state | PostgreSQL (event‑sourced tables) |
-| Immutable logs | Append‑only log store (Postgres / ClickHouse) |
-| Replay snapshots | Object storage (S3‑compatible) |
+| Execution state | Event-sourced workflow history |
+| Immutable logs | Append-only log store |
+| Snapshots | Object storage (S3-compatible) |
 | Caching | Redis (optional) |
 
-## 10. Security Architecture
+Agent internal state stores are **explicitly out of scope**.
 
-* **10.1 Identity & Auth:** OAuth 2.0 / OIDC, Service accounts per agent, Short‑lived tokens.
-* **10.2 Authorization:** Policy‑driven RBAC, Least privilege.
-* **10.3 Secrets:** External secret manager (Vault, AWS Secrets Manager), No secrets in repo or config.
-* **10.4 Audit Guarantees:** 100% decision capture, Tamper‑evident logs, Cryptographic hashing of execution chains.
+---
 
-## 11. Privacy & Compliance
+## **11\. Security Architecture**
 
-* **11.1 Data Minimization:** Store decisions, not raw prompts unless required. Configurable redaction.
-* **11.2 Compliance Targets:** SOC2 (design‑ready), GDPR (data locality support), Enterprise audit readiness.
-* **11.3 Air‑Gapped Support:** No external hard dependencies, Offline deployment supported.
+* Identity: OAuth 2.0 / OIDC (federated)  
+* Authorization: Policy-driven RBAC  
+* Secrets: External secret managers only  
+* Audit: 100% decision capture, tamper-evident logs
 
-Gantral’s compliance posture is a direct consequence of its execution model. By enforcing human oversight, authorization, and audit at the execution layer, regulatory requirements are satisfied structurally rather than procedurally.
+---
 
-## 12. Infrastructure & IaC
+## **12\. Privacy & Compliance**
 
-* **12.1 Deployment Targets:** Kubernetes (primary), Docker Compose (dev/test).
-* **12.2 IaC Tools:** Terraform, Helm.
-* **12.3 Observability:** OpenTelemetry, Prometheus metrics, Structured logs.
+* Data minimization by default  
+* Configurable redaction  
+* Self-hosted and air-gapped deployments supported
 
-## 13. Standards & Interoperability
+Compliance is a **structural property** of the execution model.
 
-* OpenAPI 3.1
-* OpenTelemetry
-* OAuth 2.0 / OIDC
-* CNCF-aligned design principles (operability, portability, extensibility)
+---
 
-## 14. Licensing & Governance
+## **13\. Infrastructure & IaC**
 
-*(See [Governance Documentation](../governance/oss-philosophy.md) for details).*
+* Deployment: Kubernetes (primary), Docker Compose (dev)  
+* Workflow runtime: Temporal  
+* IaC: Terraform, Helm  
+* Observability: OpenTelemetry, Prometheus, structured logs
 
-## 15. Implementation Phasing
+---
 
-* **Phase 1:** Core execution engine, HITL state machine, Instance API.
-* **Phase 2:** Policy engine, Deterministic replay, SDKs.
-* **Phase 3:** Enterprise‑grade audit, Adapter framework, Hardening & docs.
+## **14\. Standards & Interoperability**
 
-## 16. Final Principle
+* OpenAPI 3.1  
+* OpenTelemetry  
+* OAuth 2.0 / OIDC  
+* CNCF-aligned design principles
 
-Gantral is not about what AI can do. It is about what organizations are willing to allow AI to do—and how they prove it. This document is the reference. Deviations require explicit architectural justification.
+---
+
+## **15\. Licensing & Governance**
+
+* License: Apache 2.0  
+* Governance: Maintainer-led with public RFCs  
+* No dual-license bait-and-switch
+
+---
+
+## **16\. Final Principle**
+
+Gantral is not about what AI can do.
+
+It is about what organizations are willing to allow AI to do — and how they prove it.
+
+**This document is the reference.**
+

@@ -20,11 +20,21 @@ const (
 
 // Instance represents a concrete execution of a workflow.
 type Instance struct {
-	ID             string                 `json:"id"`
-	WorkflowID     string                 `json:"workflow_id"`
-	State          State                  `json:"state"`
-	TriggerContext map[string]interface{} `json:"trigger_context"`
-	PolicyContext  map[string]interface{} `json:"policy_context"`
-	CreatedAt      time.Time              `json:"created_at"`
-	UpdatedAt      time.Time              `json:"updated_at"`
+	ID              string                 `json:"id"`
+	WorkflowID      string                 `json:"workflow_id"`
+	State           State                  `json:"state"`
+	TriggerContext  map[string]interface{} `json:"trigger_context"`
+	PolicyContext   map[string]interface{} `json:"policy_context"`
+	PolicyVersionID string                 `json:"policy_version_id"`
+	CreatedAt       time.Time              `json:"created_at"`
+	UpdatedAt       time.Time              `json:"updated_at"`
+}
+
+// AuditEvent represents an immutable record of a state change or decision.
+type AuditEvent struct {
+	ID         string                 `json:"id"`
+	InstanceID string                 `json:"instance_id"`
+	EventType  string                 `json:"event_type"`
+	Payload    map[string]interface{} `json:"payload"`
+	Timestamp  time.Time              `json:"timestamp"`
 }

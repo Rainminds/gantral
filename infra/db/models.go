@@ -9,20 +9,25 @@ import (
 )
 
 type Decision struct {
-	ID            string
-	InstanceID    string
-	Type          string
-	ActorID       string
-	Justification string
-	CreatedAt     pgtype.Timestamptz
+	ID              string
+	InstanceID      string
+	Type            string
+	ActorID         string
+	Justification   string
+	Role            string
+	ContextSnapshot []byte
+	ContextDelta    []byte
+	PolicyVersionID string
+	CreatedAt       pgtype.Timestamptz
 }
 
 type Instance struct {
-	ID             string
-	WorkflowID     string
-	State          string
-	TriggerContext []byte
-	PolicyContext  []byte
-	CreatedAt      pgtype.Timestamptz
-	UpdatedAt      pgtype.Timestamptz
+	ID              string
+	WorkflowID      string
+	State           string
+	TriggerContext  []byte
+	PolicyContext   []byte
+	PolicyVersionID pgtype.Text
+	CreatedAt       pgtype.Timestamptz
+	UpdatedAt       pgtype.Timestamptz
 }
