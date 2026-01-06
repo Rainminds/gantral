@@ -1,130 +1,107 @@
-# Gantral End-to-End Demo (Phase 3)
+---
+sidebar_position: 1
+title: End-to-End Demo
+---
 
-This guide demonstrates the fully integrated **Gantral Control Plane** running with Temporal as the execution backend. It validates:
-- **Phase 1:** Canonical State Machine & Immutable History
-- **Phase 2:** Governance Hardening (Policy Engine)
-- **Phase 3:** Enterprise Integration (Temporal Workflow & Worker)
+# Gantral End-to-End Demo (Phase 4 Verified)
+
+This guide demonstrates the fully integrated **Gantral Control Plane** using the reference Docker environment.
+
+It validates the core architectural promise: **"Zero CPU Hibernation"**. You will see an agent process start, hit a policy barrier, exit completely to save resources, and then resume only after you approve it.
 
 ## Prerequisites
-- Docker & Docker Compose
-- Go 1.22+
-- `curl` (for API requests)
-- `jq` (optional, for pretty-printing JSON)
+*   Docker & Docker Compose
+*   `git`
+*   `curl` (optional, scripts provided)
 
 ---
 
-## 1. Start Infrastructure
-Start the required backing services (PostgreSQL, Temporal, Temporal UI).
+## 1. Start the Environment
+
+Clone the repository and navigate to the persistent agent example. This sets up Gantral Core, Temporal, and a specialized Runner.
 
 ```bash
-make up
+git clone https://github.com/Rainminds/gantral.git
+cd gantral/examples/persistent-agent
+
+# Start the stack (detached mode)
+docker compose up -d
 ```
-*Wait for a few seconds for services to become healthy.*
 
-- **PostgreSQL:** Port `5432`
-- **Temporal Server:** Port `7233`
-- **Temporal UI:** [http://localhost:8081](http://localhost:8081)
+*Wait ~10 seconds for services to become healthy.*
 
-## 2. Start the Worker (Execution Plane)
-The Worker is responsible for executing the workflow logic and activities (DB persistence).
-
-Open a **new terminal**:
-```bash
-# Ensure your .env file is present or relying on defaults
-go run cmd/worker/main.go
-```
-*You should see logs indicating the Worker started successfully.*
-
-## 3. Start the API Server (Control Plane)
-The API Server handles HTTP requests, policy evaluation triggers, and dashboard serving.
-
-Open a **new terminal**:
-```bash
-go run cmd/server/main.go
-```
-*Server listening on [http://localhost:8080](http://localhost:8080).*
+*   **Gantral Dashboard:** [http://localhost:8080](http://localhost:8080)
+*   **Temporal UI:** [http://localhost:8081](http://localhost:8081)
 
 ---
 
-## 4. Trigger High-Materiality Workflow
-We will trigger a workflow that mimics a high-risk operation (e.g., "Deploy to Production"). The policy is configured to **REQUIRE HUMAN APPROVAL**.
+## 2. Trigger the Agent
+
+We will launch a workflow that simulates a "Production Deployment." The policy is configured to **REQUIRE_HUMAN** for this action.
+
+Run the trigger script:
 
 ```bash
-curl -X POST http://localhost:8080/instances \
-  -H "Content-Type: application/json" \
-  -d '{
-    "workflow_id": "demo-deploy-v1",
-    "trigger_context": {"requested_by": "alice", "environment": "production"},
-    "policy": {
-      "id": "policy-prod-001",
-      "materiality": "HIGH",
-      "requires_human_approval": true
-    }
-  }' | jq
+./scripts/trigger.sh
 ```
 
-**Expected Output:**
-```json
-{
-  "id": "inst-...",
-  "status": "PENDING"
-}
-```
-*Note the `id` (e.g., `inst-123...`). You will use it below.*
+**What just happened?**
+1.  A new execution instance was created (`CREATED`).
+2.  The Runner picked up the task.
+3.  The Agent process started, checked the policy, saved its state to disk, and **EXITED**.
+4.  The Runner reported `SUSPENDED` to Gantral.
 
 ---
 
-## 5. Observe Execution (The "Pause")
+## 3. Observe "Zero CPU" State
 
-### A. Temporal UI (The Runtime)
-Navigate to [http://localhost:8081](http://localhost:8081).
-- You will see the workflow `GantralExecutionWorkflow` in state **Running**.
-- Click into it. You will see pending `Timer` (the storage-less wait) or Signal selector.
-- *This confirms the infrastructure is holding the state reliably.*
+Verify that the system is waiting for you, but consuming no compute resources for the agent.
 
-### B. Gantral Dashboard (The Authority)
-Navigate to [http://localhost:8080](http://localhost:8080).
-- You will see the instance in state **WAITING_FOR_HUMAN**.
-- The "Approve" and "Reject" buttons are visible.
-
-### C. Audit Log (The Evidence)
-Check what has been recorded so far:
 ```bash
-# Replace <INSTANCE_ID> with your actual ID
-curl http://localhost:8080/instances/<INSTANCE_ID>/audit | jq
+./scripts/status.sh <INSTANCE_ID>
+# Output: WAITING_FOR_HUMAN
 ```
-*You should see events for creation and the policy decision to pause.*
+
+**Verify in UI:**
+*   Go to **[http://localhost:8080](http://localhost:8080)**. You will see the instance paused.
+*   Go to **[http://localhost:8081](http://localhost:8081)** (Temporal). You will see the workflow is "Running" (sleeping), but there is no active Activity Worker processing it.
 
 ---
 
-## 6. Make a Human Decision
-You can approve via the [Dashboard](http://localhost:8080) or via API.
+## 4. Approve Execution
 
-**Via API:**
+Now, act as the "Manager" and grant authority.
+
 ```bash
-curl -X POST http://localhost:8080/instances/<INSTANCE_ID>/decisions \
-  -H "Content-Type: application/json" \
-  -d '{
-    "type": "APPROVE",
-    "actor_id": "bob-admin",
-    "justification": "Verified changes, clear to proceed"
-  }'
+./scripts/approve.sh <INSTANCE_ID>
 ```
 
----
-
-## 7. Verify Completion
-
-1.  **Dashboard:** The instance state updates to **APPROVED**.
-2.  **Temporal UI:** The workflow status changes to **Completed**.
-3.  **Audit Log:** A new event `DECISION_RECORDED` appears with `bob-admin`'s identity.
-
-## 8. Persistence Test (Optional)
-1. Stop the API Server (Ctrl+C).
-2. Stop the Worker (Ctrl+C).
-3. Restart both.
-4. Refresh the [Dashboard](http://localhost:8080).
-5. The `APPROVED` instance and its audit trail are still there.
+**What happens next?**
+1.  Gantral records your decision (auditable event).
+2.  Gantral signals the Temporal workflow to wake up.
+3.  The Runner receives a new task: "Resume Execution."
+4.  The Runner launches a **NEW** agent process.
+5.  The Agent loads its checkpoint and finishes the job.
 
 ---
-**Success!** You have demonstrated a federated, policy-controlled, auditable AI workflow execution.
+
+## 5. Verify Completion
+
+Check the final status:
+
+```bash
+./scripts/status.sh <INSTANCE_ID>
+# Output: COMPLETED
+```
+
+You have just demonstrated a **federated, policy-controlled, auditable AI workflow** that survived a complete process restart.
+
+---
+
+## 6. Cleanup
+
+To stop the environment:
+
+```bash
+docker compose down
+```
