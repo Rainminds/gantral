@@ -1,0 +1,71 @@
+
+version: '3.8'
+
+services:
+  gantral-core:
+    build:
+      context: ../../
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - DATABASE_URL=postgres://postgres:changeme@postgres:5432/gantral?sslmode=disable
+      - TEMPORAL_HOST_PORT=temporal:7233
+      - TASK_QUEUE=gantral_tasks
+      - PORT=8080
+    restart: on-failure
+    volumes:
+      - ../policies/basic_approval.rego:/app/policies/policy.rego
+      - ./gantral/config.yaml:/app/config.yaml
+    depends_on:
+      postgres:
+        condition: service_healthy
+      temporal:
+        condition: service_started
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: gantral
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: changeme
+    ports:
+      - "5432:5432"
+    volumes:
+      - gantral_postgres_data_split:/var/lib/postgresql/data
+      - ../../infra/db/schema.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d gantral"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  temporal:
+    image: temporalio/auto-setup:latest
+    ports:
+      - "7233:7233"
+      - "8081:8080"
+    environment:
+      - DB=postgres12
+      - DB_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PWD=changeme
+      - POSTGRES_SEEDS=postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  runner:
+    build: ./runner
+    environment:
+      - GANTRAL_URL=http://gantral-core:8080
+    volumes:
+      - ./agent-pre:/app/agent-pre
+      - ./agent-post:/app/agent-post
+      - ./handoff:/app/handoff
+    depends_on:
+      - gantral-core
+
+volumes:
+  gantral_postgres_data_split:

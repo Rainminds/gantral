@@ -1,77 +1,67 @@
+---
+sidebar_position: 3
+title: Expansion Narrative
+---
+
 # Expansion Narrative
 
-Gantral is built as infrastructure.
+Gantral is built as infrastructure. Infrastructure does not launch fully formed; it expands by owning the most critical control points first.
 
-Infrastructure does not launch fully formed.  
-It expands by owning the most critical control points first.
-
-This document describes architectural direction and intent. It does not constitute a commitment to deliver specific features or timelines.
+This document describes our architectural direction and intent.
 
 ---
 
-## Phase 1: HITL as an Execution Primitive (Now)
+## Horizon 1: The Authority Primitive (Current)
 
-Focus:
-- Human-in-the-Loop as a state transition
-- Deterministic execution and audit
-- SDLC-adjacent workflows (code review, incidents)
+**Focus:**
+- Human-in-the-Loop as a blocking state transition.
+- Deterministic execution and audit.
+- Developer Experience (SDKs, Local Runners).
 
-Why:
-Every material AI workflow eventually requires a human decision.
-Today, this is handled via Slack messages, emails, and ad-hoc dashboards.
-
-Gantral is designed to standardize this boundary.
+**Why:**
+Every material AI workflow eventually requires a human decision. Today, this is handled via Slack messages, emails, and ad-hoc dashboards. Gantral standardizes this boundary first because it is the highest-risk gap.
 
 ---
 
-## Phase 2: Process Awareness (Next)
+## Horizon 2: Federation & Scale (Next)
 
-Focus:
-- Process-aware orchestration across SDLC stages
-- Cross-step context propagation
-- Team-level visibility and SLAs
+**Focus:**
+- Federated Identity (OIDC) and Secret Resolution.
+- Distributed Runners across team boundaries.
+- Cross-team policy enforcement (e.g., "All Finance Agents need Risk Approval").
 
-Why:
-Once human decisions are enforced, workflows naturally need structure.
-Control expands from decisions to process context.
-
----
-
-## Phase 3: Org-Level Governance
-
-Focus:
-- Materiality-based policy enforcement
-- Cost attribution and routing
-- Compliance and audit automation
-
-Why:
-At scale, enterprises need centralized governance without blocking teams.
-Policies must be enforced structurally, not socially.
+**Why:**
+Once the primitive works for one team, it must scale to the enterprise. This requires solving the "Zero Trust" problem between the Control Plane and the Agents.
 
 ---
 
-## Phase 4: Ecosystem and Neutral Governance
+## Horizon 3: The Governance Layer
 
-Focus:
-- Open standards and specifications
-- Foundation-style governance
-- Broad ecosystem integration
+**Focus:**
+- Advanced OPA Policy Libraries.
+- Materiality-based routing.
+- Compliance automation and historical replay.
 
-Why:
-Execution control infrastructure must be neutral to be trusted long-term.
+**Why:**
+At scale, enterprises need centralized governance without blocking teams. Policies must be enforced structurally (code), not socially (wiki pages).
 
 ---
 
-## What This Narrative Is (and Is Not)
+## Horizon 4: Ecosystem Standards
 
-This is:
-- A statement of architectural direction
-- A claim on long-term territory
-- A guardrail against scope creep
+**Focus:**
+- Open protocols for "Agent Handoffs."
+- Neutral Foundation-style governance.
+- Broad integration with all major agent frameworks.
 
-This is not:
-- A delivery roadmap
-- A feature promise
-- A sales commitment
+**Why:**
+Execution control infrastructure must be neutral to be trusted long-term. We aim to be the standard "Sudo" command for the AI era.
+
+---
+
+## Note on Terminology
+
+**Horizons** describe our strategic focus over time.
+**Phases** (in the Build Plan) describe specific engineering milestones.
 
 Gantral expands by deepening control, not by accumulating features.

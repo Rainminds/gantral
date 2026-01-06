@@ -1,4 +1,7 @@
-# What Gantral Is Not
+---
+sidebar_position: 2
+title: What Gantral Is Not
+---
 
 Clear boundaries are essential for infrastructure.
 
@@ -16,6 +19,7 @@ Gantral does not:
 - Optimize prompts
 - Select or fine-tune models
 - Compete with agent frameworks
+- Manage or persist agent memory/state (Vector DBs, conversation history).
 
 Agent frameworks evolve quickly.  
 Execution control must remain stable.

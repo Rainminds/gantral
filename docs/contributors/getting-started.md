@@ -1,76 +1,84 @@
-# Getting Started
+---
+sidebar_position: 1
+title: Getting Started
+---
+
+# Getting Started with Gantral
 
 Welcome to the Gantral project.
 
-Gantral is an open-source AI Execution Control Plane focused on execution semantics, human oversight, and auditability for AI-enabled workflows.
+Gantral is an open-source **AI Execution Control Plane**. We focus on execution semantics, human oversight, and auditability for AI-enabled workflows.
 
-This guide explains how to explore the project and contribute responsibly.
+This guide explains how to explore the project, run the demos, and contribute responsibly.
 
 ---
 
-## Who This Project Is For
+## 🎯 Who This Project Is For
 
 Gantral is primarily intended for:
+- **Platform Engineers** building internal AI platforms.
+- **Infrastructure Architects** designing control planes.
+- **Security & Governance Teams** auditing AI behavior.
+- **Contributors** interested in distributed systems and execution authority.
 
-- Platform engineers
-- Infrastructure architects
-- Security and governance engineers
-- Contributors interested in execution control, not agent intelligence
-
-If you are looking to build AI agents, optimize prompts, or experiment with autonomous workflows, Gantral may not be the right project.
-
----
-
-## How to Explore the Project
-
-Start with the following documents:
-
-1. **Positioning**
-   - What Gantral is
-   - What Gantral is not
-   - Category definition
-   - Expansion narrative
-
-2. **Architecture**
-   - Technical Reference Document (TRD)
-   - Execution plane model
-   - Architectural invariants
-
-3. **Governance**
-   - Open source philosophy
-   - License commitment
-   - RFC process
-
-These documents describe architectural intent and design principles.  
-They are the authoritative reference for evaluating changes.
+> **Note:** If you are looking to build agents, optimize prompts, or experiment with LLM reasoning, Gantral is likely not the tool you need. We integrate *with* those tools; we do not replace them.
 
 ---
 
-## Repository Overview
+## 🚀 Quick Start (Run the Code)
 
-The Gantral repository is organized around a **specs-first model**.
+The best way to understand Gantral is to see it enforce authority.
 
-Specifications and design precede implementation.
+### 1. Run the "Persistent Agent" Demo
+We have a fully dockerized example that demonstrates a "Zero CPU" hibernation pattern.
 
-Code that diverges from documented semantics should be treated as incorrect, even if it appears to function.
+```bash
+git clone https://github.com/Rainminds/gantral.git
+cd gantral/examples/persistent-agent
+
+# Start the stack (Core, Temporal, Runner, Agent)
+docker compose up
+```
+
+Once running, use the included scripts to interact with the authority layer:
+
+```bash
+./scripts/trigger.sh   # Creates a workflow
+./scripts/status.sh    # Observe "WAITING_FOR_HUMAN" state
+./scripts/approve.sh   # Grant authority
+```
 
 ---
 
-## Before You Contribute
+## 📚 Essential Reading
 
-Before proposing changes, contributors are expected to:
+Before contributing code, please ground yourself in the architecture:
 
-- Read the architectural invariants
-- Understand the execution model and HITL semantics
-- Review existing RFCs (if any)
-- Confirm that the proposed change aligns with Gantral’s scope
-
-This project prioritizes correctness and clarity over speed.
+1.  **[What is Gantral?](../positioning/what-is-gantral.md)** – High-level philosophy.
+2.  **[Technical Reference (TRD)](../architecture/trd.md)** – The "Constitution" of the project.
+3.  **[Consumer Guide](../guides/example-consumer-integration.md)** – How agents are expected to behave.
 
 ---
 
-## Legal Notice
+## 🛠️ Repository Structure
 
-Participation in the project does not create any employment, partnership, or agency relationship.
+Gantral follows a **specs-first model**. Code that diverges from documented semantics is considered a bug.
 
-Contributions are subject to the project’s license and contribution requirements.
+| Folder | Purpose |
+| :--- | :--- |
+| `core/` | The Authority Service (API, State Machine). |
+| `examples/` | Reference implementations and demos. |
+| `specs/` | The Single Source of Truth for architecture. |
+| `docs/` | Project documentation (this site). |
+
+---
+
+## 🤝 Before You Contribute
+
+This project prioritizes **correctness and clarity over speed**.
+
+1.  **Read the Invariants:** Understand why we don't store agent memory.
+2.  **Check the Roadmap:** Ensure your feature isn't a "Non-Goal."
+3.  **Start Small:** Fix a bug or improve docs before proposing architectural changes.
+
+*See [How to Contribute](./how-to-contribute.md) for the full PR process.*
