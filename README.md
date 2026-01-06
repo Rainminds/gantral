@@ -1,8 +1,9 @@
+
 # Gantral
 
 > **The AI Execution Control Plane**
 
-![Status](https://img.shields.io/badge/Status-Phase_3_Complete-green) ![License](https://img.shields.io/badge/License-Apache_2.0-blue) ![Go](https://img.shields.io/badge/Go-1.24+-00ADD8) ![Temporal](https://img.shields.io/badge/Runtime-Temporal-black)
+![Status](https://img.shields.io/badge/Status-Phase_4_Complete-green) ![License](https://img.shields.io/badge/License-Apache_2.0-blue) ![Go](https://img.shields.io/badge/Go-1.24+-00ADD8) ![Temporal](https://img.shields.io/badge/Runtime-Temporal-black)
 
 **Gantral** is the open-source standard for governing AI agents in the enterprise.
 
@@ -37,7 +38,7 @@ graph TD
   end
 
   subgraph Agents["Agent Frameworks"]
-    CrewAI["CrewAI / LangGraph"]
+    CrewAI / LangGraph
     Memory["Agent Memory (Native Persistence)"]
   end
 
@@ -95,43 +96,33 @@ The technical constitution of Gantral lives in the `specs/` directory.
 
 ---
 
-## 🚀 Quick Start (Local Dev)
+## 🚀 Quick Start (Phase 4 Verified)
 
-Want to see HITL in action?
+The best way to understand Gantral is to run the **Reference Agent Proxy** demo. This demonstrates the **"Persistent Pause"** pattern where an agent hibernates (Zero CPU) while waiting for approval.
 
-1. **Prerequisites**:
-   *   Docker & Docker Compose
-   *   Go 1.24+
-
-2. **Start the Infrastructure**:
+### 1. Persistent Agent Demo
+1. **Navigate to the example**:
    ```bash
-   # Starts Postgres, Temporal Server, and Temporal UI
-   make up
+   cd examples/persistent-agent
+   ```
+2. **Start the environment**:
+   ```bash
+   docker compose up --build
+   ```
+3. **Trigger & Approve**:
+   ```bash
+   ./scripts/trigger.sh    # Agent runs, pauses, and exits (hibernates)
+   ./scripts/status.sh <id> # Verify status is WAITING_FOR_HUMAN
+   ./scripts/approve.sh <id> # Approve -> Runner wakes up agent -> Completion
    ```
 
-3. **Start the Control Plane**:
-   ```bash
-   # Terminal 1: Run the API Server
-   go run cmd/server/main.go
-   ```
+### 2. Standard Policy Library
+Explore our drop-in Rego policies in [`examples/policies/`](examples/policies/) for:
+- Multi-step approvals
+- Timeouts
+- Auto-approvals for read-only ops
 
-4. **Start a Worker (Runner)**:
-   ```bash
-   # Terminal 2: Run the Execution Worker
-   go run cmd/worker/main.go
-   ```
-
-5. **Trigger High-Materiality Workflow**:
-   ```bash
-   curl -X POST http://localhost:8080/instances \
-     -H "Content-Type: application/json" \
-     -d '{
-       "workflow_id": "demo-flow", 
-       "policy": {"materiality": "HIGH", "requires_human_approval": true}
-     }'
-   ```
-
-6. **Approve via UI**: Visit [http://localhost:8080](http://localhost:8080) to see the state `WAITING_FOR_HUMAN`, verify the audit trail, and Approve.
+For detailed implementation patterns, see [`examples/README.md`](examples/README.md).
 
 ---
 

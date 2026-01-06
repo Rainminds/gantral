@@ -39,6 +39,7 @@ This is the AI Execution Control Plane.
 
 | Dimension | Agent Builders | Governance Tools | Gantral |
 |---------|---------------|------------------|---------|
+| **Execution Model** | PaaS / Hosting | Metadata Only | **Federated Runners** (Your Infra) |
 | Focus | Intelligence | Inventory & policy | Execution & authority |
 | Unit of Control | Agent | Agent | Instance |
 | HITL | Optional / ad-hoc | Reported | Enforced via execution-state transitions |

@@ -1,0 +1,6 @@
+
+server:
+  port: 8080
+policy:
+  engine: opa
+  path: /app/policies/policy.rego

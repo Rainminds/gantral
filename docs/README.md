@@ -11,15 +11,26 @@ sidebar_position: 1
 
 ## Quick Start
 *   **[What is Gantral?](./positioning/what-is-gantral.md)**: High-level overview and philosophy.
+*   **[What Gantral is Not](./positioning/what-gantral-is-not.md)**: Clarifying boundaries vs Agent Frameworks.
 *   **[Product Spec](./product/prd.md)**: Detailed product requirements and personas.
 
-## Technical Documentation
-*   **[Technical Reference](./architecture/trd.md)**: Deep dive into the architecture, invariants, and API.
-*   **[State Machine](./architecture/state-machine.md)**: The canonical execution lifecycle.
+## Integration Guides
+*   **[Consumer Guide](./guides/example-consumer-integration.md)**: Normative guide for agents integrating with Gantral.
+*   **[Policy Integration](./guides/opa-integration.md)**: How to write and enforce OPA policies.
+*   **[Demo Walkthrough](./guides/demo.md)**: Running the reference examples.
 
-## Governance
-*   **[OSS Philosophy](./governance/oss-philosophy.md)**: Open Core principles and licensing.
-*   **[Roadmap](./governance/roadmap.md)**: What we are building next.
+## Technical Architecture
+*   **[Technical Reference (TRD)](./architecture/trd.md)**: Deep dive into the architecture, invariants, and API.
+*   **[State Machine](./architecture/state-machine.md)**: The canonical execution lifecycle.
+*   **[Implementation Guide](./architecture/implementation-guide.md)**: Reference guide for builders.
+
+## Roadmap & Progress
+*   **[Phase-wise Build Plan](./product/phase-wise-build-plan.md)**: Current build status and detailed execution plan.
+*   **[Roadmap](./governance/roadmap.md)**: Future features and strategic direction.
+
+## Governance & Contributing
+*   **[OSS Philosophy](./governance/oss-philosophy.md)**: Open Core principles.
+*   **[How to Contribute](./contributors/how-to-contribute.md)**: Guidelines for code and documentation contributions.
 
 ## Executive Context
 
@@ -34,9 +45,7 @@ These materials are not required to understand, use, or contribute to the open-s
 
 **[Executive Briefings](./executive/README.md)**
 
+---
 
 Gantral is an independent open-source project and is not affiliated with the CNCF.  
 Design and governance choices are informed by CNCF best practices.
-
----
-
