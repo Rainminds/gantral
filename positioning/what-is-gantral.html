@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.9.2">
 <title data-rh="true">What is Gantral? | Gantral</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://docs.gantral.org/img/gantral-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://docs.gantral.org/img/gantral-social-card.jpg"><meta data-rh="true" property="og:url" content="https://docs.gantral.org/positioning/what-is-gantral"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="What is Gantral? | Gantral"><meta data-rh="true" name="description" content="Gantral is an open-source AI Execution Control Plane."><meta data-rh="true" property="og:description" content="Gantral is an open-source AI Execution Control Plane."><link data-rh="true" rel="icon" href="/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://docs.gantral.org/positioning/what-is-gantral"><link data-rh="true" rel="alternate" href="https://docs.gantral.org/positioning/what-is-gantral" hreflang="en"><link data-rh="true" rel="alternate" href="https://docs.gantral.org/positioning/what-is-gantral" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"What is Gantral?","item":"https://docs.gantral.org/positioning/what-is-gantral"}]}</script><link rel="stylesheet" href="/assets/css/styles.8cf77017.css">
-<script src="/assets/js/runtime~main.11f1bd94.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.4ffcd53b.js" defer="defer"></script>
 <script src="/assets/js/main.acab2814.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -47,38 +47,61 @@
 </ol>
 <hr>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="the-enterprise-governance-crisis">The Enterprise Governance Crisis<a href="#the-enterprise-governance-crisis" class="hash-link" aria-label="Direct link to The Enterprise Governance Crisis" title="Direct link to The Enterprise Governance Crisis" translate="no">​</a></h2>
-<p>Large organizations face two critical failures when scaling AI: <strong>Fragmentation</strong> and <strong>Broken Chain of Custody</strong>.</p>
-<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="1-operational-fragmentation">1. Operational Fragmentation<a href="#1-operational-fragmentation" class="hash-link" aria-label="Direct link to 1. Operational Fragmentation" title="Direct link to 1. Operational Fragmentation" translate="no">​</a></h3>
-<p><strong>Gantral prevents 100 different teams from deploying 100 different, unmanaged agent scripts.</strong></p>
-<p>Without a shared control plane, platform teams are overwhelmed by &quot;Shadow Agents&quot;:</p>
-<ul>
-<li class=""><strong>Siloed Deployments:</strong> Every team reinvents their own &quot;human-in-the-loop&quot; glue code (Slack bots, Jira scripts, manual waits).</li>
-<li class=""><strong>Orphaned Processes:</strong> Unmanaged agents run in loops on disparate infrastructure, bypassing standard observability.</li>
-<li class=""><strong>Maintenance Nightmare:</strong> Platform engineering cannot enforce global policy changes (e.g., &quot;New Safety Check&quot;) because every agent is built differently.</li>
-</ul>
-<blockquote>
-<p><strong>&quot;Gantral decouples the Policy of Approval from the Implementation of the Agent, allowing Platform Teams to manage one central control plane instead of debugging 100 different approval scripts.&quot;</strong></p>
-</blockquote>
-<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="2-broken-chain-of-custody">2. Broken Chain of Custody<a href="#2-broken-chain-of-custody" class="hash-link" aria-label="Direct link to 2. Broken Chain of Custody" title="Direct link to 2. Broken Chain of Custody" translate="no">​</a></h3>
-<p>Even when humans <em>are</em> involved, the handoff between AI and Human is often manual and disconnected.</p>
-<ul>
-<li class=""><strong>The &quot;Air Gap&quot;:</strong> An agent stops, and a human manually finishes the task. The audit log shows two disconnected events, not one governed workflow.</li>
-<li class=""><strong>Invisible Context:</strong> The human approver rarely sees the exact context (prompts, data snapshot) the agent used to make the request.</li>
-</ul>
-<p>Gantral acts as the <strong>standardization layer</strong>. It replaces ad-hoc scripts with a unified <strong>Execution Protocol</strong> that binds the Agent&#x27;s Request to the Human&#x27;s Decision, ensuring both operational efficiency and auditability.</p>
+<p>Large organizations face two structural failures when scaling AI: <strong>Operational Fragmentation</strong> and <strong>Broken Chain of Custody</strong>.</p>
 <hr>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="1-operational-fragmentation">1. Operational Fragmentation<a href="#1-operational-fragmentation" class="hash-link" aria-label="Direct link to 1. Operational Fragmentation" title="Direct link to 1. Operational Fragmentation" translate="no">​</a></h3>
+<p><em>(The “Shadow Runbook” Problem)</em></p>
+<p>Gantral prevents critical decision logic from being buried inside agent prompts and scripts.</p>
+<p>Without a shared execution control plane, platform teams lose visibility into <strong>why agents act</strong>:</p>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="hidden-logic">Hidden Logic<a href="#hidden-logic" class="hash-link" aria-label="Direct link to Hidden Logic" title="Direct link to Hidden Logic" translate="no">​</a></h4>
+<p>Business-critical rules (e.g., <em>“Only restart DB if latency &gt; 5s”</em>) are embedded in natural-language prompts or agent code, creating <strong>“Shadow Runbooks”</strong> that platform and compliance teams cannot audit, version, or update.</p>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="siloed-implementations">Siloed Implementations<a href="#siloed-implementations" class="hash-link" aria-label="Direct link to Siloed Implementations" title="Direct link to Siloed Implementations" translate="no">​</a></h4>
+<p>Each team reinvents its own safety checks, approval logic, and escalation paths, leading to inconsistent enforcement of organizational policy.</p>
+<p><strong>Gantral decouples decision criteria from agent prompts.</strong><br>
+<!-- -->It allows platform teams to enforce deterministic, centrally governed policy on top of probabilistic agents, without rewriting agent logic.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="2-broken-chain-of-custody">2. Broken Chain of Custody<a href="#2-broken-chain-of-custody" class="hash-link" aria-label="Direct link to 2. Broken Chain of Custody" title="Direct link to 2. Broken Chain of Custody" translate="no">​</a></h3>
+<p><em>(The “Disconnected Evidence” Problem)</em></p>
+<p>Even when humans are involved, the link between <strong>facts</strong> and <strong>approvals</strong> is often broken.</p>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="the-self-reporting-fallacy">The Self-Reporting Fallacy<a href="#the-self-reporting-fallacy" class="hash-link" aria-label="Direct link to The Self-Reporting Fallacy" title="Direct link to The Self-Reporting Fallacy" translate="no">​</a></h4>
+<p>Agents summarize logs, metrics, or tool outputs for humans. These summaries can be incomplete or incorrect. Humans approve actions based on the agent’s narrative, and the audit trail records a “valid” approval for an invalid justification.</p>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="the-air-gap">The Air Gap<a href="#the-air-gap" class="hash-link" aria-label="Direct link to The Air Gap" title="Direct link to The Air Gap" translate="no">​</a></h4>
+<p>An agent recommends an action, and a human executes it manually in a separate system. There is no durable, reviewable link between the execution context at the time of approval and the action taken.</p>
+<p><strong>Gantral acts as the execution anchor layer.</strong></p>
+<p>It binds:</p>
+<ul>
+<li class="">the execution context references available at the time of decision</li>
+<li class="">the human approval or override</li>
+<li class="">the enforced execution outcome</li>
+</ul>
+<p>into a single, immutable execution record.</p>
+<p>Gantral does not interpret evidence or tool payloads.<br>
+<!-- -->It ensures that <strong>no governed action proceeds without a recorded, attributable human decision tied to the exact execution context that justified it</strong>.</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="conceptual-architecture">Conceptual Architecture<a href="#conceptual-architecture" class="hash-link" aria-label="Direct link to Conceptual Architecture" title="Direct link to Conceptual Architecture" translate="no">​</a></h2>
 <!-- -->
 <hr>
-<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="what-gantral-owns">What Gantral Owns<a href="#what-gantral-owns" class="hash-link" aria-label="Direct link to What Gantral Owns" title="Direct link to What Gantral Owns" translate="no">​</a></h2>
-<p>Gantral owns <strong>execution semantics</strong>, not agent memory.</p>
-<p>Specifically, Gantral provides:</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="what-gantral-owns-and-does-not">What Gantral Owns (and Does Not)<a href="#what-gantral-owns-and-does-not" class="hash-link" aria-label="Direct link to What Gantral Owns (and Does Not)" title="Direct link to What Gantral Owns (and Does Not)" translate="no">​</a></h2>
+<p>Gantral owns execution semantics, not agent intelligence.</p>
+<p>Gantral provides:</p>
 <ul>
-<li class="">A deterministic execution state machine.</li>
-<li class="">Human-in-the-Loop (HITL) as a blocking state transition.</li>
-<li class="">Instance-level isolation for audit, cost, and accountability.</li>
-<li class="">Declarative control policies (Rego-based).</li>
-<li class="">Immutable execution records with replay capability.</li>
+<li class="">A deterministic execution state machine</li>
+<li class="">Human-in-the-Loop (HITL) as a blocking state transition</li>
+<li class="">Instance-level isolation for audit, cost, and accountability</li>
+<li class="">Declarative control policies (via a pluggable interface)</li>
+<li class="">Immutable execution records with deterministic replay</li>
 </ul>
+<p>Gantral explicitly does not:</p>
+<ul>
+<li class="">Store or manage agent memory</li>
+<li class="">Inspect or reason over tool payloads</li>
+<li class="">Author business logic</li>
+<li class="">Make autonomous decisions</li>
+<li class="">Optimize or route models</li>
+</ul>
+<blockquote>
+<p>Gantral may record references to external execution evidence, but it never inspects, interprets, or governs tool behavior.</p>
+</blockquote>
 <p>Gantral is intentionally boring, predictable, and auditable.</p>
 <hr>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="mental-models">Mental Models<a href="#mental-models" class="hash-link" aria-label="Direct link to Mental Models" title="Direct link to Mental Models" translate="no">​</a></h2>
@@ -89,10 +112,25 @@
 <li class=""><strong>Terraform for Process</strong> — It defines the &quot;Infrastructure of Decision Making&quot; as code.</li>
 </ul>
 <hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="when-gantral-is-and-is-not-the-right-tool">When Gantral Is (and Is Not) the Right Tool<a href="#when-gantral-is-and-is-not-the-right-tool" class="hash-link" aria-label="Direct link to When Gantral Is (and Is Not) the Right Tool" title="Direct link to When Gantral Is (and Is Not) the Right Tool" translate="no">​</a></h2>
+<p>Gantral is appropriate when actions:</p>
+<ul>
+<li class="">Affect production systems</li>
+<li class="">Have regulatory, financial, or security impact</li>
+<li class="">Require explicit human accountability</li>
+<li class="">Must be auditable months or years later</li>
+</ul>
+<p>Gantral is not required for:</p>
+<ul>
+<li class="">Purely advisory agents</li>
+<li class="">Sandbox or exploratory workflows</li>
+<li class="">Fully reversible or non-material actions</li>
+</ul>
+<hr>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="next-steps">Next Steps<a href="#next-steps" class="hash-link" aria-label="Direct link to Next Steps" title="Direct link to Next Steps" translate="no">​</a></h2>
 <ul>
 <li class="">See how the architecture ensures safety in the <strong><a class="" href="/architecture/trd">Technical Reference (TRD)</a></strong>.</li>
 <li class="">See it in action with the <strong><a class="" href="/guides/demo">Persistent Agent Demo</a></strong>.</li>
-</ul></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col noPrint_WFHX"><a href="https://github.com/Rainminds/gantral/tree/main/../docs/positioning/what-is-gantral.md" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Z9Sw" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/guides/opa-integration"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">OPA Integration</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/positioning/what-gantral-is-not"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">What Gantral Is Not</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#the-core-idea-authority-vs-intelligence" class="table-of-contents__link toc-highlight">The Core Idea: Authority vs. Intelligence</a></li><li><a href="#how-it-works-the-runner-pattern" class="table-of-contents__link toc-highlight">How It Works (The Runner Pattern)</a></li><li><a href="#the-enterprise-governance-crisis" class="table-of-contents__link toc-highlight">The Enterprise Governance Crisis</a><ul><li><a href="#1-operational-fragmentation" class="table-of-contents__link toc-highlight">1. Operational Fragmentation</a></li><li><a href="#2-broken-chain-of-custody" class="table-of-contents__link toc-highlight">2. Broken Chain of Custody</a></li></ul></li><li><a href="#what-gantral-owns" class="table-of-contents__link toc-highlight">What Gantral Owns</a></li><li><a href="#mental-models" class="table-of-contents__link toc-highlight">Mental Models</a></li><li><a href="#next-steps" class="table-of-contents__link toc-highlight">Next Steps</a></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Community</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://github.com/Rainminds/gantral" target="_blank" rel="noopener noreferrer" class="footer__link-item">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 Gantral, Inc. Built with Docusaurus.</div></div></div></footer></div>
+</ul></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col noPrint_WFHX"><a href="https://github.com/Rainminds/gantral/tree/main/../docs/positioning/what-is-gantral.md" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Z9Sw" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/guides/opa-integration"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">OPA Integration</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/positioning/what-gantral-is-not"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">What Gantral Is Not</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#the-core-idea-authority-vs-intelligence" class="table-of-contents__link toc-highlight">The Core Idea: Authority vs. Intelligence</a></li><li><a href="#how-it-works-the-runner-pattern" class="table-of-contents__link toc-highlight">How It Works (The Runner Pattern)</a></li><li><a href="#the-enterprise-governance-crisis" class="table-of-contents__link toc-highlight">The Enterprise Governance Crisis</a><ul><li><a href="#1-operational-fragmentation" class="table-of-contents__link toc-highlight">1. Operational Fragmentation</a></li><li><a href="#2-broken-chain-of-custody" class="table-of-contents__link toc-highlight">2. Broken Chain of Custody</a></li></ul></li><li><a href="#conceptual-architecture" class="table-of-contents__link toc-highlight">Conceptual Architecture</a></li><li><a href="#what-gantral-owns-and-does-not" class="table-of-contents__link toc-highlight">What Gantral Owns (and Does Not)</a></li><li><a href="#mental-models" class="table-of-contents__link toc-highlight">Mental Models</a></li><li><a href="#when-gantral-is-and-is-not-the-right-tool" class="table-of-contents__link toc-highlight">When Gantral Is (and Is Not) the Right Tool</a></li><li><a href="#next-steps" class="table-of-contents__link toc-highlight">Next Steps</a></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Community</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://github.com/Rainminds/gantral" target="_blank" rel="noopener noreferrer" class="footer__link-item">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 Gantral, Inc. Built with Docusaurus.</div></div></div></footer></div>
 </body>
 </html>
