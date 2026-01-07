@@ -53,13 +53,40 @@ This document outlines the authoritative build plan for Gantral. We follow a str
 - [ ] **5.2 Service Identity**: Support AWS IAM / K8s SA for machine auth.
 - [ ] **5.3 Runner Protocol**: Pull-based task queues for network isolation.
 - [ ] **5.4 Secret Resolution**: Just-In-Time (JIT) secret fetching at the edge.
+- [ ] **5.5 Evidence Capture & Tool Mediation (Non-Authoritative)**  
+  Optional runner-side capability to capture execution evidence:
+  - Tool inputs/outputs captured at the runner boundary  
+  - Evidence stored externally and immutably  
+  - Gantral stores **references only**, never raw payloads  
+  - Evidence may be required by policy, but **never interpreted by Gantral**  
+
+  **Constraints:**  
+  - Must not introduce new execution states  
+  - Must not block or authorize tool execution  
+  - Must not inspect or reason over payload contents  
+  - Must not begin until Phase 4 acceptance criteria are satisfied
 
 ---
 
 ## 🔮 Future: Gantrio (Commercial Layer)
-*Note: These features are non-goals for Gantral OSS.*
+*Note: These features are explicit non-goals for Gantral OSS.*
 
 - [ ] Enterprise SSO (SAML)
 - [ ] Role-Based Access Control (RBAC) UI
-- [ ] Multi-Region Replication
-- [ ] Compliance Reporting Dashboard
+- [ ] Approval inboxes and escalation UX
+- [ ] Cost attribution dashboards
+- [ ] Compliance reporting and exports
+- [ ] Managed hosting and support
+
+---
+
+## Final Reminder
+
+Gantral is an **execution authority layer**, not:
+- A workflow engine
+- An agent framework
+- An autonomy platform
+
+Determinism is guaranteed by the runtime.  
+Authority is enforced by Gantral.  
+**Human accountability is final.**

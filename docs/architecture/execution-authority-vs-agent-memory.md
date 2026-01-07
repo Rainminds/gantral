@@ -22,34 +22,34 @@ It answers one question unambiguously:
 flowchart TB
 
   %% ===== External Triggers =====
-  EXT["External Trigger\nEvent / Schedule / API"]
+  EXT["External Trigger Event / Schedule / API"]
 
   %% ===== Gantral =====
   subgraph G["Gantral: Execution Authority"]
-    G1["Execution State Machine\nRUNNING / WAITING_FOR_HUMAN / ..."]
-    G2["HITL Enforcement\nApprove / Reject / Override"]
-    G3["Policy Evaluation Interface\nTransition Guards"]
-    G4["Audit & Authority Log\nImmutable Decisions"]
+    G1["Execution State Machine RUNNING / WAITING_FOR_HUMAN / ..."]
+    G2["HITL Enforcement Approve / Reject / Override"]
+    G3["Policy Evaluation Interface Transition Guards"]
+    G4["Audit & Authority Log Immutable Decisions"]
   end
 
   %% ===== Runtime =====
-  subgraph T["Deterministic Runtime\nTemporal"]
+  subgraph T["Deterministic Runtime (Temporal)"]
     T1["Workflow Orchestration"]
     T2["Durable Timers & Signals"]
-    T3["Deterministic Replay\nAuthority Replay"]
+    T3["Deterministic Replay Authority Replay"]
   end
 
   %% ===== Runners =====
-  subgraph R["Distributed Runners\nTeam-owned Infrastructure"]
+  subgraph R["Distr Runners Team-owned Infra"]
     R1["Agent Process Launcher"]
-    R2["Lifecycle Signals\nCOMPLETED / FAILED / SUSPENDED"]
+    R2["Lifecycle Signals COMPLETED / FAILED / SUSPENDED"]
   end
 
   %% ===== Agent Framework =====
   subgraph A["Agent Framework"]
     A1["Agent Reasoning & Planning"]
-    A2["Agent Memory\nConversation / Tools / State"]
-    A3["Native Persistence\nCheckpoint DB / S3"]
+    A2["Agent Memory Conversation / Tools / State"]
+    A3["Native Persistence Checkpoint DB / S3"]
   end
 
   %% ===== Flows =====

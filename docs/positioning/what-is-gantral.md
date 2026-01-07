@@ -50,26 +50,55 @@ Gantral does not "host" your agents like a PaaS. It orchestrates them via a **Fe
 
 ## The Enterprise Governance Crisis
 
-Large organizations face two critical failures when scaling AI: **Fragmentation** and **Broken Chain of Custody**.
-
-### 1. Operational Fragmentation
-**Gantral prevents 100 different teams from deploying 100 different, unmanaged agent scripts.**
-
-Without a shared control plane, platform teams are overwhelmed by "Shadow Agents":
-*   **Siloed Deployments:** Every team reinvents their own "human-in-the-loop" glue code (Slack bots, Jira scripts, manual waits).
-*   **Orphaned Processes:** Unmanaged agents run in loops on disparate infrastructure, bypassing standard observability.
-*   **Maintenance Nightmare:** Platform engineering cannot enforce global policy changes (e.g., "New Safety Check") because every agent is built differently.
-
-> **"Gantral decouples the Policy of Approval from the Implementation of the Agent, allowing Platform Teams to manage one central control plane instead of debugging 100 different approval scripts."**
-
-### 2. Broken Chain of Custody
-Even when humans *are* involved, the handoff between AI and Human is often manual and disconnected.
-*   **The "Air Gap":** An agent stops, and a human manually finishes the task. The audit log shows two disconnected events, not one governed workflow.
-*   **Invisible Context:** The human approver rarely sees the exact context (prompts, data snapshot) the agent used to make the request.
-
-Gantral acts as the **standardization layer**. It replaces ad-hoc scripts with a unified **Execution Protocol** that binds the Agent's Request to the Human's Decision, ensuring both operational efficiency and auditability.
+Large organizations face two structural failures when scaling AI: **Operational Fragmentation** and **Broken Chain of Custody**.
 
 ---
+
+### 1. Operational Fragmentation  
+*(The “Shadow Runbook” Problem)*
+
+Gantral prevents critical decision logic from being buried inside agent prompts and scripts.
+
+Without a shared execution control plane, platform teams lose visibility into **why agents act**:
+
+#### Hidden Logic
+Business-critical rules (e.g., *“Only restart DB if latency > 5s”*) are embedded in natural-language prompts or agent code, creating **“Shadow Runbooks”** that platform and compliance teams cannot audit, version, or update.
+
+#### Siloed Implementations
+Each team reinvents its own safety checks, approval logic, and escalation paths, leading to inconsistent enforcement of organizational policy.
+
+**Gantral decouples decision criteria from agent prompts.**  
+It allows platform teams to enforce deterministic, centrally governed policy on top of probabilistic agents, without rewriting agent logic.
+
+---
+
+### 2. Broken Chain of Custody  
+*(The “Disconnected Evidence” Problem)*
+
+Even when humans are involved, the link between **facts** and **approvals** is often broken.
+
+#### The Self-Reporting Fallacy
+Agents summarize logs, metrics, or tool outputs for humans. These summaries can be incomplete or incorrect. Humans approve actions based on the agent’s narrative, and the audit trail records a “valid” approval for an invalid justification.
+
+#### The Air Gap
+An agent recommends an action, and a human executes it manually in a separate system. There is no durable, reviewable link between the execution context at the time of approval and the action taken.
+
+**Gantral acts as the execution anchor layer.**
+
+It binds:
+
+- the execution context references available at the time of decision  
+- the human approval or override  
+- the enforced execution outcome  
+
+into a single, immutable execution record.
+
+Gantral does not interpret evidence or tool payloads.  
+It ensures that **no governed action proceeds without a recorded, attributable human decision tied to the exact execution context that justified it**.
+
+---
+
+## Conceptual Architecture 
 
 ```mermaid
 graph TB
@@ -128,16 +157,27 @@ graph TB
 
 ---
 
-## What Gantral Owns
+## What Gantral Owns (and Does Not)
 
-Gantral owns **execution semantics**, not agent memory.
+Gantral owns execution semantics, not agent intelligence.
 
-Specifically, Gantral provides:
-- A deterministic execution state machine.
-- Human-in-the-Loop (HITL) as a blocking state transition.
-- Instance-level isolation for audit, cost, and accountability.
-- Declarative control policies (Rego-based).
-- Immutable execution records with replay capability.
+Gantral provides:
+
+- A deterministic execution state machine
+- Human-in-the-Loop (HITL) as a blocking state transition
+- Instance-level isolation for audit, cost, and accountability
+- Declarative control policies (via a pluggable interface)
+- Immutable execution records with deterministic replay
+
+Gantral explicitly does not:
+
+- Store or manage agent memory
+- Inspect or reason over tool payloads
+- Author business logic
+- Make autonomous decisions
+- Optimize or route models
+
+> Gantral may record references to external execution evidence, but it never inspects, interprets, or governs tool behavior.
 
 Gantral is intentionally boring, predictable, and auditable.
 
@@ -150,6 +190,23 @@ Gantral can be understood as:
 - **"Sudo" for AI** — An agent tries to execute a command, but Gantral intercepts it and asks, "Are you authorized?"
 - **Kubernetes for Semantics** — It manages the *lifecycle state* of AI processes, not just the containers.
 - **Terraform for Process** — It defines the "Infrastructure of Decision Making" as code.
+
+---
+
+## When Gantral Is (and Is Not) the Right Tool
+
+Gantral is appropriate when actions:
+
+- Affect production systems
+- Have regulatory, financial, or security impact
+- Require explicit human accountability
+- Must be auditable months or years later
+
+Gantral is not required for:
+
+- Purely advisory agents
+- Sandbox or exploratory workflows
+- Fully reversible or non-material actions
 
 ---
 
