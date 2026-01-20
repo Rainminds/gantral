@@ -49,10 +49,10 @@ This document outlines the authoritative build plan for Gantral. We follow a str
 ## 🚧 Phase 5: Federated Execution (In Progress)
 *Goal: Enable secure, multi-team execution with zero trust.*
 
-- [ ] **5.1 Identity Federation**: Replace local users with OIDC (JWT) claims.
-- [ ] **5.2 Service Identity**: Support AWS IAM / K8s SA for machine auth.
-- [ ] **5.3 Runner Protocol**: Pull-based task queues for network isolation.
-- [ ] **5.4 Secret Resolution**: Just-In-Time (JIT) secret fetching at the edge.
+- [x] **5.1 Identity Federation**: Implemented OIDC/JWT Middleware with Dev Mode (HS256) and Production (RS256) support. Verified via Docker.
+- [x] **5.2 Service Identity**: Implemented Multi-Verifier (Chain) and RBAC Middleware. Runners restricted to Polling; Users restricted to Decisions.
+- [x] **5.3 Runner Protocol**: Pull-based task queues for network isolation.
+- [x] **5.4 Secret Resolution**: Just-In-Time (JIT) secret fetching at the edge.
 - [ ] **5.5 Evidence Capture & Tool Mediation (Non-Authoritative)**  
   Optional runner-side capability to capture execution evidence:
   - Tool inputs/outputs captured at the runner boundary  

@@ -1,4 +1,7 @@
-# Category Definition
+---
+sidebar_position: 3
+title: Category Definition
+---
 
 Gantral defines a new category:
 

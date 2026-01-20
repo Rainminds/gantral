@@ -1,7 +1,10 @@
-
 #!/bin/bash
-echo "Triggering new execution..."
-curl -X POST http://localhost:8080/instances \
-  -H "Content-Type: application/json" \
-  -d '{"workflow_id": "demo-agent-flow", "trigger_context": {"tier": "prod"}, "policy": {"materiality": "HIGH"}}'
-echo ""
+echo "Triggering new execution via authenticated script..."
+# Ensure we use the venv python if it exists
+if [ -f "$(dirname "$0")/../.venv/bin/python3" ]; then
+    PYTHON_CMD="$(dirname "$0")/../.venv/bin/python3"
+else
+    PYTHON_CMD="python3"
+fi
+
+$PYTHON_CMD $(dirname "$0")/trigger.py

@@ -7,17 +7,11 @@ import (
 )
 
 func TestRoutes(t *testing.T) {
-	// We can use nil dependencies for testing route existence if we don't execute them deeply,
-	// or assume Handler methods handle nil gracefully during simple wiring checks?
-	// Better to use empty struct defaults or mocks if needed.
-	// For routing check, we just verify paths are registered.
-
-	// Since NewServer constructs a Handler which is used in Routes, we need to pass strict types?
-	// NewServer(port, client, queue, store)
+	// Use nil dependencies for route registration check.
+	// NewServer constructs the Handler; we verifies Routes() registers paths correctly.
 
 	srv := NewServer("8080", nil, "queue", nil)
-	// Note: Calling methods on srv.Routes() might panic if handlers access nil client/store immediately.
-	// But Routes() just registers them.
+	// Routes() registers handlers but doesn't execute them, so nil dependencies are safe here.
 	mux := srv.Routes()
 
 	// Check Healthz (does not require client/store)

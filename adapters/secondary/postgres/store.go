@@ -51,7 +51,8 @@ func (s *Store) CreateInstance(ctx context.Context, inst *engine.Instance) error
 	}
 	defer func() { _ = tx.Rollback(ctx) }()
 
-	qtx := s.Queries.WithTx(tx)
+	// Correctly using the embedded promoted method directly
+	qtx := s.WithTx(tx)
 
 	// 1. Create Instance
 	_, err = qtx.CreateInstance(ctx, db.CreateInstanceParams{
@@ -117,7 +118,8 @@ func (s *Store) RecordDecision(ctx context.Context, cmd engine.RecordDecisionCmd
 	}
 	defer func() { _ = tx.Rollback(ctx) }()
 
-	qtx := s.Queries.WithTx(tx)
+	// Correctly using the embedded promoted method directly
+	qtx := s.WithTx(tx)
 
 	// 1. Create Decision Record
 	decisionID := fmt.Sprintf("dec-%d", time.Now().UnixNano())
@@ -178,15 +180,8 @@ func (s *Store) RecordDecision(ctx context.Context, cmd engine.RecordDecisionCmd
 }
 
 func (s *Store) GetAuditEvents(ctx context.Context, instanceID string) ([]engine.AuditEvent, error) {
-	// We need a query for this. Assuming 'listAuditEventsByInstance' doesn't exist in generated code yet?
-	// The user request context mentioned "Update adapters... Implement the method using sqlc".
-	// But I cannot run sqlc generation locally effectively without tools setup (user simulated it before).
-	// I will check if `GetAuditEvents` queries exist or if I need to append a raw query or simulate the generated code.
-	// Looking at `queries.sql.go` previously viewed, there was NO `GetAuditEvents` or `ListAuditEvents`.
-	// Since I cannot run sqlc, I must manually implement the method using pgx raw query for now OR simulating the generated code again is risky/verbose.
-	// Given strict verification, raw query is acceptable if sqlc is not required to be auto-generated *right now*.
-	// However, `Store` struct embeds `*db.Queries`.
-	// I'll add the method to the store using raw SQL via pool.
+	// Using raw query as sqlc generation is not currently automated in this environment.
+	// This implements ports.InstanceStore.GetAuditEvents.
 
 	const listAuditEventsValues = `
 		SELECT id, instance_id, event_type, payload, timestamp

@@ -51,7 +51,9 @@ func (c *Client) CreateInstance(ctx context.Context, workflowID string, triggerC
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute request: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode != http.StatusCreated {
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
@@ -89,7 +91,9 @@ func (c *Client) RecordDecision(ctx context.Context, instanceID string, decision
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute request: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	// 201 Created from API
 	if resp.StatusCode != http.StatusCreated {

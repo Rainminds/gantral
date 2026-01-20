@@ -4,8 +4,13 @@ import json
 import os
 import time
 
-HANDOFF_FILE = "handoff/context.json"
 EXECUTION_ID = os.environ.get("GANTRAL_EXECUTION_ID")
+
+def get_handoff_path(execution_id):
+    safe_id = "".join([c for c in execution_id if c.isalnum() or c in ('-', '_')])
+    return f"handoff/context_{safe_id}.json"
+
+HANDOFF_FILE = get_handoff_path(EXECUTION_ID)
 
 def main():
     print(f"[Agent-Post] Started for Execution {EXECUTION_ID}. Resurrected.")

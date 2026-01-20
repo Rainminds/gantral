@@ -38,7 +38,7 @@ graph TD
   end
 
   subgraph Agents["Agent Frameworks"]
-    CrewAI / LangGraph
+    AgentFw["CrewAI / LangGraph"]
     Memory["Agent Memory (Native Persistence)"]
   end
 
