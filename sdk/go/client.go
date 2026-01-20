@@ -52,9 +52,7 @@ func (c *Client) CreateInstance(ctx context.Context, workflowID string, triggerC
 		return nil, fmt.Errorf("failed to execute request: %w", err)
 	}
 	defer func() {
-		if closeErr := resp.Body.Close(); closeErr != nil {
-			// Log or handle error if critical, for now suppress to satisfy errcheck
-		}
+		_ = resp.Body.Close()
 	}()
 
 	if resp.StatusCode != http.StatusCreated {
@@ -94,9 +92,7 @@ func (c *Client) RecordDecision(ctx context.Context, instanceID string, decision
 		return nil, fmt.Errorf("failed to execute request: %w", err)
 	}
 	defer func() {
-		if closeErr := resp.Body.Close(); closeErr != nil {
-			// suppress
-		}
+		_ = resp.Body.Close()
 	}()
 
 	// 201 Created from API
