@@ -51,7 +51,8 @@ func (s *Store) CreateInstance(ctx context.Context, inst *engine.Instance) error
 	}
 	defer func() { _ = tx.Rollback(ctx) }()
 
-	qtx := s.Queries.WithTx(tx)
+	// Correctly using the embedded promoted method directly
+	qtx := s.WithTx(tx)
 
 	// 1. Create Instance
 	_, err = qtx.CreateInstance(ctx, db.CreateInstanceParams{
@@ -117,7 +118,8 @@ func (s *Store) RecordDecision(ctx context.Context, cmd engine.RecordDecisionCmd
 	}
 	defer func() { _ = tx.Rollback(ctx) }()
 
-	qtx := s.Queries.WithTx(tx)
+	// Correctly using the embedded promoted method directly
+	qtx := s.WithTx(tx)
 
 	// 1. Create Decision Record
 	decisionID := fmt.Sprintf("dec-%d", time.Now().UnixNano())

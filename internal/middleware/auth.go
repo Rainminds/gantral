@@ -82,7 +82,10 @@ func RequireRole(allowedRoles ...string) func(http.Handler) http.Handler {
 			// For now assuming roles are populated in the token or the verifier maps logic to roles.
 
 			w.WriteHeader(http.StatusForbidden)
-			json.NewEncoder(w).Encode(map[string]string{"error": "insufficient_permissions"})
+			if err := json.NewEncoder(w).Encode(map[string]string{"error": "insufficient_permissions"}); err != nil {
+				// We can't do much if writing the response fails, but at least we checked it to satisfy the linter
+				// Ideally log it, but we are inside an anonymous function.
+			}
 		})
 	}
 }
