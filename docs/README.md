@@ -9,29 +9,48 @@ sidebar_position: 1
 
 > **"We don’t help you build agents. We help you run AI safely across your organization."**
 
+## Position Paper
+
+Gantral is grounded in a vendor-neutral position paper that defines the **AI Execution Control Plane** as a missing infrastructure layer for execution-time governance in AI-assisted systems.
+
+These documents explain *why* execution authority, human accountability, and replayable audit must be enforced at runtime—independent of agent frameworks, models, or workflows.
+
+* **[Executive Summary](./positioning/ai-execution-control-plane-summary.md)**  
+  A concise overview of the problem, core principles, and reference architecture.  
+  Intended for platform leaders, architects, and decision-makers.
+
+* **[AI Execution Control Plane — Position Paper](./positioning/ai-execution-control-plane.md)**  
+  The full, non-normative position paper defining execution authority, determinism, and auditability in AI-driven systems.
+
+---
 ## Quick Start
 *   **[What is Gantral?](./positioning/what-is-gantral.md)**: High-level overview and philosophy.
 *   **[What Gantral is Not](./positioning/what-gantral-is-not.md)**: Clarifying boundaries vs Agent Frameworks.
 *   **[Product Spec](./product/prd.md)**: Detailed product requirements and personas.
 
+---
 ## Integration Guides
 *   **[Consumer Guide](./guides/example-consumer-integration.md)**: Normative guide for agents integrating with Gantral.
 *   **[Policy Integration](./guides/opa-integration.md)**: How to write and enforce OPA policies.
 *   **[Demo Walkthrough](./guides/demo.md)**: Running the reference examples.
 
+---
 ## Technical Architecture
 *   **[Technical Reference (TRD)](./architecture/trd.md)**: Deep dive into the architecture, invariants, and API.
 *   **[State Machine](./architecture/state-machine.md)**: The canonical execution lifecycle.
 *   **[Implementation Guide](./architecture/implementation-guide.md)**: Reference guide for builders.
 
+---
 ## Roadmap & Progress
 *   **[Phase-wise Build Plan](./product/phase-wise-build-plan.md)**: Current build status and detailed execution plan.
 *   **[Roadmap](./governance/roadmap.md)**: Future features and strategic direction.
 
+---
 ## Governance & Contributing
 *   **[OSS Philosophy](./governance/oss-philosophy.md)**: Open Core principles.
 *   **[How to Contribute](./contributors/how-to-contribute.md)**: Guidelines for code and documentation contributions.
 
+---
 ## Executive Context
 
 For readers evaluating Gantral from an enterprise, platform, risk, or regulatory perspective, we maintain a small set of executive briefings that provide higher-level context on:

@@ -1,0 +1,171 @@
+variables:
+  # Global settings
+  GO_VERSION: "1.25"
+  PYTHON_VERSION: "3.11"
+  # Optimize Git fetch for DCO checks
+  GIT_DEPTH: "0" 
+  # Go Module Caching
+  GOPATH: "$CI_PROJECT_DIR/.go"
+  GOCACHE: "$CI_PROJECT_DIR/.go-build"
+
+stages:
+  - compliance
+  - build
+  - test
+  - docs-deploy
+
+# ---------------------------------------------------------------------------
+# Workflow Rules
+# ---------------------------------------------------------------------------
+workflow:
+  rules:
+    # 1. Emergency Mode: Always run full suite on Merge Requests
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    
+    # 2. Maintenance Mode: Run on branch pushes (devs working directly on GitLab)
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH
+
+# ---------------------------------------------------------------------------
+# Compliance (DCO Check)
+# ---------------------------------------------------------------------------
+check_dco:
+  stage: compliance
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache git bash
+  script:
+    - |
+      echo "🔍 Validating DCO (Developer Certificate of Origin)..."
+      
+      if [ "$CI_PIPELINE_SOURCE" == "merge_request_event" ]; then
+        # MR Context: Check range of commits
+        git fetch origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+        COMMITS=$(git rev-list --no-merges origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME..$CI_COMMIT_SHA)
+      else
+        # Push Context: Check just the HEAD commit
+        COMMITS=$(git rev-parse HEAD)
+      fi
+
+      EXIT_CODE=0
+      for sha in $COMMITS; do
+        if ! git show -s --format=%B $sha | grep -q "^Signed-off-by:"; then
+          echo "❌ Commit $sha is missing 'Signed-off-by' line."
+          EXIT_CODE=1
+        fi
+      done
+      
+      if [ "$EXIT_CODE" -eq 1 ]; then
+        echo "----------------------------------------------------------------"
+        echo "🚨 DCO Check Failed."
+        echo "👉 Fix: git commit --amend -s && git push --force-with-lease"
+        echo "----------------------------------------------------------------"
+        exit 1
+      fi
+      echo "✅ DCO Check Passed."
+
+# ---------------------------------------------------------------------------
+# Build Stage (Fast Feedback)
+# ---------------------------------------------------------------------------
+build_core:
+  stage: build
+  image: golang:$GO_VERSION
+  script:
+    - make build
+  cache: &go_cache
+    key: ${CI_COMMIT_REF_SLUG}-go
+    paths:
+      - .go/pkg/mod/
+      - .go-build/
+    policy: pull-push
+
+build_runner:
+  stage: build
+  image: python:$PYTHON_VERSION
+  script:
+    - cd examples/persistent-agent/runner
+    - pip install -r requirements.txt
+    - python -m compileall .
+  cache: &py_cache
+    key: ${CI_COMMIT_REF_SLUG}-python
+    paths:
+      - examples/persistent-agent/runner/.venv/
+      - .cache/pip
+    policy: pull-push
+
+# ---------------------------------------------------------------------------
+# Test Stage (Full Confidence for DR)
+# ---------------------------------------------------------------------------
+test_core:
+  stage: test
+  image: golang:$GO_VERSION
+  services:
+    - name: postgres:16-alpine
+      alias: postgres
+      command: ["postgres", "-c", "fsync=off"] # Optimization for CI
+  variables:
+    POSTGRES_DB: gantral
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: changeme
+    DATABASE_URL: "postgres://postgres:changeme@postgres:5432/gantral?sslmode=disable"
+  script:
+    # Ensure dependencies are installed if cache missed
+    - go mod download
+    - make test
+  cache:
+    <<: *go_cache
+    policy: pull
+
+lint_core:
+  stage: test
+  image: golangci/golangci-lint:latest
+  script:
+    - golangci-lint run -v --timeout=5m
+  cache:
+    <<: *go_cache
+    policy: pull
+
+test_runner:
+  stage: test
+  image: python:$PYTHON_VERSION
+  script:
+    - cd examples/persistent-agent/runner
+    - pip install -r requirements.txt
+    - pip install pytest
+    - pytest
+  cache:
+    <<: *py_cache
+    policy: pull
+
+# ---------------------------------------------------------------------------
+# Documentation (Hot Standby Deploy)
+# ---------------------------------------------------------------------------
+pages:
+  stage: docs-deploy
+  image: node:20
+  script:
+    - cd docs-site
+    - npm ci
+    - npm run build
+    # GitLab Pages requires the output to be in 'public/'
+    - mv build ../public
+  artifacts:
+    paths:
+      - public
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-docs
+    paths:
+      - docs-site/node_modules/
+    policy: pull-push
+  rules:
+    # Always update the standby site on Main branch pushes
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - docs/**/*
+        - docs-site/**/*
+    # Optional: Enable for MRs if you want to preview docs changes on GitLab
+    # - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    #   changes:
+    #     - docs/**/*
+    #     - docs-site/**/*

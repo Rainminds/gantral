@@ -4,26 +4,46 @@ import json
 import os
 import time
 
-CHECKPOINT_FILE = "checkpoint/state.json"
 
-def load_checkpoint():
-    if os.path.exists(CHECKPOINT_FILE):
-        with open(CHECKPOINT_FILE, "r") as f:
+def get_checkpoint_path(execution_id):
+    # Sanitize execution_id to avoid path traversal
+    safe_id = "".join([c for c in execution_id if c.isalnum() or c in ('-', '_')])
+    return f"checkpoint/state_{safe_id}.json"
+
+def load_checkpoint(execution_id):
+    path = get_checkpoint_path(execution_id)
+    if os.path.exists(path):
+        with open(path, "r") as f:
             return json.load(f)
     return None
 
-def save_checkpoint(state):
-    os.makedirs(os.path.dirname(CHECKPOINT_FILE), exist_ok=True)
-    with open(CHECKPOINT_FILE, "w") as f:
+def save_checkpoint(execution_id, state):
+    path = get_checkpoint_path(execution_id)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w") as f:
         json.dump(state, f)
 
 def main():
     # Simulation of receiving status from Runner (infrastructure)
     # The runner will set this env var based on what it got from Gantral
     gantral_status = os.environ.get("GANTRAL_STATUS", "UNKNOWN")
-    print(f"[Agent] Started. Status from Gantral: {gantral_status}")
+    execution_id = os.environ.get("GANTRAL_EXECUTION_ID", "UNKNOWN")
+    
+    print(f"[Agent] Started. Execution: {execution_id}. Status from Gantral: {gantral_status}")
+    
+    # Verify JIT Secrets
+    api_key = os.environ.get("API_KEY")
+    mock_val = os.environ.get("MOCK_VAL")
+    
+    if api_key:
+        print(f"[Agent] SECRET FOUND: API_KEY={api_key}")
+    else:
+        print("[Agent] API_KEY not found.")
+        
+    if mock_val:
+        print(f"[Agent] SECRET FOUND: MOCK_VAL={mock_val}")
 
-    state = load_checkpoint()
+    state = load_checkpoint(execution_id)
 
     if not state:
         print("[Agent] No checkpoint found. Starting fresh execution.")
@@ -34,18 +54,13 @@ def main():
         # Now we hit the sensitive step
         print("[Agent] Approaching Sensitive Step: 'Launch Nuclear Missiles'")
         
-        # In a real app, here we would call Gantral to *request* permission if we didn't have it.
-        # But this demo relies on the Runner to have checked Gantral for us?
-        # Re-reading prompt: "Runner: Poll Gantral API... subprocess(agent)... Capture Exit Code... if 3 -> suspend"
-        # "Agent: If status != APPROVED... Save state... sys.exit(3)"
-        
-        # So the agent checks permissions *now*.
-        # For this demo, valid statuses are probably "PENDING" (default), "WAITING_FOR_HUMAN", "APPROVED".
+        # In this persistent-agent model, the Agent checks the status injected by the Runner.
+        # If not APPROVED, it hibernates (exit 3).
         
         if gantral_status != "APPROVED":
             print("[Agent] Stop! Sensitive step requires approval.")
             print("[Agent] Saving state to checkpoint...")
-            save_checkpoint({"step": "pre_launch", "data": "ready_to_launch"})
+            save_checkpoint(execution_id, {"step": "pre_launch", "data": "ready_to_launch"})
             print("HIBERNATING")
             sys.exit(3)
         
@@ -59,8 +74,9 @@ def main():
                 print("[Agent] Missiles Launched.")
                 
                 # Cleanup
-                if os.path.exists(CHECKPOINT_FILE):
-                    os.remove(CHECKPOINT_FILE)
+                path = get_checkpoint_path(execution_id)
+                if os.path.exists(path):
+                    os.remove(path)
                 
                 sys.exit(0)
             else:

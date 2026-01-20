@@ -13,6 +13,8 @@ services:
       - TEMPORAL_HOST_PORT=temporal:7233
       - TASK_QUEUE=gantral_tasks
       - PORT=8080
+      - DEV_MODE=true
+      - DEV_AUTH_SECRET=dev-secret-key
     restart: on-failure
     volumes:
       - ../policies/basic_approval.rego:/app/policies/policy.rego
@@ -61,6 +63,8 @@ services:
     build: ./runner
     environment:
       - GANTRAL_URL=http://gantral-core:8080
+      - DEV_AUTH_SECRET=dev-secret-key
+      - MY_SECRET_API_KEY=super-secret-from-docker-env
     volumes:
       - ./agent:/agent
     depends_on:
