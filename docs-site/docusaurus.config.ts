@@ -47,8 +47,8 @@ const config: Config = {
           sidebarPath: './sidebars.ts',
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/Rainminds/gantral/tree/main/',
+          //editUrl:
+          //  'https://github.com/Rainminds/gantral/tree/main/',
         },
         blog: false, // Disable blog for docs-only mode
         theme: {
@@ -85,8 +85,8 @@ const config: Config = {
         },
         // {to: '/blog', label: 'Blog', position: 'left'},
         {
-          href: 'https://github.com/Rainminds/gantral',
-          label: 'GitHub',
+          href: 'https://git.gantral.org',
+          label: 'Git',
           position: 'right',
         },
       ],
@@ -98,8 +98,8 @@ const config: Config = {
           title: 'Community',
           items: [
             {
-              label: 'GitHub',
-              href: 'https://github.com/Rainminds/gantral',
+              label: 'Git',
+              href: 'https://git.gantral.org',
             },
           ],
         },
