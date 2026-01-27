@@ -19,10 +19,15 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U postgres"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+    
+    env:
+      TEMPORAL_HOST_PORT: "localhost:7233"
+      # Force IPv4 to avoid [::1] connection issues in CI
+      DATABASE_URL: "postgres://postgres:changeme@127.0.0.1:5432/gantral?sslmode=disable"
 
     steps:
       - uses: actions/checkout@v4
@@ -52,14 +57,11 @@ jobs:
         run: make test
 
       - name: Test Integration & E2E
-        env:
-          TEMPORAL_HOST_PORT: "localhost:7233"
-          DATABASE_URL: "postgres://postgres:changeme@localhost:5432/gantral?sslmode=disable"
         run: make test-integration
 
       - name: Coverage Check
         run: |
-          go test -coverpkg=./... -coverprofile=coverage.raw.out ./...
+          DATABASE_URL="$DATABASE_URL" TEMPORAL_HOST_PORT="$TEMPORAL_HOST_PORT" go test -coverpkg=./... -coverprofile=coverage.raw.out ./...
           # Exclude generated code (infra/db), wiring (infra), entrypoints (cmd), and boilerplate (pkg/logger)
           # Also excluding root main.go if present in the coverage profile as 'github.com/Rainminds/gantral/main.go'
           grep -v -E "infra/|cmd/|pkg/logger/|pkg/config/|sdk/|github.com/Rainminds/gantral/main.go" coverage.raw.out > coverage.out

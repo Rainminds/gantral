@@ -34,7 +34,8 @@ func Test_EndToEnd_HITL(t *testing.T) {
 	// 0. Setup Configuration
 	dbURL := os.Getenv("DATABASE_URL")
 	if dbURL == "" {
-		dbURL = "postgres://postgres:changeme@localhost:5432/gantral?sslmode=disable"
+		dbURL = "postgres://postgres:changeme@127.0.0.1:5432/gantral?sslmode=disable"
+		t.Logf("DATABASE_URL not set, using default: %s", dbURL)
 	}
 
 	// Automation: Ensure Schema Exists

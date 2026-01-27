@@ -6,6 +6,8 @@ import (
 	stdhttp "net/http" // Alias standard library
 	"os"
 
+	"time"
+
 	gantralhttp "github.com/Rainminds/gantral/adapters/primary/http" // Alias primary adapter
 	"github.com/Rainminds/gantral/adapters/secondary/postgres"
 	"github.com/Rainminds/gantral/internal/auth"
@@ -138,8 +140,9 @@ func main() {
 	finalHandler := gantralhttp.LoggingMiddleware(authMiddleware(rbacHandler))
 
 	httpServer := &stdhttp.Server{
-		Addr:    ":" + port,
-		Handler: finalHandler,
+		Addr:              ":" + port,
+		Handler:           finalHandler,
+		ReadHeaderTimeout: 5 * time.Second,
 	}
 
 	logger.Info("Server listening...", "addr", ":"+port)
