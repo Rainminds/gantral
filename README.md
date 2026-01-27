@@ -5,11 +5,13 @@
 
 ![Status](https://img.shields.io/badge/Status-Phase_4_Complete-green) ![License](https://img.shields.io/badge/License-Apache_2.0-blue) ![Go](https://img.shields.io/badge/Go-1.24+-00ADD8) ![Temporal](https://img.shields.io/badge/Runtime-Temporal-black)
 
-**Gantral** is the open-source standard for governing AI agents in the enterprise.
+**Gantral** is an open-source project exploring a standard approach to governing AI agent execution in the enterprise.
 
 Just as Kubernetes manages container orchestration, **Gantral manages AI execution semantics**—standardizing how agents execute, pause for human authority, escalate risk, and prove accountability.
 
 It solves the "Who authorized this?" problem by providing a deterministic execution engine, immutable audit logs, and a first-class Human-in-the-Loop (HITL) state machine backed by **Temporal**.
+
+Gantral is an active open-source project, and we welcome contributors interested in AI infrastructure, execution control, and governance primitives.
 
 ---
 
