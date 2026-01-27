@@ -40,7 +40,8 @@ func TestIntegration_HITL_Flow(t *testing.T) {
 	_ = godotenv.Load("../.env")
 	dbURL := os.Getenv("DATABASE_URL")
 	if dbURL == "" {
-		t.Skip("DATABASE_URL not set, skipping integration test")
+		dbURL = "postgres://postgres:changeme@127.0.0.1:5432/gantral?sslmode=disable"
+		t.Logf("DATABASE_URL not set, using default: %s", dbURL)
 	}
 
 	// Run Migrations ensure schema exists
