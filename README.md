@@ -1,47 +1,91 @@
-
 # Gantral
 
-> **The AI Execution Control Plane**
+> **AI Execution Control Plane (Open Source)**
 
-![Status](https://img.shields.io/badge/Status-Phase_4_Complete-green) ![License](https://img.shields.io/badge/License-Apache_2.0-blue) ![Go](https://img.shields.io/badge/Go-1.24+-00ADD8) ![Temporal](https://img.shields.io/badge/Runtime-Temporal-black)
+![Status](https://img.shields.io/badge/Status-Active-green)
+![License](https://img.shields.io/badge/License-Apache_2.0-blue)
+![Go](https://img.shields.io/badge/Go-1.24+-00ADD8)
+![Runtime](https://img.shields.io/badge/Runtime-Temporal-black)
 
-**Gantral** is an open-source project exploring a standard approach to governing AI agent execution in the enterprise.
+**Gantral** is an open-source project defining a neutral **execution authority layer** for AI-assisted and agentic systems.
 
-Just as Kubernetes manages container orchestration, **Gantral manages AI execution semantics**—standardizing how agents execute, pause for human authority, escalate risk, and prove accountability.
+Gantral provides infrastructure primitives to **govern, pause, resume, and audit execution-time decisions** — independent of agent frameworks, models, or workflow engines.
 
-It solves the "Who authorized this?" problem by providing a deterministic execution engine, immutable audit logs, and a first-class Human-in-the-Loop (HITL) state machine backed by **Temporal**.
-
-Gantral is an active open-source project, and we welcome contributors interested in AI infrastructure, execution control, and governance primitives.
+Gantral does not build agents or workflows.  
+It defines **when execution may proceed** and **how that decision is recorded**.
 
 ---
 
-## 🧩 Where Gantral Fits
+## Why Gantral Exists
 
-Gantral acts as the **Authority Layer** above your agent frameworks (LangChain, CrewAI, AutoGen) and the **Orchestration Layer** below your enterprise infrastructure.
+As AI systems are embedded into real operational workflows, organizations encounter execution-time governance failures that existing tools do not address.
 
-It uses a **Federated Runner Architecture**: Code runs on your team's infrastructure; Gantral manages the decision state.
+In practice:
+
+- approval rules drift into agent code, scripts, and prompts
+- similar workflows enforce governance differently across teams
+- policy changes require code changes in multiple places
+- human approvals are enforced socially rather than technically
+- audits reconstruct decisions after the fact rather than replaying them
+
+Gantral exists to make **execution authority explicit, enforceable, and replayable**.
+
+---
+
+## What Gantral Is — and Is Not
+
+Gantral **is**:
+
+- an execution authority layer
+- a deterministic control plane for AI-assisted actions
+- a system of record for execution-time decisions
+- infrastructure for explicit Human-in-the-Loop (HITL) enforcement
+
+Gantral **is not**:
+
+- an agent framework
+- a workflow engine or orchestrator
+- a policy authoring system
+- an AI governance UI
+- an autonomous or self-approving system
+
+Gantral sits **above agents and automation** and **below organizational accountability**.
+
+---
+
+## Where Gantral Fits
+
+Gantral introduces a clear responsibility boundary:
+
+- **Agents** reason, plan, and act
+- **Gantral** determines whether execution may proceed
+- **Humans** retain final authority
+- **Audit systems** consume deterministic execution records
+
+Gantral uses a **federated execution model**:  
+agent code runs on team-owned infrastructure, while Gantral manages execution state and authority decisions.
 
 ```mermaid
 graph TD
-  subgraph Enterprise["Enterprise Authority"]
-    IdP["Identity (Okta/Entra)"]
-    Secrets["Vault/AWS Secrets"]
+  subgraph Enterprise["Enterprise Systems"]
+    IdP["Identity Provider"]
+    Secrets["Secret Management"]
   end
 
-  subgraph Gantral["Gantral Control Plane"]
+  subgraph Gantral["Gantral (Execution Authority)"]
     State["Execution State Machine"]
-    Policy["Policy & Governance"]
-    Audit["Immutable Audit Log"]
+    Policy["Policy Evaluation (Advisory)"]
+    Audit["Immutable Execution History"]
   end
 
-  subgraph Runtime["Execution Layer"]
-    Temporal["Temporal Cluster (Deterministic Runtime)"]
-    Runner["Distributed Runner (Team VPC)"]
+  subgraph Runtime["Deterministic Runtime"]
+    Temporal["Temporal"]
+    Runner["Distributed Runners"]
   end
 
   subgraph Agents["Agent Frameworks"]
-    AgentFw["CrewAI / LangGraph"]
-    Memory["Agent Memory (Native Persistence)"]
+    AgentFw["Agent Logic"]
+    Memory["Agent Memory (Framework-Owned)"]
   end
 
   Enterprise --> Gantral
@@ -52,108 +96,115 @@ graph TD
 
 ---
 
-## 🚀 Capabilities
+## Core Capabilities
 
-### 1. Federated Execution Model
-**Your code, your infra.** Agents execute on distributed **Runners** deployed in your secure VPCs. Sensitive data never leaves your environment; only metadata and decisions flow to the Control Plane.
+### Execution Authority and HITL
 
-### 2. First-Class HITL State Machine
-Human-in-the-Loop is not a UI feature—it's an execution state.
-Agents transition to `WAITING_FOR_HUMAN`, **hibernate** (releasing compute), and resume deterministically only when authorized.
+Human-in-the-Loop is modeled as an **execution state**, not a notification or convention.
+Execution pauses explicitly and resumes only after a recorded decision.
 
-### 3. Agent-Native Persistence
-Gantral supports long-running approvals (days/weeks) by leveraging **Agent Framework Checkpointing** (e.g., CrewAI `@persist`, LangGraph Checkpoints). No zombie processes consuming RAM while waiting for approval.
+### Deterministic Execution and Replay
 
-### 4. Policy-as-Guard
-Define materiality and authority rules (e.g., *"Always require VP approval for transfers > $10k"*) using declarative Policy-as-Code. Policies act as **Transition Guards**, enforced synchronously before any action occurs.
+Execution decisions are instance-scoped, append-only, and replayable without relying on agent memory or transient logs.
 
-### 5. Regulatory Compliance
-Designed to satisfy **EU AI Act (Art. 14)** human oversight requirements and **SOC 2 Type II** auditability standards. Every decision is cryptographically linked to a human identity and policy version.
+### Federated Execution
 
----
+Agents run on team-owned infrastructure.
+Gantral does not execute agent logic or handle sensitive payloads.
 
-## ❗ Scope
+### Policy as Transition Guard
 
-| Gantral IS | Gantral IS NOT |
-| :--- | :--- |
-| ✅ An AI execution authority layer | ❌ An agent builder or LLM host |
-| ✅ A system of record for decisions | ❌ An autonomous "magic" platform |
-| ✅ Infrastructure for HITL & Audit | ❌ A replacement for Jira/CI-CD |
-| ✅ Identity & Secret Agnostic (Federated) | ❌ An Identity Provider or Secret Store |
+External policy engines provide **advisory signals** that act as transition guards, not decision-makers.
+
+### Long-Running Approvals
+
+Gantral supports long-running approvals via agent-native persistence or split-agent execution patterns, without holding compute resources during waits.
 
 ---
 
-## 📚 Documentation
+## Scope and Boundaries
 
-**📘 [Read the Full Documentation](docs/README.md)**
+| Gantral IS                         | Gantral IS NOT                    |
+| ---------------------------------- | --------------------------------- |
+| Execution authority infrastructure | Agent framework                   |
+| Deterministic decision ledger      | Workflow engine                   |
+| HITL enforcement layer             | Autonomous system                 |
+| Federated and self-hosted          | Identity provider or secret store |
 
-The technical constitution of Gantral lives in the `specs/` directory.
-
-- **[Technical Reference](docs/architecture/trd.md)**: The master architecture document.
-- **[Architecture Decisions](specs/adr/)**: Why we chose Temporal, Federated Runners, and OIDC.
-- **[Consumer Guide](docs/guides/example-consumer-integration.md)**: How to integrate agents with Gantral.
-- **[Execution vs Memory](docs/architecture/execution-authority-vs-agent-memory.md)**: Understanding state ownership.
-- **[Product Requirements](docs/product/prd.md)**: The product vision and requirements.
-
+These boundaries are intentional and non-negotiable.
 
 ---
 
-## 🚀 Quick Start (Phase 4 Verified)
+## Documentation
 
-The best way to understand Gantral is to run the **Reference Agent Proxy** demo. This demonstrates the **"Persistent Pause"** pattern where an agent hibernates (Zero CPU) while waiting for approval.
+📘 **[Full Documentation](docs/README.md)**
 
-### 1. Persistent Agent Demo
-1. **Navigate to the example**:
-   ```bash
-   cd examples/persistent-agent
-   ```
-2. **Start the environment**:
-   ```bash
-   docker compose up --build
-   ```
-3. **Trigger & Approve**:
-   ```bash
-   ./scripts/trigger.sh    # Agent runs, pauses, and exits (hibernates)
-   ./scripts/status.sh <id> # Verify status is WAITING_FOR_HUMAN
-   ./scripts/approve.sh <id> # Approve -> Runner wakes up agent -> Completion
-   ```
+Key references:
 
-### 2. Standard Policy Library
-Explore our drop-in Rego policies in [`examples/policies/`](examples/policies/) for:
-- Multi-step approvals
-- Timeouts
-- Auto-approvals for read-only ops
+* **[Technical Reference (TRD)](docs/architecture/trd.md)**
+  Authoritative architecture, invariants, and execution semantics.
 
-For detailed implementation patterns, see [`examples/README.md`](examples/README.md).
+* **[Execution State Machine](docs/architecture/state-machine.md)**
+  Canonical lifecycle and guarantees.
+
+* **[Implementation Guide](docs/architecture/implementation-guide.md)**
+  Reference guidance aligned with the TRD.
+
+* **[Consumer Integration Guide](docs/guides/example-consumer-integration.md)**
+  Normative guidance for integrating agents and systems.
+
+* **[Product Specification (PRD)](docs/product/prd.md)**
+  Product boundaries and intent.
+
+* **[Adoption Guides](docs/adoption/README.md)**
+  How organizations evaluate and introduce Gantral safely.
 
 ---
 
-## 🛠️ Development & Architecture
+## Getting Started (Reference Demos)
 
-Gantral is built on:
-*   **Language**: Go 1.24+ (Core), Python/TS (SDKs)
-*   **Runtime**: Temporal (Workflow Durability)
-*   **Storage**: Postgres 16 (Event Store)
-*   **Identity**: OIDC (Federated)
+The repository includes reference examples demonstrating execution pauses, approvals, and deterministic resumption.
 
-To run the full test suite:
+To run the persistent-agent demo:
+
 ```bash
-make test
+cd examples/persistent-agent
+docker compose up --build
 ```
 
----
+Then trigger and approve an execution using the provided scripts.
 
-## 🏛️ Governance & Community
-
-Gantral is a "Maintainer-Led" project committed to transparency and community collaboration.
-
-- **[Governance](GOVERNANCE.md)**: How decisions are made.
-- **[Contributing](CONTRIBUTING.md)**: DCO and contribution guidelines.
-- **[Code of Conduct](CODE_OF_CONDUCT.md)**: CNCF-aligned community standards.
-- **[Security](SECURITY.md)**: Vulnerability reporting.
+These examples are illustrative and not required for production use.
 
 ---
 
-<p align="left">
-  © 2026 Rainminds. Licensed under Apache 2.0.
-</p>
+## Project Status
+
+Gantral is an active open-source project under development.
+
+The current focus is on:
+
+* execution correctness
+* authority semantics
+* deterministic replay
+* integration clarity
+
+Roadmap details are available in the documentation.
+
+---
+
+## Governance and Community
+
+Gantral is a maintainer-led open-source project developed in the open.
+
+* **[Governance](GOVERNANCE.md)** – decision-making and project structure
+* **[Contributing](CONTRIBUTING.md)** – contribution guidelines
+* **[Code of Conduct](CODE_OF_CONDUCT.md)** – community standards
+* **[Security](SECURITY.md)** – vulnerability reporting
+
+Gantral is an independent project and is **not affiliated with the Cloud Native Computing Foundation (CNCF)**.
+Design choices are informed by CNCF principles, including neutrality, composability, and clear responsibility boundaries.
+
+---
+
+© 2025 Rainminds. Licensed under the Apache License, Version 2.0.
