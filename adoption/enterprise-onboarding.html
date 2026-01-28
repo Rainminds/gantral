@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-adoption/enterprise-onboarding" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.2">
+<title data-rh="true">Enterprise Onboarding Playbook | Gantral</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://docs.gantral.org/img/gantral-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://docs.gantral.org/img/gantral-social-card.jpg"><meta data-rh="true" property="og:url" content="https://docs.gantral.org/adoption/enterprise-onboarding"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Enterprise Onboarding Playbook | Gantral"><meta data-rh="true" name="description" content="This document describes how organizations typically introduce Gantral into production environments safely, incrementally, and reversibly."><meta data-rh="true" property="og:description" content="This document describes how organizations typically introduce Gantral into production environments safely, incrementally, and reversibly."><link data-rh="true" rel="icon" href="/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://docs.gantral.org/adoption/enterprise-onboarding"><link data-rh="true" rel="alternate" href="https://docs.gantral.org/adoption/enterprise-onboarding" hreflang="en"><link data-rh="true" rel="alternate" href="https://docs.gantral.org/adoption/enterprise-onboarding" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Adoption Overview","item":"https://docs.gantral.org/adoption/"},{"@type":"ListItem","position":2,"name":"Enterprise Onboarding Playbook","item":"https://docs.gantral.org/adoption/enterprise-onboarding"}]}</script><link rel="stylesheet" href="/assets/css/styles.8cf77017.css">
+<script src="/assets/js/runtime~main.29bee27a.js" defer="defer"></script>
+<script src="/assets/js/main.e8e71c80.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")),document.documentElement.setAttribute("data-theme-choice",t||"system")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><link rel="preload" as="image" href="/img/logo.svg"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/"><div class="navbar__logo"><img src="/img/logo.svg" alt="Gantral Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/img/logo.svg" alt="Gantral Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">gantral</b></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/">Documentation</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><a href="https://git.gantral.org" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">Git<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/"><span title="Welcome to Gantral" class="linkLabel_WmDU">Welcome to Gantral</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--active" href="/adoption"><span title="Adoption Overview" class="categoryLinkLabel_W154">Adoption Overview</span></a><button aria-label="Collapse sidebar category &#x27;Adoption Overview&#x27;" aria-expanded="true" type="button" class="clean-btn menu__caret"></button></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/adoption/design-partners"><span title="Design Partner Engagement" class="linkLabel_WmDU">Design Partner Engagement</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/adoption/enterprise-onboarding"><span title="Enterprise Onboarding Playbook" class="linkLabel_WmDU">Enterprise Onboarding Playbook</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/adoption/security-and-trust"><span title="Security and Trust (Adoption View)" class="linkLabel_WmDU">Security and Trust (Adoption View)</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/adoption/adoption-boundaries"><span title="Adoption Boundaries and Non-Goals" class="linkLabel_WmDU">Adoption Boundaries and Non-Goals</span></a></li></ul></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/executive"><span title="Executive Briefings" class="linkLabel_WmDU">Executive Briefings</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/architecture/trd"><span title="architecture" class="categoryLinkLabel_W154">architecture</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/contributors/getting-started"><span title="contributors" class="categoryLinkLabel_W154">contributors</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/governance/oss-philosophy"><span title="governance" class="categoryLinkLabel_W154">governance</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/guides/demo"><span title="guides" class="categoryLinkLabel_W154">guides</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/positioning/what-is-gantral"><span title="positioning" class="categoryLinkLabel_W154">positioning</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/product/prd"><span title="product" class="categoryLinkLabel_W154">product</span></a></div></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="Breadcrumbs"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><a class="breadcrumbs__link" href="/adoption"><span>Adoption Overview</span></a></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">Enterprise Onboarding Playbook</span></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>Enterprise Onboarding Playbook</h1></header>
+<p>This document describes how organizations typically introduce Gantral into production environments <strong>safely, incrementally, and reversibly</strong>.</p>
+<p>It is not a deployment guide and does not prescribe tooling choices.<br>
+<!-- -->It focuses on <strong>organizational adoption of execution authority</strong>, not feature enablement.</p>
+<p>Gantral is an AI Execution Control Plane.<br>
+<!-- -->Onboarding is intentionally deliberate.</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="what-you-are-introducing">What You Are Introducing<a href="#what-you-are-introducing" class="hash-link" aria-label="Direct link to What You Are Introducing" title="Direct link to What You Are Introducing" translate="no">​</a></h2>
+<p>Gantral introduces a <strong>formal execution authority layer</strong> into environments where AI-assisted workflows already exist.</p>
+<p>Specifically, Gantral:</p>
+<ul>
+<li class="">determines whether execution may proceed</li>
+<li class="">enforces pauses for explicit human authority</li>
+<li class="">resumes or terminates execution based on recorded decisions</li>
+<li class="">produces a deterministic, replayable execution record</li>
+</ul>
+<p>Gantral does <strong>not</strong>:</p>
+<ul>
+<li class="">build or host agents</li>
+<li class="">orchestrate workflows</li>
+<li class="">optimize models or tools</li>
+<li class="">store prompts, agent memory, or secrets</li>
+<li class="">make probabilistic or autonomous decisions</li>
+</ul>
+<p>Execution authority is introduced without changing how work is performed.</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="where-gantral-fits">Where Gantral Fits<a href="#where-gantral-fits" class="hash-link" aria-label="Direct link to Where Gantral Fits" title="Direct link to Where Gantral Fits" translate="no">​</a></h2>
+<p>Gantral sits <strong>above agents and automation</strong> and <strong>below organizational accountability</strong>.</p>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">Agents / Tools</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">↓</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">Gantral (Execution Authority)</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">↓</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">Human Decision</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">↓</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">Audit &amp; Replay</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span></code></pre></div></div>
+<p>This placement is intentional and non-negotiable.</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="recommended-onboarding-sequence">Recommended Onboarding Sequence<a href="#recommended-onboarding-sequence" class="hash-link" aria-label="Direct link to Recommended Onboarding Sequence" title="Direct link to Recommended Onboarding Sequence" translate="no">​</a></h2>
+<p>Enterprise onboarding typically proceeds in four stages.<br>
+<!-- -->Each stage builds trust before introducing enforcement.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="stage-1--workflow-selection">Stage 1 — Workflow Selection<a href="#stage-1--workflow-selection" class="hash-link" aria-label="Direct link to Stage 1 — Workflow Selection" title="Direct link to Stage 1 — Workflow Selection" translate="no">​</a></h3>
+<p>Select <strong>one or two workflows</strong> with the following characteristics:</p>
+<p>Good candidates:</p>
+<ul>
+<li class="">irreversible or production-impacting actions</li>
+<li class="">existing human approval rituals</li>
+<li class="">regulatory, financial, or security relevance</li>
+</ul>
+<p>Poor candidates:</p>
+<ul>
+<li class="">exploratory or sandbox workflows</li>
+<li class="">low-risk automation</li>
+<li class="">performance-critical paths</li>
+</ul>
+<p>Gantral is most effective where <strong>human accountability already exists but is implicit</strong>.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="stage-2--shadow-deployment-no-enforcement">Stage 2 — Shadow Deployment (No Enforcement)<a href="#stage-2--shadow-deployment-no-enforcement" class="hash-link" aria-label="Direct link to Stage 2 — Shadow Deployment (No Enforcement)" title="Direct link to Stage 2 — Shadow Deployment (No Enforcement)" translate="no">​</a></h3>
+<p>Deploy Gantral in <strong>observe-only mode</strong>.</p>
+<p>During this stage:</p>
+<ul>
+<li class="">execution proceeds without blocking</li>
+<li class="">Gantral records execution boundaries</li>
+<li class="">hypothetical approval points are identified</li>
+<li class="">no human interaction is required</li>
+</ul>
+<p>This stage establishes baseline trust and visibility without disruption.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="stage-3--controlled-enforcement">Stage 3 — Controlled Enforcement<a href="#stage-3--controlled-enforcement" class="hash-link" aria-label="Direct link to Stage 3 — Controlled Enforcement" title="Direct link to Stage 3 — Controlled Enforcement" translate="no">​</a></h3>
+<p>Enable explicit human-in-the-loop enforcement for:</p>
+<ul>
+<li class="">a small number of high-impact actions</li>
+<li class="">a single team or workflow</li>
+</ul>
+<p>During this stage:</p>
+<ul>
+<li class="">execution pauses at defined authority boundaries</li>
+<li class="">approvals, rejections, and overrides are explicit</li>
+<li class="">execution resumes only after a recorded decision</li>
+</ul>
+<p>Enforcement is narrow by design.</p>
+<hr>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="stage-4--operationalization">Stage 4 — Operationalization<a href="#stage-4--operationalization" class="hash-link" aria-label="Direct link to Stage 4 — Operationalization" title="Direct link to Stage 4 — Operationalization" translate="no">​</a></h3>
+<p>Expand usage when:</p>
+<ul>
+<li class="">multiple teams rely on AI-assisted execution</li>
+<li class="">approval patterns diverge across workflows</li>
+<li class="">policy changes outpace code changes</li>
+<li class="">audit and accountability questions increase</li>
+</ul>
+<p>At this stage, Gantral becomes a <strong>platform-level execution contract</strong> rather than a workflow-specific tool.</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="operational-guarantees">Operational Guarantees<a href="#operational-guarantees" class="hash-link" aria-label="Direct link to Operational Guarantees" title="Direct link to Operational Guarantees" translate="no">​</a></h2>
+<p>Gantral guarantees:</p>
+<ul>
+<li class="">deterministic execution state transitions</li>
+<li class="">immutable, append-only execution history</li>
+<li class="">explicit human authority for governed actions</li>
+<li class="">replayable decision records independent of agent memory</li>
+<li class="">policy changes without redeploying agents</li>
+</ul>
+<p>Gantral never:</p>
+<ul>
+<li class="">self-approves execution</li>
+<li class="">inspects agent reasoning or prompts</li>
+<li class="">stores raw credentials or secrets</li>
+<li class="">bypasses human authority</li>
+<li class="">mutates historical execution records</li>
+</ul>
+<p>These guarantees are structural, not configurable.</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-and-trust-posture-summary">Security and Trust Posture (Summary)<a href="#security-and-trust-posture-summary" class="hash-link" aria-label="Direct link to Security and Trust Posture (Summary)" title="Direct link to Security and Trust Posture (Summary)" translate="no">​</a></h2>
+<p>From an onboarding perspective:</p>
+<ul>
+<li class="">Gantral is self-hosted</li>
+<li class="">Licensed under Apache 2.0</li>
+<li class="">Integrates with existing identity providers</li>
+<li class="">Stores references to secrets, not secrets themselves</li>
+<li class="">Produces tamper-evident execution records</li>
+<li class="">Supports air-gapped and regulated environments</li>
+</ul>
+<p>Trust is established through <strong>architecture and transparency</strong>, not contractual assurances.</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="reversibility-and-exit">Reversibility and Exit<a href="#reversibility-and-exit" class="hash-link" aria-label="Direct link to Reversibility and Exit" title="Direct link to Reversibility and Exit" translate="no">​</a></h2>
+<p>Gantral onboarding is intentionally reversible.</p>
+<p>If Gantral is removed:</p>
+<ul>
+<li class="">agents continue to function</li>
+<li class="">workflows continue to run</li>
+<li class="">execution authority reverts to prior conventions</li>
+</ul>
+<p>No business logic is trapped inside Gantral.</p>
+<p>This reversibility is essential to trust.</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="common-adoption-anti-patterns">Common Adoption Anti-Patterns<a href="#common-adoption-anti-patterns" class="hash-link" aria-label="Direct link to Common Adoption Anti-Patterns" title="Direct link to Common Adoption Anti-Patterns" translate="no">​</a></h2>
+<p>Avoid:</p>
+<ul>
+<li class="">enabling enforcement before observing real execution</li>
+<li class="">applying Gantral to low-risk exploratory workflows</li>
+<li class="">bypassing WAITING_FOR_HUMAN to preserve speed</li>
+<li class="">embedding approval logic inside agents</li>
+<li class="">treating Gantral as a workflow engine or policy system</li>
+</ul>
+<p>These patterns erode governance rather than strengthening it.</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="final-perspective">Final Perspective<a href="#final-perspective" class="hash-link" aria-label="Direct link to Final Perspective" title="Direct link to Final Perspective" translate="no">​</a></h2>
+<p>Before Gantral:</p>
+<blockquote>
+<p>“We assume a human reviewed this.”</p>
+</blockquote>
+<p>After Gantral:</p>
+<blockquote>
+<p>“We can demonstrate who authorized this execution,<br>
+<!-- -->under what conditions,<br>
+<!-- -->and replay that decision later.”</p>
+</blockquote>
+<p>Enterprise onboarding succeeds when execution authority becomes <strong>explicit, enforced, and defensible</strong> — without changing how work gets done.</p></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/adoption/design-partners"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">Design Partner Engagement</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/adoption/security-and-trust"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">Security and Trust (Adoption View)</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#what-you-are-introducing" class="table-of-contents__link toc-highlight">What You Are Introducing</a></li><li><a href="#where-gantral-fits" class="table-of-contents__link toc-highlight">Where Gantral Fits</a></li><li><a href="#recommended-onboarding-sequence" class="table-of-contents__link toc-highlight">Recommended Onboarding Sequence</a><ul><li><a href="#stage-1--workflow-selection" class="table-of-contents__link toc-highlight">Stage 1 — Workflow Selection</a></li><li><a href="#stage-2--shadow-deployment-no-enforcement" class="table-of-contents__link toc-highlight">Stage 2 — Shadow Deployment (No Enforcement)</a></li><li><a href="#stage-3--controlled-enforcement" class="table-of-contents__link toc-highlight">Stage 3 — Controlled Enforcement</a></li><li><a href="#stage-4--operationalization" class="table-of-contents__link toc-highlight">Stage 4 — Operationalization</a></li></ul></li><li><a href="#operational-guarantees" class="table-of-contents__link toc-highlight">Operational Guarantees</a></li><li><a href="#security-and-trust-posture-summary" class="table-of-contents__link toc-highlight">Security and Trust Posture (Summary)</a></li><li><a href="#reversibility-and-exit" class="table-of-contents__link toc-highlight">Reversibility and Exit</a></li><li><a href="#common-adoption-anti-patterns" class="table-of-contents__link toc-highlight">Common Adoption Anti-Patterns</a></li><li><a href="#final-perspective" class="table-of-contents__link toc-highlight">Final Perspective</a></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Community</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://git.gantral.org" target="_blank" rel="noopener noreferrer" class="footer__link-item">Git<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 Gantral, Inc. Built with Docusaurus.</div></div></div></footer></div>
+</body>
+</html>
