@@ -4,7 +4,15 @@ sidebar_label: Executive Summary
 sidebar_position: 5
 ---
 
-*Executive Summary · v1.4*
+*Executive Summary · January 2026*
+
+> **Canonical Reference**
+>
+> This executive summary is derived from the position paper  
+> **“The AI Execution Control Plane”**, published on Zenodo.
+>
+> **Read the authoritative version (DOI):**  
+> https://doi.org/10.5281/zenodo.18410169
 
 ---
 
@@ -128,26 +136,3 @@ Trust emerges only when organizations can answer:
 That is the role of the **AI Execution Control Plane**.
 
 ---
-
-## Canonical Reference Architecture (Conceptual)
-
-This diagram is conceptual, not implementational.
-
-### Execution Authority Layer
-- Owns execution states  
-- Enforces pauses and resumes  
-- Captures human decisions  
-
-### Deterministic Execution Substrate
-- Guarantees ordering and durability  
-- Enables replay of authority decisions  
-
-### Agent & Automation Systems
-- Own reasoning, planning, memory, and tools  
-- Are interchangeable and replaceable  
-
-### Enterprise & Audit Consumers
-- Consume authoritative execution records  
-- Do not influence execution  
-
-No layer crosses responsibility boundaries.
