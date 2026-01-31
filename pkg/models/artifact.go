@@ -1,0 +1,174 @@
+package models
+
+import (
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"time"
+)
+
+// SchemaVersionV1 defines the current schema version for commitment artifacts.
+const SchemaVersionV1 = "v1"
+
+// CommitmentArtifact represents the immutable proof of an execution authority transition.
+// It serves as the root of trust for auditability and verification.
+//
+// "EmitArtifact generates a non-repudiable proof of authorization bound to execution state."
+type CommitmentArtifact struct {
+	// ArtifactVersion is the schema version (e.g., "v1").
+	ArtifactVersion string `json:"artifact_version"`
+
+	// ArtifactID is the unique identifier of this artifact (usually the hash of its content).
+	ArtifactID string `json:"artifact_id"`
+
+	// InstanceID is the UUID of the execution instance.
+	InstanceID string `json:"instance_id"`
+
+	// PrevArtifactHash is the hash of the previous artifact in the chain.
+	// This links artifacts together into an immutable log.
+	PrevArtifactHash string `json:"prev_artifact_hash"`
+
+	// AuthorityState is the state being transitioned to (e.g., APPROVED, REJECTED).
+	AuthorityState string `json:"authority_state"`
+
+	// PolicyVersionID is the version of the policy used for evaluation.
+	PolicyVersionID string `json:"policy_version_id"`
+
+	// ContextHash is the SHA256 hash of the execution context snapshot.
+	ContextHash string `json:"context_hash"`
+
+	// HumanActorID is the identity of the human/system authorizing the transition.
+	HumanActorID string `json:"human_actor_id"`
+
+	// Timestamp is the exact time of emission (RFC3339).
+	Timestamp string `json:"timestamp"`
+
+	// ArtifactHash is the self-hash of the artifact payload.
+	// It mirrors ArtifactID in this v1 implementation.
+	ArtifactHash string `json:"artifact_hash"`
+}
+
+// artifactPayload is a private struct used for strict canonical serialization.
+// It ensures that only the relevant fields are hashed and that the order is deterministic
+// if we were to rely on struct order (though we use map for extra safety usually,
+// specifically defining this struct confirms what strictly goes into the hash).
+// We rely on standard json.Marshal behavior of struct fields for this private struct,
+// but to be truly "Enterprise Standard" and robust against struct reordering,
+// we will verify strict properties in tests.
+//
+// However, to strictly satisfy "Implement MarshalJSON explicitly to ensure deterministic field ordering",
+// we will adhere to a map-based approach in the logic below or strictly defined struct.
+// Given strict requirements, map sorting is the robust standard way in Go to ensure key order.
+type artifactPayload struct {
+	ArtifactVersion  string `json:"artifact_version"`
+	InstanceID       string `json:"instance_id"`
+	PrevArtifactHash string `json:"prev_artifact_hash"`
+	AuthorityState   string `json:"authority_state"`
+	PolicyVersionID  string `json:"policy_version_id"`
+	ContextHash      string `json:"context_hash"`
+	HumanActorID     string `json:"human_actor_id"`
+	Timestamp        string `json:"timestamp"`
+}
+
+// NewCommitmentArtifact creates a new artifact with the given fields.
+// It automatically sets the SchemaVersion and Timestamp.
+// It does NOT calculate the ID/Hash; that must be done via CalculateHashAndSetID.
+func NewCommitmentArtifact(
+	instanceID string,
+	prevArtifactHash string,
+	authorityState string,
+	policyVersionID string,
+	contextHash string,
+	humanActorID string,
+) *CommitmentArtifact {
+	return &CommitmentArtifact{
+		ArtifactVersion:  SchemaVersionV1,
+		InstanceID:       instanceID,
+		PrevArtifactHash: prevArtifactHash,
+		AuthorityState:   authorityState,
+		PolicyVersionID:  policyVersionID,
+		ContextHash:      contextHash,
+		HumanActorID:     humanActorID,
+		Timestamp:        time.Now().UTC().Format(time.RFC3339),
+	}
+}
+
+// CalculateHashAndSetID computes the SHA256 hash of the canonical payload
+// and sets both ArtifactHash and ArtifactID.
+// It returns an error if serialization fails.
+func (a *CommitmentArtifact) CalculateHashAndSetID() error {
+	payloadBytes, err := a.CanonicalPayload()
+	if err != nil {
+		return fmt.Errorf("failed to generate canonical payload: %w", err)
+	}
+
+	hash := sha256.Sum256(payloadBytes)
+	hashString := hex.EncodeToString(hash[:])
+
+	a.ArtifactHash = hashString
+	a.ArtifactID = hashString
+	return nil
+}
+
+// CanonicalPayload returns the strictly deterministic JSON bytes used for hashing.
+// It uses a map to ensure keys are sorted alphabetically by encoding/json,
+// guaranteeing a stable hash regardless of struct field order.
+func (a *CommitmentArtifact) CanonicalPayload() ([]byte, error) {
+	// 1. Validate required fields (Fail-Closed)
+	if a.InstanceID == "" {
+		return nil, errors.New("canonical payload: missing instance_id")
+	}
+	if a.AuthorityState == "" {
+		return nil, errors.New("canonical payload: missing authority_state")
+	}
+	if a.ContextHash == "" {
+		return nil, errors.New("canonical payload: missing context_hash")
+	}
+	if a.Timestamp == "" {
+		return nil, errors.New("canonical payload: missing timestamp")
+	}
+	// Note: PrevArtifactHash can be empty for the first artifact (Genesis),
+	// but strictly speaking, explicit nil handling should be done by caller.
+	// We allow empty string as "Genesis" if that's the design, or enforce "000..." if needed.
+	// For now, we allow it but ensure it's included in the map.
+
+	// 2. Construct map for sorted keys
+	msg := map[string]string{
+		"artifact_version":   a.ArtifactVersion,
+		"instance_id":        a.InstanceID,
+		"prev_artifact_hash": a.PrevArtifactHash,
+		"authority_state":    a.AuthorityState,
+		"policy_version_id":  a.PolicyVersionID,
+		"context_hash":       a.ContextHash,
+		"human_actor_id":     a.HumanActorID,
+		"timestamp":          a.Timestamp,
+	}
+
+	// 3. Marshal with standard library (sorts map keys)
+	return json.Marshal(msg)
+}
+
+// MarshalJSON implements the json.Marshaler interface to ensure
+// the full object handles 0-values correctly and adheres to schema.
+// We force the standard struct marshaling but could enforce order if needed.
+// Since typical consumers parse JSON into objects, key order in the OUTER object
+// is less critical than the HASH payload order. But to be safe, we can reuse
+// the map approach for the outer object too, adding the ID fields.
+func (a *CommitmentArtifact) MarshalJSON() ([]byte, error) {
+	// Construct map to ensure complete representation including ID/Hash
+	msg := map[string]string{
+		"artifact_version":   a.ArtifactVersion,
+		"artifact_id":        a.ArtifactID,
+		"instance_id":        a.InstanceID,
+		"prev_artifact_hash": a.PrevArtifactHash,
+		"authority_state":    a.AuthorityState,
+		"policy_version_id":  a.PolicyVersionID,
+		"context_hash":       a.ContextHash,
+		"human_actor_id":     a.HumanActorID,
+		"timestamp":          a.Timestamp,
+		"artifact_hash":      a.ArtifactHash,
+	}
+	return json.Marshal(msg)
+}

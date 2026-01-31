@@ -1,8 +1,7 @@
-# **Gantral – Comprehensive Implementation Guide**
+# Gantral – Enterprise-Grade Engineering Implementation Guide (AI-Coding-Ready)
 
-**Version:** v4.0 (Authority-First, Federated Execution, Agent-Native Persistence)
-
-**Status:** Reference implementation guide (non-normative)
+**Version:** v6.0 (Implementation-Executable)
+**Status:** Authoritative engineering implementation guide
 
 **Audience:**
 
@@ -26,6 +25,14 @@ This version incorporates the finalized architectural clarification:
 * Deterministic execution and replay are guaranteed by a workflow runtime (Temporal)
 
 **Rule:** If this guide conflicts with the TRD, the TRD is correct.
+
+## **0. Governing Rules (Non-Negotiable)**
+* **TRD invariants override this document**
+* **Fail-closed behavior is mandatory**
+* **No best-effort execution is permitted**
+* **All authority transitions must be deterministic**
+* **Logs are never evidence**
+* **If behavior is ambiguous, execution must stop**
 
 ---
 
@@ -216,7 +223,30 @@ Agent memory replay is optional and non-authoritative.
 
 ---
 
-## **8\. APIs & SDKs**
+## **8\. Implementing Verification (Phase 6)**
+
+### **Responsibility**
+* Ensure system is audit-ready even if the operator is hostile.
+* Bind execution to cryptographic evidence.
+
+### **Atomic Commit & Fail-Closed**
+Every authority transition (`APPROVE`, `REJECT`, `OVERRIDE`) involves two write targets:
+1. **Operational DB:** Updates the state machine.
+2. **Artifact Store:** Writes the `CommitmentArtifact`.
+
+**Requirement:** These must be virtually atomic.
+* If Artifact emission fails -> The state transition **MUST** fail.
+* **Fail-Closed:** The system must halt the workflow rather than proceed without evidence.
+
+### **Offline Verification**
+Use the `gantral-verify` CLI tool to validate artifacts offline.
+* It recomputes the hash chain (`prev_artifact_id`).
+* It validates the signature against the KMS public key.
+* It requires NO access to the Gantral API or Database.
+
+---
+
+## **9\. APIs & SDKs**
 
 ### **API Principles**
 
@@ -232,7 +262,7 @@ Agent memory replay is optional and non-authoritative.
 
 ---
 
-## **9\. Adapters & Framework-Native Integrations (Updated)**
+## **10\. Adapters & Framework-Native Integrations (Updated)**
 
 ### **Responsibility**
 
@@ -279,7 +309,7 @@ Gantral never loads, inspects, or persists agent internal state.
 
 ---
 
-## **10\. Security, Identity & Federation**
+## **11\. Security, Identity & Federation**
 
 ### **10.1 Human Identity**
 
@@ -300,7 +330,7 @@ Gantral never loads, inspects, or persists agent internal state.
 
 ---
 
-## **11\. Runner Pattern (Federated Execution)**
+## **12\. Runner Pattern (Federated Execution)**
 
 * Runners execute inside team-owned infrastructure  
 * Pull-based task queues  
@@ -311,7 +341,7 @@ Gantral is the **authority**. Runners are the **executors**.
 
 ---
 
-## **12\. Deployment Model**
+## **13\. Deployment Model**
 
 * Kubernetes (primary)  
 * Self-hosted  
@@ -319,7 +349,7 @@ Gantral is the **authority**. Runners are the **executors**.
 
 ---
 
-## **13\. Implementation Phases**
+## **14\. Implementation Phases**
 
 * Phase 1 – Control Foundations  
 * Phase 2 – Governance Hardening  
@@ -330,7 +360,7 @@ Phases must be completed **strictly in order**.
 
 ---
 
-## **14\. What This Guide Protects Against**
+## **15\. What This Guide Protects Against**
 
 * Accidental autonomy  
 * Agent memory leakage into audit logs  
@@ -340,7 +370,7 @@ Phases must be completed **strictly in order**.
 
 ---
 
-## **15\. Final Reminder**
+## **16\. Final Reminder**
 
 Gantral is not about what AI can do.
 
