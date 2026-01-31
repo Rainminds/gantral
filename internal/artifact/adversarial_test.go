@@ -78,7 +78,9 @@ func Test_ChainBreakage(t *testing.T) {
 
 	// If someone changed ArtA's content:
 	artA.HumanActorID = "malicious"
-	artA.CalculateHashAndSetID() // Now A has a new ID
+	if err := artA.CalculateHashAndSetID(); err != nil {
+		t.Fatal(err)
+	} // Now A has a new ID
 
 	// ASSERT that verification of the chain fails
 	if artB.PrevArtifactHash == artA.ArtifactID {
@@ -113,7 +115,9 @@ func Test_ReplayDeterminism(t *testing.T) {
 	fixedTS := "2023-01-01T00:00:00Z"
 	art := models.NewCommitmentArtifact("i1", "p1", "s1", "pv1", "c1", "a1")
 	art.Timestamp = fixedTS
-	art.CalculateHashAndSetID()
+	if err := art.CalculateHashAndSetID(); err != nil {
+		t.Fatal(err)
+	}
 	expectedHash := art.ArtifactHash
 
 	// 2. Re-run verification logic

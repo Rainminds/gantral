@@ -109,7 +109,9 @@ func TestArtifact_JSONStructure(t *testing.T) {
 
 	bytes, _ := json.Marshal(art)
 	var asMap map[string]interface{}
-	json.Unmarshal(bytes, &asMap)
+	if err := json.Unmarshal(bytes, &asMap); err != nil {
+		t.Fatalf("Failed to unmarshal JSON: %v", err)
+	}
 
 	required := []string{
 		"artifact_version", "artifact_id", "instance_id",

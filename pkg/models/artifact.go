@@ -50,28 +50,6 @@ type CommitmentArtifact struct {
 	ArtifactHash string `json:"artifact_hash"`
 }
 
-// artifactPayload is a private struct used for strict canonical serialization.
-// It ensures that only the relevant fields are hashed and that the order is deterministic
-// if we were to rely on struct order (though we use map for extra safety usually,
-// specifically defining this struct confirms what strictly goes into the hash).
-// We rely on standard json.Marshal behavior of struct fields for this private struct,
-// but to be truly "Enterprise Standard" and robust against struct reordering,
-// we will verify strict properties in tests.
-//
-// However, to strictly satisfy "Implement MarshalJSON explicitly to ensure deterministic field ordering",
-// we will adhere to a map-based approach in the logic below or strictly defined struct.
-// Given strict requirements, map sorting is the robust standard way in Go to ensure key order.
-type artifactPayload struct {
-	ArtifactVersion  string `json:"artifact_version"`
-	InstanceID       string `json:"instance_id"`
-	PrevArtifactHash string `json:"prev_artifact_hash"`
-	AuthorityState   string `json:"authority_state"`
-	PolicyVersionID  string `json:"policy_version_id"`
-	ContextHash      string `json:"context_hash"`
-	HumanActorID     string `json:"human_actor_id"`
-	Timestamp        string `json:"timestamp"`
-}
-
 // NewCommitmentArtifact creates a new artifact with the given fields.
 // It automatically sets the SchemaVersion and Timestamp.
 // It does NOT calculate the ID/Hash; that must be done via CalculateHashAndSetID.
