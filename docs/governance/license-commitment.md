@@ -1,3 +1,7 @@
+---
+title: License Commitment
+---
+
 # License Commitment
 
 Gantral is licensed under the **Apache License, Version 2.0**.

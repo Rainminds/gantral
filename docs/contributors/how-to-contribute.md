@@ -1,3 +1,7 @@
+---
+title: How to Contribute
+---
+
 # How to Contribute
 
 Gantral welcomes contributions that strengthen its core mission:  

@@ -1,3 +1,7 @@
+---
+title: Design Philosophy
+---
+
 # Design Philosophy
 
 Gantral is infrastructure.

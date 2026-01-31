@@ -1,7 +1,6 @@
 ---
 title: The AI Execution Control Plane
 sidebar_label: AI Execution Control Plane
-sidebar_position: 4
 ---
 
 > **Canonical Reference**

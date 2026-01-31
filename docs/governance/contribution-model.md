@@ -1,3 +1,7 @@
+---
+title: Contribution Model
+---
+
 # Contribution Model
 
 Gantral welcomes contributions that strengthen its core mission.

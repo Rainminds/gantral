@@ -1,3 +1,7 @@
+---
+title: Code Style and Quality
+---
+
 # Code Style and Quality
 
 Gantral prioritizes clarity and auditability over cleverness.

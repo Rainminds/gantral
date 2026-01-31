@@ -1,3 +1,7 @@
+---
+title: RFC Process
+---
+
 # RFC Process
 
 Gantral evolves through an explicit Request for Comments (RFC) process.

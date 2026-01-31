@@ -1,3 +1,7 @@
+---
+title: Contributor License Agreement (CLA)
+---
+
 # Contributor License Agreement (CLA)
 
 To protect contributors and users of Gantral, the project requires a Contributor License Agreement (CLA) for code contributions.

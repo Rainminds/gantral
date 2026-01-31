@@ -1,30 +1,53 @@
 ---
-sidebar_position: 2
 title: What Gantral Is Not
 ---
 
 Clear boundaries are essential for infrastructure.
 
-Gantral explicitly does **not** attempt to solve everything related to AI, SDLC automation, or agent development.
+Gantral is intentionally narrow.
+Its value comes from **what it enforces** and, equally, from **what it refuses to do**.
 
-If Gantral tried to do these things, it would fail at its core mission: execution control.
+If Gantral attempted to solve adjacent problems in AI development, automation,
+or analytics, it would undermine its core purpose: **execution authority**.
+
+This document defines those boundaries explicitly.
 
 ---
 
-## Gantral Is NOT an Agent Builder
+## Gantral Is NOT an Agent Framework
 
 Gantral does not:
 
-- Build AI agents
-- Optimize prompts
-- Select or fine-tune models
-- Compete with agent frameworks
-- Manage or persist agent memory/state (Vector DBs, conversation history).
+- build AI agents
+- define agent architectures
+- manage prompts or toolchains
+- select, train, or fine-tune models
+- persist or inspect agent memory or reasoning state
 
-Agent frameworks evolve quickly.  
-Execution control must remain stable.
+Agent frameworks are responsible for **intelligence**.
+Gantral is responsible for **authority**.
 
-Gantral intentionally sits *above* agent builders and works with them.
+This separation ensures that:
+- agent evolution does not destabilize execution control
+- auditability does not depend on agent internals
+- governance remains independent of reasoning behavior
+
+---
+
+## Gantral Is NOT a Workflow Engine or Orchestrator
+
+Gantral does not:
+
+- replace workflow engines (Temporal, Airflow, etc.)
+- own business process definitions
+- schedule arbitrary jobs
+- optimize execution performance
+- define task graphs or retries
+
+Gantral governs **whether execution may proceed**, not **how workflows are designed or optimized**.
+
+Workflow engines handle orchestration.
+Gantral enforces authority at execution boundaries.
 
 ---
 
@@ -32,37 +55,67 @@ Gantral intentionally sits *above* agent builders and works with them.
 
 Gantral does not:
 
-- Replace CI/CD systems
-- Replace GitHub, Jira, or ServiceNow
-- Claim to automate the entire SDLC autonomously
-- Promise “AI-run engineering organizations”
+- replace CI/CD systems
+- replace GitHub, Jira, ServiceNow, or ticketing tools
+- claim to automate the full SDLC
+- promise autonomous engineering organizations
 
-Gantral governs **decisions within workflows**, not the workflows themselves.
+Gantral integrates *into* existing SDLC systems.
+It does not attempt to subsume them.
+
+Its role is to ensure that **execution decisions inside workflows are authorized and attributable**.
 
 ---
 
-## Gantral Is NOT an Observability or Analytics Tool
+## Gantral Is NOT an Observability, Monitoring, or Analytics Tool
 
 Gantral does not:
 
-- Benchmark model quality
-- Measure accuracy, precision, or recall
-- Optimize agent performance
-- Replace AgentOps or observability platforms
+- benchmark model quality
+- measure accuracy, precision, or recall
+- analyze agent performance
+- replace observability or AgentOps platforms
+- interpret logs or metrics
 
-Gantral may consume observability signals, but it does not own them.
+Gantral may **consume signals** from observability systems,
+but it does not generate insight or analysis from them.
+
+Its concern is **authority**, not measurement.
 
 ---
 
-## Gantral Is NOT a UI-First Product
+## Gantral Is NOT a Policy Authoring System
+
+Gantral does not:
+
+- define organizational policy
+- replace policy engines
+- interpret regulatory text
+- encode compliance logic directly
+
+Policy engines (e.g. OPA) provide **advisory evaluation**.
+Gantral enforces **authority decisions** as execution state.
+
+Policy advises.
+Authority enforces.
+
+---
+
+## Gantral Is NOT a UI-First or Convenience-Driven Product
 
 Gantral does not prioritize:
 
-- Visual workflow builders
-- No-code orchestration
-- Dashboard-driven configuration
+- visual workflow builders
+- no-code orchestration
+- dashboard-driven execution control
+- convenience over determinism
 
-Declarative configuration and explicit execution semantics take precedence over convenience.
+Explicit semantics and enforceable boundaries take precedence over usability shortcuts.
+
+If a choice must be made, Gantral favors:
+- correctness over convenience
+- determinism over flexibility
+- failure over ambiguity
 
 ---
 
@@ -70,29 +123,51 @@ Declarative configuration and explicit execution semantics take precedence over 
 
 Gantral does not:
 
-- Allow AI to bypass human authority
-- Support self-approving execution loops
-- Replace accountability with automation
+- allow AI systems to approve themselves
+- support self-authorizing execution loops
+- remove human accountability from material actions
+- “trust” AI judgment for irreversible execution
 
-Human authority is treated as final within Gantral’s execution model by design.
+If an action is material,
+Gantral enforces **explicit authority**.
 
-If a workflow is material, Gantral enforces HITL — not optional review.
+Human involvement is not optional where authority is required.
+
+---
+
+## Gantral Is NOT a Compliance or Legal Guarantee
+
+Gantral does not:
+
+- guarantee regulatory compliance
+- certify legal admissibility
+- replace auditors, regulators, or legal review
+- determine correctness or intent
+
+Gantral provides **technical verifiability**, not legal judgment.
+
+Absence of proof is treated honestly as absence of proof.
 
 ---
 
 ## Why These Non-Goals Matter
 
-Most AI platforms fail enterprise adoption not because they lack features, but because they lack **clear limits**.
+Infrastructure fails in regulated environments not because it lacks features,
+but because it lacks **clear limits**.
 
-Gantral’s non-goals are deliberate.
+Gantral’s non-goals ensure that:
 
-They ensure that Gantral remains:
+- execution authority remains explicit
+- audit does not depend on inference
+- failure is detectable
+- responsibility is not blurred
 
-- Auditable
-- Regulator-compatible
-- Trustworthy in high-stakes environments
-- Compatible with a wide ecosystem
+If a use case requires:
+- silent autonomy
+- implicit approval
+- narrative-based reconstruction
 
-If a use case requires autonomy without accountability, Gantral is not the right tool.
+Gantral is not the right tool.
 
-That is a feature, not a limitation.
+That is not a limitation.
+It is the design.

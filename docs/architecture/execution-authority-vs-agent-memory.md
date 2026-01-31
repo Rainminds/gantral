@@ -1,55 +1,64 @@
+---
+title: Execution Authority vs Agent Memory vs Runtime
+---
+
 # Execution Authority vs Agent Memory vs Runtime
 
-This diagram shows the **strict separation of responsibilities** in Gantral.
+This document explains the **strict separation of responsibilities** enforced by Gantral.
 
 It answers one question unambiguously:
 
-**Who owns what state, and why Temporal is still required even when agents manage their own memory.**
+> **Who owns which state, and why a deterministic runtime (e.g. Temporal) is still required even when agents manage their own memory.**
+
+This separation is foundational to **verifiability, replay, and audit correctness**.
 
 ---
 
-## **High-level Responsibility Split**
+## High-Level Responsibility Split
 
-* **Execution Authority** → *Gantral*  
-* **Execution Runtime** → *Deterministic Workflow Engine (Temporal)*  
-* **Agent Memory & Reasoning** → *Agent Frameworks (CrewAI, LangGraph, etc.)*
+- **Execution Authority** → *Gantral*  
+- **Execution Runtime** → *Deterministic Workflow Engine (e.g. Temporal)*  
+- **Agent Memory & Reasoning** → *Agent Frameworks (CrewAI, LangGraph, etc.)*
+
+Each layer is necessary.  
+No layer may subsume the responsibilities of another.
 
 ---
 
-## **Single-Page Architecture Diagram**
+## Single-Page Architecture Diagram
 
 ```mermaid
 flowchart TB
 
   %% ===== External Triggers =====
-  EXT["External Trigger Event / Schedule / API"]
+  EXT["External Trigger<br/>Event / Schedule / API"]
 
   %% ===== Gantral =====
-  subgraph G["Gantral: Execution Authority"]
-    G1["Execution State Machine RUNNING / WAITING_FOR_HUMAN / ..."]
-    G2["HITL Enforcement Approve / Reject / Override"]
-    G3["Policy Evaluation Interface Transition Guards"]
-    G4["Audit & Authority Log Immutable Decisions"]
+  subgraph G["Gantral — Execution Authority"]
+    G1["Authority State Machine<br/>RUNNING / WAITING_FOR_HUMAN / ..."]
+    G2["Human Authority Enforcement<br/>APPROVE / REJECT / OVERRIDE"]
+    G3["Policy Evaluation Interface<br/>Transition Guards (Advisory)"]
+    G4["Authority Record Store<br/>Immutable Commitment Artifacts"]
   end
 
   %% ===== Runtime =====
   subgraph T["Deterministic Runtime (Temporal)"]
     T1["Workflow Orchestration"]
     T2["Durable Timers & Signals"]
-    T3["Deterministic Replay Authority Replay"]
+    T3["Deterministic Replay<br/>Authority Decisions Only"]
   end
 
   %% ===== Runners =====
-  subgraph R["Distr Runners Team-owned Infra"]
+  subgraph R["Runners (Team-Owned Infrastructure)"]
     R1["Agent Process Launcher"]
-    R2["Lifecycle Signals COMPLETED / FAILED / SUSPENDED"]
+    R2["Lifecycle Signals<br/>COMPLETED / FAILED / SUSPENDED"]
   end
 
   %% ===== Agent Framework =====
   subgraph A["Agent Framework"]
     A1["Agent Reasoning & Planning"]
-    A2["Agent Memory Conversation / Tools / State"]
-    A3["Native Persistence Checkpoint DB / S3"]
+    A2["Agent Memory<br/>Conversation / Tool State"]
+    A3["Native Persistence<br/>Checkpoint Store (DB / S3)"]
   end
 
   %% ===== Flows =====
@@ -66,108 +75,134 @@ flowchart TB
   A2 --> A3
 
   %% Suspend / Resume Flow
-  A1 -->|WAITING_FOR_HUMAN| R2
+  A1 -->|Requires Authority| R2
   R2 -->|SUSPENDED| T2
   T2 -->|Approval Signal| R1
 
   %% Completion Flow
-  A1 -->|Done / Error| R2
+  A1 -->|Completed / Error| R2
   R2 --> T1
 
   %% Audit
   G1 --> G4
   G2 --> G4
   T3 --> G4
-
 ```
----
-
-## **How to Read This Diagram**
-
-### **1\. Gantral \= Execution Authority**
-
-* Owns execution state  
-* Decides **when** execution may proceed  
-* Enforces human approval  
-* Produces the **authoritative audit log**
-
-Gantral never sees:
-
-* Agent memory  
-* Prompts  
-* Tool state
 
 ---
 
-### **2\. Temporal \= Execution Runtime**
+## How to Read This Diagram
 
-* Owns ordering, time, retries, and durability  
-* Guarantees deterministic replay of **authority decisions**  
-* Waits safely for hours or days during HITL
+### 1. Gantral = Execution Authority
 
-Temporal does **not**:
+Gantral owns **execution authority as state**.
 
-* Run agent reasoning  
-* Store agent memory  
-* Decide outcomes
+It is responsible for:
 
----
+* defining when execution may proceed
+* enforcing Human-in-the-Loop (HITL)
+* recording authority decisions immutably
+* emitting commitment artifacts atomically with authority transitions
 
-### **3\. Agent Framework \= Reasoning \+ Memory**
+Gantral explicitly does **not** see or manage:
 
-* Owns cognition, planning, and tools  
-* Persists internal state using **native persistence**  
-* Can safely exit and resume later
+* agent memory
+* prompts
+* tool payloads
+* agent reasoning traces
 
-If native persistence is **not supported**:
-
-* The agent **must be split** into pre-approval and post-approval stages
+Gantral governs **permission**, not cognition.
 
 ---
 
-### **4\. Runners \= Execution Boundary**
+### 2. Deterministic Runtime = Ordering, Time, Replay
 
-* Launch agent processes  
-* Detect lifecycle outcomes:  
-  * COMPLETED  
-  * FAILED  
-  * SUSPENDED (hibernation)  
-* Translate agent signals into Gantral execution events
+A deterministic workflow runtime (e.g. Temporal) is required even when agents manage their own memory.
 
-Runners never make decisions.
+The runtime owns:
 
----
+* ordering of execution steps
+* durable timers and waits
+* retries and escalation timing
+* deterministic replay of **authority decisions**
 
-## **Why This Separation Matters**
+The runtime does **not**:
 
-* **Auditability**: Authority can be replayed without agent memory  
-* **Cost efficiency**: No compute during long approvals  
-* **Framework freedom**: Any agent framework can be used  
-* **Regulator trust**: Clear ownership of decisions
+* reason
+* evaluate policy
+* grant authority
+* persist agent memory
 
----
-
-## **One-line Summary**
-
-**Gantral decides. Temporal remembers. Agents think.**
+Replay re-executes workflow logic using recorded authority history.
+It never reconstructs agent cognition.
 
 ---
 
-## **Recommended Placement in the Repo**
+### 3. Agent Framework = Reasoning and Memory
 
-Add this file as:
+Agent frameworks own:
 
-/docs/architecture/execution-authority-vs-agent-memory.md
+* reasoning and planning
+* tool invocation
+* internal state and memory
+* persistence of agent checkpoints
 
-Then:
+Agents may safely:
 
-1. Link it from:  
-   * `README.md`  
-   * `docs/architecture/README.md`  
-2. Reference it from:  
-   * PRD (conceptual grounding)  
-   * TRD (visual companion)  
-   * Consumer Guide (for developers)
+* checkpoint state
+* exit during long waits
+* resume later in a new process
 
-This diagram becomes the **canonical mental model** for contributors, users, and reviewers.
+If an agent framework does **not** support native persistence:
 
+* the agent **must be split** into pre-approval and post-approval stages
+
+Gantral never serializes or inspects agent memory.
+
+---
+
+### 4. Runners = Execution Boundary
+
+Runners are the execution edge.
+
+They:
+
+* launch agent processes
+* detect lifecycle outcomes:
+
+  * `COMPLETED`
+  * `FAILED`
+  * `SUSPENDED`
+* translate outcomes into Gantral execution events
+
+Runners never:
+
+* evaluate policy
+* make authority decisions
+* infer approval
+
+They are strictly mechanical.
+
+---
+
+## Why This Separation Matters
+
+This architecture enables:
+
+* **Verifiable audit** — authority can be replayed without agent memory
+* **Fail-closed behavior** — execution stops if authority cannot be enforced
+* **Cost efficiency** — no compute during long human approvals
+* **Framework freedom** — any agent system may be used
+* **Regulator confidence** — explicit ownership of decisions
+
+Collapsing these layers breaks determinism and auditability.
+
+---
+
+## One-Line Mental Model
+
+**Gantral decides.
+The runtime remembers.
+Agents think.**
+
+---

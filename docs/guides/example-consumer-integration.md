@@ -1,5 +1,4 @@
 ---
-sidebar_position: 2
 title: Example Consumer Guide
 ---
 
@@ -7,93 +6,95 @@ title: Example Consumer Guide
 
 ⚠️ **This document is not a system specification.**
 
-It is the **normative usage guide** for external consumers (agents, tools, workflows) integrating with Gantral.
+It is the **normative usage guide** for external consumers (agents, tools, workflows)
+that integrate with Gantral.
 
 ---
 
 ## How External Agents and Systems Should Use Gantral
 
 **Status:** Consumption guide (normative for consumers)  
-**Audience:**  
-- Agent developers  
-- Platform engineers integrating Gantral  
-- Teams building tools, automations, or workflows that require human approval  
+**Audience:**
+- Agent developers
+- Platform engineers integrating Gantral
+- Teams building tools, automations, or workflows that require human authority
 
 ---
 
 ## Purpose
 
-This guide explains **when and how external agents and systems should consume Gantral**.
+This guide explains **when and how external systems must consume Gantral**.
 
 It answers **one question only**:
 
-> **When and how should my agent or system call Gantral?**
+> **When and how should my agent or system ask Gantral before executing an action?**
 
 This guide is intentionally narrow.  
-It does **not** explain how Gantral works internally.
+It does **not** explain Gantral’s internal architecture or enforcement mechanics.
 
 ---
 
 ## 1. What Gantral Is (From a Consumer’s Perspective)
 
-Gantral is an **execution control plane**.
+From the outside, Gantral is an **execution authority gate**.
 
-From the outside, Gantral:
+Gantral:
 
-- Receives a request to perform a sensitive action  
-- Decides whether execution may continue  
-- Pauses execution if human approval is required  
-- Resumes or terminates execution based on that decision  
+- Receives a request to perform a potentially material action
+- Evaluates whether execution may proceed
+- Pauses execution when authority is required
+- Resumes or terminates execution based on an explicit decision
 
 Gantral is **not**:
 
-- An agent framework  
-- A task runner  
-- A policy engine  
-- A workflow orchestrator  
+- An agent framework
+- A task runner
+- A policy engine
+- A workflow orchestrator
 
-As a consumer, you treat Gantral as a **decision gate**, not as a runtime.
+As a consumer, you treat Gantral as **the authority**, not as infrastructure you control.
 
 ---
 
-## 2. When You Should Call Gantral
+## 2. When You Must Call Gantral
 
-You should call Gantral **before executing any action** that:
+You must call Gantral **before executing any action** that:
 
-- Has irreversible side effects  
-- Affects production systems  
-- Has regulatory, financial, or security impact  
-- Requires human accountability  
+- Has irreversible side effects
+- Affects production systems
+- Has regulatory, financial, or security impact
+- Requires human accountability
 
 ### Examples
 
-- Deleting production infrastructure  
-- Executing high-cost AI operations  
-- Triggering payments or refunds  
-- Sending external communications  
-- Making customer-impacting changes  
+- Deleting or mutating production infrastructure
+- Executing high-cost or high-risk AI operations
+- Triggering payments, refunds, or financial transfers
+- Sending external communications
+- Making customer-impacting changes
 
-If an action can be safely retried, undone, or sandboxed, Gantral is usually **not required**.
+If an action is fully reversible, sandboxed, or advisory-only,
+Gantral is usually **not required**.
 
 ---
 
-## 3. High-Level Integration Flow
+## 3. Canonical Consumer Interaction Flow
 
-From a consumer’s point of view, the flow is always:
+From a consumer’s perspective, the flow is always:
 
-1. Prepare action context  
-2. Ask Gantral for a decision  
-3. Handle Gantral’s response  
-4. Either wait, resume, or abort  
+1. Prepare execution context
+2. Ask Gantral for authority
+3. Observe Gantral’s execution state
+4. Either wait, resume, or abort
 
-> **Your system must not execute the action until Gantral explicitly allows it.**
+> **A consumer must never execute an action until Gantral explicitly allows it.**
 
 ---
 
 ## 4. Minimal SDK Interaction Pattern
 
-Exact function names may vary by SDK.  
-The **semantics do not**.
+Exact SDK names vary.  
+**The semantics do not.**
 
 ### Step 1: Create or Identify an Execution Instance
 
@@ -101,36 +102,39 @@ The **semantics do not**.
 instance = gantral.create_instance(
     workflow_id,
     workflow_version,
-    context
+    execution_context
 )
 ````
 
-This represents a **single execution attempt**.
+This represents **one immutable execution attempt**.
 
 ---
 
-### Step 2: Request a Decision
+### Step 2: Request Authority
 
 ```python
-response = gantral.request_decision(
+state = gantral.request_authority(
     instance_id = instance.id,
     actor_id = "agent-or-service-id",
     action_context
 )
 ```
 
-Gantral evaluates policy and execution state.
+Gantral evaluates policy and execution state
+and returns the **current authoritative execution state**.
 
 ---
 
-### Step 3: Handle the Response
+### Step 3: Handle the Execution State
 
-Gantral will return **one of the following outcomes**.
+Gantral will place the instance in one of the following states.
 
-#### APPROVED
+---
+
+#### APPROVED / RUNNING
 
 * You may proceed with execution
-* Use the **exact context returned by Gantral**
+* You **must** use the context returned by Gantral
 
 ```python
 execute(action)
@@ -141,85 +145,72 @@ execute(action)
 #### WAITING_FOR_HUMAN
 
 * **Do not** execute the action
-* Pause the agent or workflow
-* Follow the appropriate pause pattern (see Section 5)
+* Pause execution immediately
+* Follow an approved pause pattern (see Section 5)
 
 ```python
-wait_for_update(instance_id)
+wait_for_update(instance.id)
 ```
 
 ---
 
-#### REJECTED
+#### REJECTED or TERMINATED
 
 * Do not execute the action
 * Abort the workflow
+* Do not retry
 
 ```python
-abort("Rejected by policy or human")
+abort("Execution not authorized")
 ```
-
----
-
-#### TERMINATED
-
-* Treat as a hard stop
-* Do not retry
 
 ---
 
 ## 5. Handling Long-Running Approvals (Critical)
 
-Many approvals take **minutes, hours, or days**.
+Approvals may take **minutes, hours, or days**.
 
-❌ Do **not** rely on local RAM or in-process state for these waits.
+❌ Do **not** rely on local RAM, in-process state, or sleeping threads.
 
-Gantral supports long-running approvals via **two valid consumer patterns**.
+Gantral supports long-running waits via **two valid consumer patterns only**.
 
 ---
 
-### 5.1 Pattern A – Persisted Pause (Preferred)
+### 5.1 Pattern A — Persisted Pause (Preferred)
 
 Use this pattern **only if your agent framework supports native persistence / checkpointing**.
 
-When Gantral returns `WAITING_FOR_HUMAN`:
+When Gantral enters `WAITING_FOR_HUMAN`:
 
-1. Persist agent state using the framework’s native checkpointing
+1. Persist agent state using the framework’s native mechanism
 2. Exit the process cleanly (zero CPU usage)
 3. Wait for Gantral to signal approval
 4. Start a new process
 5. Restore agent state from persistence
 6. Resume execution
 
-Gantral manages **execution authority**.
+Gantral manages **authority**.
 Your framework manages **agent memory**.
 
 #### Framework Examples
 
-* CrewAI Flows → `@persist` (SQLite / Postgres)
-* LangGraph → Checkpointers (SQLite / Redis / S3)
+* CrewAI Flows → native persistence (SQLite / Postgres)
+* LangGraph → checkpointing (SQLite / Redis / S3)
 
-> **Rule:** If your agent cannot be restarted from a checkpoint, you must not use this pattern.
+> **Rule:**
+> If your agent cannot restart from a checkpoint, you must not use this pattern.
 
 ---
 
-### 5.2 Pattern B – Split-Agent Pattern
+### 5.2 Pattern B — Split-Agent Pattern (Mandatory Without Persistence)
 
-*(Mandatory if No Persistence)*
+If your agent framework **cannot** resume from persisted state,
+you must **split execution into stages**.
 
-Some agent frameworks do **not** support native checkpointing or resume.
-
-If your agent **cannot** be restarted from persisted state, you must **not** pause execution in memory.
-
-You must split execution into **multiple stages**.
-
-#### The Split-Agent Pattern
-
-When Gantral returns `WAITING_FOR_HUMAN`:
+When Gantral enters `WAITING_FOR_HUMAN`:
 
 1. Terminate the current agent execution
-2. Persist **only minimal handoff context**
-   (IDs, references, inputs — not internal memory)
+2. Persist only minimal handoff context (IDs, references, inputs)
 3. Wait for Gantral approval
 4. Start a new agent or workflow
 5. Resume execution using the approved context
@@ -230,60 +221,60 @@ Each stage is a **separate execution**, not a resumed process.
 
 ```
 Agent A (pre-approval)
- ├─ gathers information
- ├─ prepares action context
- ├─ calls Gantral
- └─ exits on WAITING_FOR_HUMAN
+ ├─ gather information
+ ├─ prepare action context
+ ├─ call Gantral
+ └─ exit on WAITING_FOR_HUMAN
 
-[human approval happens]
+[human authority decision]
 
 Agent B (post-approval)
- ├─ loads approved context
- ├─ performs the action
- └─ completes execution
+ ├─ load approved context
+ ├─ execute the action
+ └─ complete
 ```
 
 #### Hard Rules for Non-Persistent Frameworks
 
 If your framework does not support persistence:
 
-* ❌ Do NOT keep agent state in memory
-* ❌ Do NOT sleep, poll, or block locally
-* ❌ Do NOT attempt to serialize internal agent state yourself
-* ✅ Do split execution into pre-approval and post-approval stages
+* ❌ Do NOT keep state in memory
+* ❌ Do NOT sleep or poll locally
+* ❌ Do NOT attempt to serialize internal agent memory
+* ✅ Split execution cleanly
 
-Failure to follow this pattern breaks auditability and is **not supported**.
+Violating these rules breaks auditability and is unsupported.
 
 ---
 
 ### 5.3 Choosing the Correct Pattern
 
-| Agent Framework Capability | Required Pattern    |
-| -------------------------- | ------------------- |
-| Native checkpointing       | Persisted Pause     |
-| No checkpointing           | Split-Agent Pattern |
+| Agent Capability     | Required Pattern    |
+| -------------------- | ------------------- |
+| Native checkpointing | Persisted Pause     |
+| No checkpointing     | Split-Agent Pattern |
 
 ---
 
-## 6. Required Consumer Behavior (Rules)
+## 6. Required Consumer Rules (Non-Negotiable)
 
 Consumers **must**:
 
-* Treat Gantral decisions as authoritative
-* Pause execution when instructed
-* Persist state or split execution correctly
+* Treat Gantral execution state as authoritative
+* Pause immediately when instructed
+* Persist or split execution correctly
 * Resume only when explicitly allowed
-* Use the context returned by Gantral
+* Use the execution context returned by Gantral
 
 Consumers **must not**:
 
-* Retry locally while waiting for approval
-* Execute actions speculatively
-* Cache approval decisions
+* Execute speculatively
+* Retry locally while waiting
+* Cache approvals
 * Bypass Gantral on failure
 * Store agent memory inside Gantral context
 
-Violating these rules **breaks auditability**.
+Violations **invalidate auditability**.
 
 ---
 
@@ -291,34 +282,34 @@ Violating these rules **breaks auditability**.
 
 Gantral may:
 
-* Apply timeouts while waiting for approval
+* Apply approval timeouts
 * Escalate to different approvers
 * Terminate execution on timeout
 
 As a consumer:
 
-* You do **not** manage timeouts yourself
-* You must react to Gantral’s final state
+* You do **not** manage timeouts
+* You react only to Gantral’s execution state
 
-Timeout behavior is controlled **centrally**.
+Timeout behavior is centrally enforced.
 
 ---
 
 ## 8. Error Handling Expectations
 
-If Gantral returns an error:
+If Gantral returns an error or ambiguous state:
 
-* Treat it as **no approval granted**
+* Treat it as **no authority granted**
 * Do not execute the action
-* Surface the error to operators or logs
+* Surface the failure to operators or logs
 
-Failing open is **never permitted**.
+Fail-open behavior is **never permitted**.
 
 ---
 
-## 9. Example Reference
+## 9. Example Reference Implementation
 
-A complete working example is provided at:
+A working example is provided at:
 
 ```
 /examples/agent-proxy
@@ -328,9 +319,9 @@ The example demonstrates:
 
 * Persisted pause on `WAITING_FOR_HUMAN`
 * Split-agent execution where persistence is unavailable
-* Process exit and restart
+* Process exit and restart semantics
 
-Use it as a **reference**, not as a library.
+Use it as a **reference**, not as a dependency.
 
 ---
 
@@ -340,7 +331,7 @@ This guide does **not** explain:
 
 * Gantral’s internal state machine
 * Policy authoring or Rego syntax
-* Audit and replay internals
+* Audit or replay internals
 * Deployment or infrastructure setup
 
 Refer to the **TRD** and **Implementation Guide** for those topics.
@@ -349,21 +340,21 @@ Refer to the **TRD** and **Implementation Guide** for those topics.
 
 ## 11. Agent Logs vs Execution Evidence
 
-Agent-side logging is useful for debugging.
+Agent-side logs are useful for debugging.
 
-It is **not sufficient** for execution authority, auditability, or human accountability.
+They are **not sufficient** for execution authority or accountability.
 
 For workflows requiring defensible approvals:
 
-* Tool inputs/outputs may be captured outside the agent
+* Tool inputs/outputs may be captured externally
 * Evidence must be immutable and independently attested
 * Gantral consumes **references**, not raw payloads
 
-Gantral never trusts agent logs as authoritative evidence.
+Gantral never treats agent logs as authoritative evidence.
 
 ### Optional Pattern: Evidence-Aware Approval
 
-* Agent calls tool
+* Agent invokes tool
 * Runner captures raw I/O
 * Evidence stored externally
 * Evidence reference attached to execution context
@@ -371,15 +362,15 @@ Gantral never trusts agent logs as authoritative evidence.
 
 #### When External Evidence Capture Is Recommended
 
-* Regulatory, financial, or safety-critical approvals
-* Decisions that must be defensible months later
+* Regulatory or financial decisions
 * Irreversible actions
+* Approvals that must be defensible months later
 
-#### When Agent-Side Logging Is Sufficient
+#### When Agent Logs Are Sufficient
 
-* Advisory or exploratory workflows
+* Advisory workflows
 * Non-production environments
-* Actions with no lasting side effects
+* Low-impact actions
 
 ---
 
@@ -387,8 +378,11 @@ Gantral never trusts agent logs as authoritative evidence.
 
 Gantral exists to ensure:
 
-> **Actions happen only when an organization is willing to be accountable for them.**
+> **Actions occur only when an organization is willing to be accountable for them.**
 
 As a consumer, your responsibility is simple:
 
-**Ask first. Persist or split correctly. Act only when allowed.**
+**Ask first.
+Pause correctly.
+Act only when allowed.**
+
