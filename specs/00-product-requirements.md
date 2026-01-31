@@ -40,7 +40,7 @@ What breaks is:
 - **Non-Repudiation** (Proof of authorship)
 - **Non-Repudiation** (Proof of authorship)
 - **Hostile Replay** (Offline verification by untrusted parties)
-- **Edward-Readiness** (Verifiability & Admissibility)  
+- **Readiness** (Verifiability & Admissibility)  
 
 ### What Happens in Practice
 
