@@ -1,7 +1,6 @@
 ---
 title: AI Execution Control Plane — Executive Summary
 sidebar_label: Executive Summary
-sidebar_position: 5
 ---
 
 *Executive Summary · January 2026*

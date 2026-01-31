@@ -1,6 +1,4 @@
 ---
-sidebar_position: 2
-id: roadmap
 title: Roadmap & Build Status
 sidebar_label: Roadmap
 ---

@@ -1,3 +1,7 @@
+---
+title: Legal Notice
+---
+
 # Legal Notice
 
 This documentation describes architectural intent, design principles, and project direction.

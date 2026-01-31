@@ -1,317 +1,317 @@
 ---
-id: opa-integration
 title: OPA Integration Reference
 sidebar_label: OPA Integration
 ---
 
-# **Gantral – Implementation Guide**
+# OPA Integration Reference
 
-## **Policy Evaluation with OPA (Reference Implementation)**
+## Policy Evaluation with Open Policy Agent (OPA)
 
-**Status:** Reference implementation guide (non-normative)
+**Status:** Reference implementation guide (non-normative)  
 
 **Audience:**
-
-* Platform engineers  
-* Core contributors  
-* Enterprise implementers  
-* Solution architects  
-* Security, Risk, and Compliance reviewers
-
-**Purpose:**  
-This guide explains **how to implement Gantral’s policy evaluation layer using Open Policy Agent (OPA)** as a *reference implementation*, while remaining fully compliant with the Gantral **PRD** and **TRD**.
-
-This guide is intentionally **non-normative**:
-
-* It does **not** redefine Gantral’s architecture or execution semantics  
-* It demonstrates *one correct way* to implement the pluggable policy evaluation interface
-
-**Rule:** If this guide conflicts with the TRD, this guide is wrong.
+- Platform engineers  
+- Core contributors  
+- Enterprise implementers  
+- Solution architects  
+- Security, Risk, and Compliance reviewers  
 
 ---
 
-## **1\. How This Guide Fits into Gantral**
+## Purpose
 
-### **What This Guide IS**
+This document explains **how to implement Gantral’s policy evaluation layer using Open Policy Agent (OPA)** as a *reference implementation*.
 
-* A concrete implementation guide  
-* A reference for contributors and adopters  
-* A practical bridge between the PRD (intent) and TRD (constitution)  
-* A starting point for real enterprise deployments
+OPA is used here to demonstrate **one correct way** to implement Gantral’s **pluggable policy evaluation interface**, while remaining fully compliant with the Gantral **PRD v5.1** and **TRD v4.1**.
 
-### **What This Guide IS NOT**
+This guide is intentionally **non-normative**.
 
-* A replacement for the TRD  
-* A binding architectural dependency  
-* A definition of Gantral’s execution semantics
-
-OPA is used here as a **reference evaluator**, not as a core dependency.
+> **Rule:** If this guide conflicts with the TRD, this guide is wrong.
 
 ---
 
-## **2\. Recap: Correct Responsibility Split**
+## 1. How This Guide Fits into Gantral
+
+### What This Guide IS
+
+- A concrete implementation reference  
+- A bridge between PRD intent and TRD guarantees  
+- A practical example for contributors and adopters  
+- Suitable for enterprise and regulated environments  
+
+### What This Guide IS NOT
+
+- A definition of Gantral’s execution semantics  
+- A requirement to use OPA  
+- A policy authoring standard  
+- A replacement for the TRD  
+
+OPA is an **implementation choice**, not a dependency.
+
+---
+
+## 2. Responsibility Split (Non-Negotiable)
 
 Gantral enforces a strict separation of concerns.
 
-### **Gantral Owns**
+### Gantral Owns
 
-* Execution state machine  
-* HITL transitions  
-* Authority capture  
-* Audit and deterministic replay  
-* Instance lifecycle
+- Authority state machine  
+- Execution state transitions  
+- Human-in-the-Loop (HITL) enforcement  
+- Authority capture and commitment artifacts  
+- Deterministic replay of authority decisions  
 
-### **Policy Evaluator (OPA in this guide) Provides**
+### Policy Evaluator (OPA) Provides
 
-* Declarative policy evaluation  
-* Advisory signals influencing execution transitions  
-* Approver eligibility and escalation hints
+- Declarative policy evaluation  
+- Advisory signals during execution transitions  
+- Approver eligibility and escalation hints  
 
-### **Policy Evaluators Never**
+### Policy Evaluators Never
 
-* Pause execution  
-* Approve actions  
-* Override decisions  
-* Write audit logs
+- Pause execution  
+- Approve actions  
+- Override decisions  
+- Resume workflows  
+- Write audit or authority records  
 
-They **only advise**. Gantral enforces.
+**Policy advises. Authority enforces.**
 
 ---
 
-## **3\. Where Policy Evaluation Happens (Critical)**
+## 3. Where Policy Evaluation Occurs
 
 Policy evaluation occurs:
 
-* **Synchronously** during execution transitions  
-* As a **transition guard**, not a durable execution state  
-* **Before** entering `WAITING_FOR_HUMAN`
+- **Synchronously** during execution transitions  
+- As a **transition guard**, not a state  
+- **Before** entering `WAITING_FOR_HUMAN`
 
 Canonical flow:
 
-RUNNING  
-  └── policy evaluated  
-        ├── ALLOW → continue execution  
-        └── REQUIRE\_HUMAN → WAITING\_FOR\_HUMAN
+```
+
+RUNNING
+└─ policy evaluated
+├─ ALLOW → continue execution
+├─ REQUIRE_HUMAN → WAITING_FOR_HUMAN
+└─ DENY → TERMINATED
+
+````
 
 There is **no `CHECK_POLICY` execution state**.
 
 ---
 
-## **4\. Policy Evaluation Interface (Contract)**
+## 4. Policy Evaluation Interface (Contract)
 
-Gantral exposes an internal policy evaluation interface. The interface is evaluator-agnostic; OPA is one implementation.
+Gantral exposes an **evaluator-agnostic policy interface**.
+OPA is one implementation.
 
-### **4.1 Input (Structured & TRD-Aligned Schema)**
+### 4.1 Input Schema (Structured, Immutable)
 
-Policy evaluators receive **structured context**, never raw prompts.
+Policy evaluators receive **structured context**, never raw prompts or tool payloads.
 
 ```json
-{  
-  "instance": {  
-    "instance_id": "uuid",  
-    "workflow_id": "string",  
-    "workflow_version": "string",  
-    "materiality": "LOW | MEDIUM | HIGH",  
-    "owning_team_id": "string"  
-  },  
-  "execution": {  
-    "current_state": "RUNNING",  
-    "step": "string",  
-    "cost_estimate": 123.45  
-  },  
-  "context": {  
-    "domain": "sdlc | finance | operations | support",  
-    "trigger": "PR | INCIDENT | PAYMENT | OTHER",  
-    "attributes": { }  
-  },  
-  "identity": {  
-    "actor_id": "service_account_or_human_id",  
-    "roles": ["AGENT_EXECUTOR"]  
-  },  
-  "policy": {  
-    "policy_version_id": "string"  
-  }  
+{
+  "instance": {
+    "instance_id": "uuid",
+    "workflow_id": "string",
+    "workflow_version": "string",
+    "materiality": "LOW | MEDIUM | HIGH",
+    "owning_team_id": "string"
+  },
+  "execution": {
+    "current_state": "RUNNING",
+    "step": "string",
+    "cost_estimate": 123.45
+  },
+  "context": {
+    "domain": "sdlc | finance | operations | support",
+    "trigger": "PR | INCIDENT | PAYMENT | OTHER",
+    "attributes": {}
+  },
+  "identity": {
+    "actor_id": "service_or_human_id",
+    "roles": ["AGENT_EXECUTOR"]
+  },
+  "policy": {
+    "policy_version_id": "string"
+  }
 }
-```
+````
 
-**Notes (Critical):**
+**Critical guarantees:**
 
-* `actor_id` naming is aligned exactly with TRD terminology  
-* `policy_version_id` is **explicitly included** to guarantee deterministic replay
+* Inputs are immutable snapshots
+* `policy_version_id` is always explicit
+* No evaluator sees agent memory or tool payloads
 
 ---
 
-### **4.2 Output (Advisory Decision Signals)**
+### 4.2 Output Schema (Advisory Only)
 
 ```json
-{  
-  "decision": "ALLOW | REQUIRE_HUMAN | DENY",  
-  "approver_roles": ["TECH_LEAD", "RISK_OFFICER"],  
-  "timeout": "30m",  
-  "escalation_roles": ["PLATFORM_ADMIN"]  
+{
+  "decision": "ALLOW | REQUIRE_HUMAN | DENY",
+  "approver_roles": ["TECH_LEAD", "RISK_OFFICER"],
+  "timeout": "30m",
+  "escalation_roles": ["PLATFORM_ADMIN"]
 }
 ```
 
-OPA returns signals only. Gantral interprets and enforces them.
+OPA emits **signals only**.
+Gantral interprets and enforces them.
 
 ---
 
-## **5\. Using OPA as the Policy Evaluator**
+## 5. Using OPA as the Evaluator
 
-OPA evaluates policies written in Rego using the input schema above.
+OPA evaluates Rego policies using the schema above.
 
-### **5.1 Deployment Models**
+### 5.1 Deployment Options
 
 OPA may be deployed as:
 
-* Sidecar to the Gantral execution engine  
-* Centralized policy service  
+* Sidecar to the Gantral execution engine (recommended initially)
+* Centralized policy service
 * Embedded library (advanced / optional)
 
-Sidecar deployment is recommended initially for simplicity and isolation.
+Deployment choice does **not** change semantics.
 
 ---
 
-## **6\. Example Rego Policy (Illustrative)**
+## 6. Example Rego Policy (Illustrative)
 
 ```rego
 package gantral.policy
 
 default decision = "ALLOW"
 
-decision = "REQUIRE_HUMAN" {  
-  input.instance.materiality == "HIGH"  
+decision = "REQUIRE_HUMAN" {
+  input.instance.materiality == "HIGH"
 }
 
-decision = "DENY" {  
-  input.execution.cost_estimate > 100000  
-  not input.context.attributes.override_allowed  
+decision = "DENY" {
+  input.execution.cost_estimate > 100000
+  not input.context.attributes.override_allowed
 }
 
-approver_roles = ["TECH_LEAD"] {  
-  input.instance.materiality == "MEDIUM"  
+approver_roles = ["TECH_LEAD"] {
+  input.instance.materiality == "MEDIUM"
 }
 
-approver_roles = ["RISK_OFFICER"] {  
-  input.instance.materiality == "HIGH"  
+approver_roles = ["RISK_OFFICER"] {
+  input.instance.materiality == "HIGH"
 }
 ```
 
+This example is illustrative only.
+Gantral does not interpret Rego semantics.
+
 ---
 
-## **7\. Mapping OPA Output to Execution Transitions (Updated)**
+## 7. Mapping Policy Signals to Execution Transitions
 
-| OPA Signal | Gantral Behavior |
-| ----- | ----- |
-| `ALLOW` | Continue execution |
-| `REQUIRE_HUMAN` | Transition to `WAITING_FOR_HUMAN` |
-| `DENY` | Transition to `TERMINATED` |
-| `timeout` present | Schedule a `TIMEOUT` execution event |
+| Policy Signal     | Gantral Behavior                   |
+| ----------------- | ---------------------------------- |
+| `ALLOW`           | Continue execution                 |
+| `REQUIRE_HUMAN`   | Transition to `WAITING_FOR_HUMAN`  |
+| `DENY`            | Transition to `TERMINATED`         |
+| `timeout` present | Schedule `TIMEOUT` execution event |
 
-### **Timeout Semantics (Critical)**
+### Timeout Semantics
 
-If a `timeout` value is present:
+If a `timeout` is provided:
 
-1. Gantral schedules a `TIMEOUT` event at the specified duration  
-2. Upon expiry, **if the instance is still in `WAITING_FOR_HUMAN`**:  
-   * **Fail-closed:** transition to `TERMINATED`, or  
-   * **Escalate:** emit an `ESCALATION` event and update eligible approver roles using `escalation_roles`
+1. Gantral schedules a `TIMEOUT` event
+2. If still in `WAITING_FOR_HUMAN` at expiry:
 
-The exact behavior is determined by policy configuration.
+   * **Fail-closed** (default), or
+   * **Escalate** using `escalation_roles`
 
 Timeout handling is **execution control**, not policy evaluation.
 
 ---
 
-## **8\. HITL Handling (Gantral-Owned)**
+## 8. HITL Handling (Gantral-Owned)
 
 Once in `WAITING_FOR_HUMAN`:
 
-* Gantral determines eligible approvers  
-* Gantral captures decision, role, justification, and context  
-* Gantral enforces resume, override, or termination  
-* Gantral seals the audit record
+* Gantral determines eligible approvers
+* Gantral captures decision, role, justification, and context
+* Gantral enforces resume, override, or termination
+* Gantral emits the commitment artifact
 
 OPA is **not invoked** during human decision capture.
 
 ---
 
-## **9\. CI/CD and Offline Validation (Optional)**
+## 9. CI/CD and Offline Policy Validation (Optional)
 
 OPA policies may be:
 
-* Unit tested  
-* Validated in CI pipelines  
+* Unit tested
+* Validated in CI
 * Reviewed independently of Gantral code
 
-This is recommended but **non-blocking** to runtime execution.
+This is recommended but **not required** at runtime.
 
 ---
 
-## **10\. Failure Modes & Guarantees (Clarified)**
+## 10. Failure Modes and Guarantees
 
-### **Policy Evaluator Unavailable**
+### Evaluator Unavailable
 
-* HIGH materiality → fail closed  
-* MEDIUM materiality → configurable  
+* HIGH materiality → fail closed
+* MEDIUM materiality → configurable
 * LOW materiality → fail open allowed
 
 All failures emit explicit execution events.
 
-### **Determinism Guarantee**
+### Determinism & Replay
 
-* Policy inputs are immutable snapshots  
-* `policy_version_id` is recorded with every evaluation  
-* Replay uses the **same policy version**, never the latest
+* Policy inputs are immutable
+* `policy_version_id` is recorded with each evaluation
+* Replay uses the **same policy version**
+* Latest policy is never substituted during replay
 
-This prevents replay drift under policy evolution.
+Replay divergence is therefore detectable.
 
 ---
 
-## **11\. Extending Beyond OPA**
+## 11. Beyond OPA
 
 Because Gantral depends only on the policy interface:
 
-* Enterprises may replace OPA with internal policy engines  
-* Regulators may mandate specific evaluators  
+* Enterprises may use internal policy engines
 * Multiple evaluators may coexist
+* Regulator-mandated evaluators can be substituted
 
 Gantral remains unchanged.
 
 ---
 
-## **12\. How and Where to Use This Guide**
+## 12. When to Use This Guide
 
-### **Who Should Read This**
+This guide is most useful:
 
-* Contributors implementing the policy layer  
-* Enterprises deploying self-hosted Gantral  
-* Security and compliance reviewers  
-* Partners building adapters or extensions
-
-### **Where This Guide Lives**
-
-Recommended locations:
-
-* `/docs/implementation/policy-evaluation-opa.md`  
-* Public documentation site (advanced section)  
-* Reference repository README
-
-### **When to Use It**
-
-* After reading the TRD  
-* Before implementing the policy layer  
-* During enterprise architecture reviews  
-* During audits to explain policy–execution separation
+* After reading the TRD
+* Before implementing the policy layer
+* During enterprise architecture review
+* During audits explaining policy vs authority separation
 
 ---
 
-## **13\. Final Reminder**
+## Final Reminder
 
-OPA is an **implementation choice**.
+OPA is an **advisor**.
 
-Gantral is the **execution authority**.
+Gantral is the **authority**.
 
 Humans remain accountable.
 
-This guide exists to help teams build correctly — not to redefine the system.
+This guide exists to help teams implement policy evaluation **correctly**,
+not to redefine how Gantral works.
+
