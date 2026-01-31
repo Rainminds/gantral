@@ -1,7 +1,7 @@
 # Gantral & Gantrio — Product Requirements Document (PRD)
 
-**Version:** v5.0 (Authority–Experience Split Clarified)  
-**Status:** Public, canonical product document  
+**Version:** v10.0 (Authority-First, Federated Execution, Agent-Native Persistence)
+**Status:** Authoritative execution plan (current)  
 **Audience:** Enterprises, platform engineers, contributors, regulators, partners  
 
 ---
@@ -35,7 +35,12 @@ What breaks is:
 - Execution control  
 - Human authority  
 - Accountability  
-- Auditability at organizational scale  
+- Accountability  
+- Auditability at organizational scale
+- **Non-Repudiation** (Proof of authorship)
+- **Non-Repudiation** (Proof of authorship)
+- **Hostile Replay** (Offline verification by untrusted parties)
+- **Readiness** (Verifiability & Admissibility)  
 
 ### What Happens in Practice
 
@@ -71,7 +76,9 @@ It is infrastructure that standardizes how AI-assisted and agentic workflows:
 - Start  
 - Pause for human authority  
 - Resume, override, or terminate  
-- Produce deterministic, auditable records  
+- Resume, override, or terminate  
+- Produce deterministic, auditable records
+- Emit **cryptographic commitment artifacts** for every authority transition  
 
 Gantral sits **above agent frameworks** and **below enterprise systems**.
 

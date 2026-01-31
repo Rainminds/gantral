@@ -132,6 +132,7 @@ Policy evaluators receive **structured context**, never raw prompts.
 
 * `actor_id` naming is aligned exactly with TRD terminology  
 * `policy_version_id` is **explicitly included** to guarantee deterministic replay
+* **Hashing Requirement:** The full JSON input payload must be hashed (SHA-256) and bound to the resulting `CommitmentArtifact`.
 
 ---
 

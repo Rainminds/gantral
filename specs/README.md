@@ -1,5 +1,7 @@
 # Gantral Technical Specifications
 > **⚠️ SINGLE SOURCE OF TRUTH:** These documents constitute the technical constitution. If the code conflicts with these docs, the code is wrong.
+> **Core Pillars:** Authority, Determinism, and **Verifiability**.
+> Gantral provides **Adversarial Auditability** via **Cryptographic Evidence**.
 > Deviations require an RFC in `specs/rfc/`.
 
 ## Table of Contents

@@ -6,23 +6,39 @@ The definition of a process. Contains steps, triggers, and references to policie
 - **Steps:** Sequence of actions.
 - **Policy Refs:** Links to governance policies.
 
-## Instance
+## ExecutionInstance
 A concrete, immutable execution of a Workflow Template.
-- **ID:** Unique execution ID (UUID).
-- **TeamID:** Tenant/Team ownership.
-- **State:** Current state in the state machine.
-- **Context:** Snapshot of data at creation (Trigger context).
-- **CostMetadata:** Token usage and cost tracking.
-- **AuditLog:** Complete history of events for this instance.
+- **instance_id:** (UUID, immutable)
+- **workflow_id:** String
+- **workflow_version:** String
+- **owning_team_id:** String
+- **current_state:** String (Enum)
+- **created_at:** Timestamp
+- **terminated_at:** Timestamp
 
-## Decision
+## AuthorityDecision
 A record of human intervention.
-- **Type:** `APPROVE`, `REJECT`, `OVERRIDE`.
-- **User (ActorID):** Identity of the human actor.
-- **Role:** The role authorized to make the decision.
-- **Justification:** Human notes or reason for override.
-- **ContextSnapshot:** What the human saw when deciding.
-- **Timestamp:** Exact time of decision.
+- **decision_id:** Unique ID.
+- **instance_id:** Link to execution.
+- **decision_type:** `APPROVE`, `REJECT`, `OVERRIDE`.
+- **human_actor_id:** Identity of the human actor.
+- **role:** The role authorized to make the decision.
+- **justification:** Reason for decision.
+- **context_snapshot_hash:** Hash of what the human saw.
+- **timestamp:** Exact time of decision.
+
+## CommitmentArtifact
+The cryptographic proof of a transition.
+- **artifact_version:** Schema version.
+- **artifact_id:** Unique ID.
+- **instance_id:** Execution instance.
+- **prev_artifact_hash:** Hash of the previous artifact (Merkle Chain).
+- **authority_state:** State being transitioned to.
+- **policy_version_id:** Policy version used.
+- **context_hash:** Hash of execution context.
+- **human_actor_id:** Signer identity.
+- **timestamp:** Emission time.
+- **artifact_hash:** Self-hash.
 
 ## Policy
 Declarative rules governing execution.

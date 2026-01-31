@@ -12,6 +12,12 @@ This document is the **technical constitution** of the Gantral open-source core.
 
 It defines the architectural invariants, execution semantics, responsibility boundaries, and control guarantees that **must hold across all implementations**.
 
+**Technology Stack (Mandatory):**
+- **Control Plane:** Go (Required for deterministic concurrency)
+- **Workflow Runtime:** Temporal (Required for history and replay)
+- **Policy Engine:** Open Policy Agent (OPA)
+- **Data Stores:** PostgreSQL (Metadata) + Object Storage (Artifacts)
+
 Gantral deliberately separates **execution authority** from **agent reasoning and memory**.
 
 > **If an implementation conflicts with this document, the implementation is incorrect.**
@@ -41,7 +47,10 @@ Technically, Gantral provides:
 - Declarative control policies for materiality, authority, and escalation  
 - A **pluggable policy evaluation interface** (advisory only)  
 - Control APIs and SDKs that sit **above agent frameworks and below enterprise systems**  
-- Deterministic execution and replay guarantees via a workflow runtime  
+- A **pluggable policy evaluation interface** (advisory only)  
+- Control APIs and SDKs that sit **above agent frameworks and below enterprise systems**  
+- Deterministic execution and replay guarantees via a workflow runtime
+- **Cryptographic Artifact Log** for adversarial auditability (offline verification)  
 
 Gantral is **domain-agnostic by design**.  
 SDLC workflows are an initial wedge, not the boundary.
@@ -143,8 +152,10 @@ Agents execute actions but **cannot self-advance authority**.
 6. Execution continues or transitions to `WAITING_FOR_HUMAN`
 7. Agent framework checkpoints state and suspends execution
 8. Human decision captured (if required)
+8. Human decision captured (if required)
 9. Execution resumes or terminates via a new process
-10. Audit record sealed
+10. **Commitment Artifact emitted and sealed**
+11. Audit record sealed
 
 ---
 
@@ -328,20 +339,25 @@ All logic remains server-side.
 
 ## 9. Repository Structure
 
+## 9. Repository Structure (Required)
+
 ```
-/gantral
-  /docs
-  /specs
-  /core
-  /engine
+/cmd
+  /gantral-api
+  /gantral-worker
+/internal
+  /authority
+  /workflow
   /policy
-  /hitl
-  /audit
-  /api
+  /artifact
+  /replay
+  /identity
+  /storage
+/pkg
   /sdk
-  /adapters
-  /infra
-  /tests
+  /models
+/docs
+/tests
 ```
 
 Principles:
@@ -357,7 +373,9 @@ Principles:
 | Purpose         | Technology                     |
 | --------------- | ------------------------------ |
 | Execution state | Event-sourced workflow history |
+| Execution state | Event-sourced workflow history |
 | Immutable logs  | Append-only log store          |
+| Artifact Log    | **WORM Storage (S3/GCS)** - Cryptographic Commitments |
 | Snapshots       | Object storage (S3-compatible) |
 | Caching         | Redis (optional)               |
 
