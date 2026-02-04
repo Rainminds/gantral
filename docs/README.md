@@ -64,15 +64,15 @@ and **below organizational accountability**.
 Gantral is designed so that execution decisions can be
 **independently verified under hostile, post-incident conditions**.
 
-The Verifiability section defines:
-- the threat model
-- the commitment artifact
-- the replay protocol
-- explicit failure semantics
-- what Gantral does *not* claim
+This section defines both:
+- the **minimum admissibility bar** for execution-time authority, and
+- the **mechanisms** required to produce verifiable evidence.
 
 These documents are written for auditors, regulators,
 and reviewers who do **not** trust systems, operators, or narratives.
+
+- **[Admissible Execution](./verifiability/admissible-execution.md)**  
+  Normative definition of what qualifies as valid execution authority.
 
 - **[Verifiability Overview](./verifiability/README.md)**  
   Entry point for independent verification.
@@ -94,11 +94,11 @@ and reviewers who do **not** trust systems, operators, or narratives.
 
 ---
 
-## Position Paper
+## Position Papers
 
-Gantral is grounded in a vendor-neutral position paper that defines the
-**AI Execution Control Plane** as a missing infrastructure layer for
-execution-time governance.
+Gantral is grounded in vendor-neutral position papers that define:
+- the **AI Execution Control Plane** as a missing infrastructure layer, and
+- the **admissibility standard** for execution-time authority.
 
 These documents explain *why* authority, determinism,
 and replayable audit must be enforced at runtime.
@@ -107,7 +107,10 @@ and replayable audit must be enforced at runtime.
   High-level framing for platform leaders and decision-makers.
 
 - **[AI Execution Control Plane — Position Paper](./positioning/ai-execution-control-plane.md)**  
-  Full, non-normative technical and conceptual foundation.
+  Category definition and non-normative technical foundation.
+
+- **[Admissible Execution — Invariants for Execution Authority](./verifiability/admissible-execution.md)**  
+  Normative standard defining the minimum bar for defensible execution.
 
 ---
 
