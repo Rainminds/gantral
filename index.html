@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.9.2">
 <title data-rh="true">Welcome to Gantral | Gantral</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://docs.gantral.org/img/gantral-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://docs.gantral.org/img/gantral-social-card.jpg"><meta data-rh="true" property="og:url" content="https://docs.gantral.org/"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Welcome to Gantral | Gantral"><meta data-rh="true" name="description" content="Gantral is an open-source AI Execution Control Plane."><meta data-rh="true" property="og:description" content="Gantral is an open-source AI Execution Control Plane."><link data-rh="true" rel="icon" href="/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://docs.gantral.org/"><link data-rh="true" rel="alternate" href="https://docs.gantral.org/" hreflang="en"><link data-rh="true" rel="alternate" href="https://docs.gantral.org/" hreflang="x-default"><script data-rh="true">function insertBanner(){var n=document.createElement("div");n.id="__docusaurus-base-url-issue-banner-container";n.innerHTML='\n<div id="__docusaurus-base-url-issue-banner" style="border: thick solid red; background-color: rgb(255, 230, 179); margin: 20px; padding: 20px; font-size: 20px;">\n   <p style="font-weight: bold; font-size: 30px;">Your Docusaurus site did not load properly.</p>\n   <p>A very common reason is a wrong site <a href="https://docusaurus.io/docs/docusaurus.config.js/#baseUrl" style="font-weight: bold;">baseUrl configuration</a>.</p>\n   <p>Current configured baseUrl = <span style="font-weight: bold; color: red;">/</span>  (default value)</p>\n   <p>We suggest trying baseUrl = <span id="__docusaurus-base-url-issue-banner-suggestion-container" style="font-weight: bold; color: green;"></span></p>\n</div>\n',document.body.prepend(n);var e=document.getElementById("__docusaurus-base-url-issue-banner-suggestion-container"),s=window.location.pathname,o="/"===s.substr(-1)?s:s+"/";e.innerHTML=o}document.addEventListener("DOMContentLoaded",function(){void 0===window.docusaurus&&insertBanner()})</script><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Welcome","item":"https://docs.gantral.org/"}]}</script><link rel="stylesheet" href="/assets/css/styles.8cf77017.css">
-<script src="/assets/js/runtime~main.5f9b86d9.js" defer="defer"></script>
-<script src="/assets/js/main.96f5ef2c.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.a8c0f83a.js" defer="defer"></script>
+<script src="/assets/js/main.2b1e4aa9.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
 <svg style="display: none;"><defs>
@@ -61,17 +61,18 @@ and <strong>below organizational accountability</strong>.</p>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="verifiability-start-here-for-audit--proof">Verifiability (Start Here for Audit &amp; Proof)<a href="#verifiability-start-here-for-audit--proof" class="hash-link" aria-label="Direct link to Verifiability (Start Here for Audit &amp; Proof)" title="Direct link to Verifiability (Start Here for Audit &amp; Proof)" translate="no">​</a></h2>
 <p>Gantral is designed so that execution decisions can be
 <strong>independently verified under hostile, post-incident conditions</strong>.</p>
-<p>The Verifiability section defines:</p>
+<p>This section defines both:</p>
 <ul>
-<li class="">the threat model</li>
-<li class="">the commitment artifact</li>
-<li class="">the replay protocol</li>
-<li class="">explicit failure semantics</li>
-<li class="">what Gantral does <em>not</em> claim</li>
+<li class="">the <strong>minimum admissibility bar</strong> for execution-time authority, and</li>
+<li class="">the <strong>mechanisms</strong> required to produce verifiable evidence.</li>
 </ul>
 <p>These documents are written for auditors, regulators,
 and reviewers who do <strong>not</strong> trust systems, operators, or narratives.</p>
 <ul>
+<li class="">
+<p><strong><a class="" href="/verifiability/admissible-execution">Admissible Execution</a></strong><br>
+<!-- -->Normative definition of what qualifies as valid execution authority.</p>
+</li>
 <li class="">
 <p><strong><a class="" href="/verifiability">Verifiability Overview</a></strong><br>
 <!-- -->Entry point for independent verification.</p>
@@ -98,10 +99,12 @@ and reviewers who do <strong>not</strong> trust systems, operators, or narrative
 </li>
 </ul>
 <hr>
-<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="position-paper">Position Paper<a href="#position-paper" class="hash-link" aria-label="Direct link to Position Paper" title="Direct link to Position Paper" translate="no">​</a></h2>
-<p>Gantral is grounded in a vendor-neutral position paper that defines the
-<strong>AI Execution Control Plane</strong> as a missing infrastructure layer for
-execution-time governance.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="position-papers">Position Papers<a href="#position-papers" class="hash-link" aria-label="Direct link to Position Papers" title="Direct link to Position Papers" translate="no">​</a></h2>
+<p>Gantral is grounded in vendor-neutral position papers that define:</p>
+<ul>
+<li class="">the <strong>AI Execution Control Plane</strong> as a missing infrastructure layer, and</li>
+<li class="">the <strong>admissibility standard</strong> for execution-time authority.</li>
+</ul>
 <p>These documents explain <em>why</em> authority, determinism,
 and replayable audit must be enforced at runtime.</p>
 <ul>
@@ -111,7 +114,11 @@ and replayable audit must be enforced at runtime.</p>
 </li>
 <li class="">
 <p><strong><a class="" href="/positioning/ai-execution-control-plane">AI Execution Control Plane — Position Paper</a></strong><br>
-<!-- -->Full, non-normative technical and conceptual foundation.</p>
+<!-- -->Category definition and non-normative technical foundation.</p>
+</li>
+<li class="">
+<p><strong><a class="" href="/verifiability/admissible-execution">Admissible Execution — Invariants for Execution Authority</a></strong><br>
+<!-- -->Normative standard defining the minimum bar for defensible execution.</p>
 </li>
 </ul>
 <hr>
@@ -237,6 +244,6 @@ a small set of executive briefings provide higher-level context.</p>
 <p>Gantral is an independent open-source project.<br>
 <!-- -->It is not affiliated with the Cloud Native Computing Foundation (CNCF).</p>
 <p>Design and governance choices are informed by CNCF principles,
-including neutrality, composability, and explicit responsibility boundaries.</p></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--next" href="/verifiability"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">Verifiability Overview</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#what-problem-gantral-addresses" class="table-of-contents__link toc-highlight">What Problem Gantral Addresses</a></li><li><a href="#what-gantral-is--and-is-not" class="table-of-contents__link toc-highlight">What Gantral Is — and Is Not</a></li><li><a href="#verifiability-start-here-for-audit--proof" class="table-of-contents__link toc-highlight">Verifiability (Start Here for Audit &amp; Proof)</a></li><li><a href="#position-paper" class="table-of-contents__link toc-highlight">Position Paper</a></li><li><a href="#getting-oriented" class="table-of-contents__link toc-highlight">Getting Oriented</a></li><li><a href="#adoption-and-evaluation" class="table-of-contents__link toc-highlight">Adoption and Evaluation</a></li><li><a href="#integration-guides" class="table-of-contents__link toc-highlight">Integration Guides</a></li><li><a href="#technical-architecture" class="table-of-contents__link toc-highlight">Technical Architecture</a></li><li><a href="#governance" class="table-of-contents__link toc-highlight">Governance</a></li><li><a href="#contributing" class="table-of-contents__link toc-highlight">Contributing</a></li><li><a href="#executive-context-optional-reading" class="table-of-contents__link toc-highlight">Executive Context (Optional Reading)</a></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Community</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://git.gantral.org" target="_blank" rel="noopener noreferrer" class="footer__link-item">Git<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 Gantral, Inc. Built with Docusaurus.</div></div></div></footer></div>
+including neutrality, composability, and explicit responsibility boundaries.</p></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--next" href="/verifiability"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">Verifiability Overview</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#what-problem-gantral-addresses" class="table-of-contents__link toc-highlight">What Problem Gantral Addresses</a></li><li><a href="#what-gantral-is--and-is-not" class="table-of-contents__link toc-highlight">What Gantral Is — and Is Not</a></li><li><a href="#verifiability-start-here-for-audit--proof" class="table-of-contents__link toc-highlight">Verifiability (Start Here for Audit &amp; Proof)</a></li><li><a href="#position-papers" class="table-of-contents__link toc-highlight">Position Papers</a></li><li><a href="#getting-oriented" class="table-of-contents__link toc-highlight">Getting Oriented</a></li><li><a href="#adoption-and-evaluation" class="table-of-contents__link toc-highlight">Adoption and Evaluation</a></li><li><a href="#integration-guides" class="table-of-contents__link toc-highlight">Integration Guides</a></li><li><a href="#technical-architecture" class="table-of-contents__link toc-highlight">Technical Architecture</a></li><li><a href="#governance" class="table-of-contents__link toc-highlight">Governance</a></li><li><a href="#contributing" class="table-of-contents__link toc-highlight">Contributing</a></li><li><a href="#executive-context-optional-reading" class="table-of-contents__link toc-highlight">Executive Context (Optional Reading)</a></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Community</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://git.gantral.org" target="_blank" rel="noopener noreferrer" class="footer__link-item">Git<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 Gantral, Inc. Built with Docusaurus.</div></div></div></footer></div>
 </body>
 </html>
