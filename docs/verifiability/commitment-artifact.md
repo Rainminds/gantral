@@ -242,3 +242,16 @@ and public execution semantics,
 then Gantral must not claim that it can be proven.
 
 The commitment artifact defines the boundary of that claim.
+
+---
+
+## Implementation Specification
+
+Gantral’s commitment artifact is implemented according to a
+separate, normative implementation specification that defines
+exact field structure, hash construction, atomic emission rules,
+and offline verification logic.
+
+That specification is used by Gantral implementations and
+independent verifiers, but is not required to understand
+the verifiability claims made in this document.
