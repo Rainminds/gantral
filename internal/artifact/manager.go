@@ -1,6 +1,7 @@
 package artifact
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -21,21 +22,24 @@ var (
 // Manager implements the ArtifactEmitter interface.
 // It manages the lifecycle of commitment artifacts.
 type Manager struct {
-	// In a real implementation, this would likely hold references to a storage backend
-	// (e.g., ObjectStorage, KMS) to persist the artifact.
-	// For Phase 6.1, we focus on the domain logic and in-memory generation.
+	store Store
 }
 
-// NewManager creates a new artifact manager.
-func NewManager() *Manager {
-	return &Manager{}
+// NewManager creates a new artifact manager with the given persistence store.
+func NewManager(store Store) *Manager {
+	return &Manager{store: store}
 }
 
 // EmitArtifact generates, seals, and calculates the ID for a new commitment artifact.
 // It implements strict validation and fail-closed logic.
 //
 // Security Property: "EmitArtifact generates a non-repudiable proof of authorization bound to execution state."
+// EmitArtifact generates, seals, and persists a new commitment artifact.
+// It implements strict validation, fail-closed logic, and atomic persistence.
+//
+// Security Property: "EmitArtifact generates a non-repudiable proof of authorization bound to execution state."
 func (m *Manager) EmitArtifact(
+	ctx context.Context,
 	instanceID string,
 	prevHash string,
 	state string,
@@ -72,10 +76,12 @@ func (m *Manager) EmitArtifact(
 		return nil, fmt.Errorf("%w: %v", ErrArtifactSerialization, err)
 	}
 
-	// 4. In a full implementation, we would now:
-	//    - Sign the artifact with KMS (Signature field).
-	//    - Persist to WORM storage.
-	// For Phase 6.1, returning the chemically pure domain object is the goal.
+	// 4. Persistence (Phase 6.2)
+	// We persist to the WORM storage before returning.
+	// If persistence fails, we MUST fail the operation (Atomicity).
+	if err := m.store.Write(ctx, art); err != nil {
+		return nil, fmt.Errorf("persistence failure: %w", err)
+	}
 
 	return art, nil
 }

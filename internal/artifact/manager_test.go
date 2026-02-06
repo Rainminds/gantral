@@ -1,16 +1,29 @@
 package artifact
 
 import (
+	"context"
 	"encoding/json"
 	"testing"
 
 	"github.com/Rainminds/gantral/pkg/models"
 )
 
+// MockStore is a no-op store for testing Manager logic.
+type MockStore struct{}
+
+func (s *MockStore) Write(ctx context.Context, art *models.CommitmentArtifact) error {
+	return nil
+}
+
+func (s *MockStore) Get(ctx context.Context, id string) (*models.CommitmentArtifact, error) {
+	return nil, nil
+}
+
 func TestEmitArtifact_Success(t *testing.T) {
-	m := NewManager()
+	m := NewManager(&MockStore{})
 
 	art, err := m.EmitArtifact(
+		context.Background(),
 		"inst-123",
 		"prev-hash-abc",
 		"APPROVED",
@@ -87,16 +100,16 @@ func TestEmitArtifact_Determinism(t *testing.T) {
 }
 
 func TestEmitArtifact_InvalidInput(t *testing.T) {
-	m := NewManager()
+	m := NewManager(&MockStore{})
 
 	// Missing InstanceID
-	_, err := m.EmitArtifact("", "prev", "STATE", "pol", "ctx", "act")
+	_, err := m.EmitArtifact(context.Background(), "", "prev", "STATE", "pol", "ctx", "act")
 	if err == nil {
 		t.Error("Expected error for empty InstanceID, got nil")
 	}
 
 	// Missing ContextHash
-	_, err = m.EmitArtifact("inst", "prev", "STATE", "pol", "", "act")
+	_, err = m.EmitArtifact(context.Background(), "inst", "prev", "STATE", "pol", "", "act")
 	if err == nil {
 		t.Error("Expected error for empty ContextHash, got nil")
 	}
@@ -104,8 +117,8 @@ func TestEmitArtifact_InvalidInput(t *testing.T) {
 
 func TestArtifact_JSONStructure(t *testing.T) {
 	// Verify that MarshalJSON includes all fields and flattened structure
-	m := NewManager()
-	art, _ := m.EmitArtifact("inst", "prev", "APPROVED", "pol", "ctx", "act")
+	m := NewManager(&MockStore{})
+	art, _ := m.EmitArtifact(context.Background(), "inst", "prev", "APPROVED", "pol", "ctx", "act")
 
 	bytes, _ := json.Marshal(art)
 	var asMap map[string]interface{}

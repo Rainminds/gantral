@@ -1,6 +1,7 @@
 package artifact
 
 import (
+	"context"
 	"encoding/json"
 	"strings"
 	"testing"
@@ -12,8 +13,8 @@ import (
 
 func Test_TamperResistance(t *testing.T) {
 	// 1. Create a valid artifact
-	m := NewManager()
-	validArt, err := m.EmitArtifact("inst-1", "prev-0", "APPROVED", "v1", "ctx-hash", "admin")
+	m := NewManager(&MockStore{})
+	validArt, err := m.EmitArtifact(context.Background(), "inst-1", "prev-0", "APPROVED", "v1", "ctx-hash", "admin")
 	if err != nil {
 		t.Fatalf("Setup failed: %v", err)
 	}
@@ -51,13 +52,13 @@ func Test_TamperResistance(t *testing.T) {
 }
 
 func Test_ChainBreakage(t *testing.T) {
-	m := NewManager()
+	m := NewManager(&MockStore{})
 
 	// 1. Create Artifact A
-	artA, _ := m.EmitArtifact("inst-1", "genesis", "RUNNING", "v1", "ctx-A", "sys")
+	artA, _ := m.EmitArtifact(context.Background(), "inst-1", "genesis", "RUNNING", "v1", "ctx-A", "sys")
 
 	// 2. Create Artifact B pointing to Artifact A
-	artB, _ := m.EmitArtifact("inst-1", artA.ArtifactID, "APPROVED", "v1", "ctx-B", "human")
+	artB, _ := m.EmitArtifact(context.Background(), "inst-1", artA.ArtifactID, "APPROVED", "v1", "ctx-B", "human")
 
 	// 3. "Corrupt" Artifact A (Simulate that the history log was altered)
 	// Actually, we check that B *requires* A's ID.
@@ -89,11 +90,11 @@ func Test_ChainBreakage(t *testing.T) {
 }
 
 func Test_AmbiguityRefusal(t *testing.T) {
-	m := NewManager()
+	m := NewManager(&MockStore{})
 
 	// 1. Attempt to emit with missing critical field (Empty Context Hash)
 	// The Manager.EmitArtifact is expected to Fail-Closed (return error, no artifact).
-	art, err := m.EmitArtifact("inst-1", "prev", "APPROVED", "v1", "", "actor")
+	art, err := m.EmitArtifact(context.Background(), "inst-1", "prev", "APPROVED", "v1", "", "actor")
 
 	// 2. ASSERT fatal error
 	if err == nil {

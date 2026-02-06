@@ -49,6 +49,174 @@ Gantral exists to make execution authority:
 
 ---
 
+## The Execution Authority Gap (Before and After)
+
+Most AI governance failures are not caused by models.
+They are caused by how execution authority is implicitly assumed.
+
+The diagrams below contrast the common “before” state
+with an execution-time authority model.
+
+**Before:**
+In this model, authority is implied by process and reconstructed after the fact.
+
+```mermaid
+flowchart TB
+   A[AI Agent or Model
+   • Policy logic embedded in prompts or code
+   • Proposes or initiates actions autonomously]
+
+   A --> M[Execution Management
+   • Automation workflows
+   • Task runners or orchestration
+   • Executes without explicit authority checks]
+
+   A -.-> H[Human Reviewer
+   • Informal notification or review
+   • No explicit authority boundary]
+
+   H --> T[Human Action Tools
+   • Dashboards
+   • Ticketing systems
+   • Admin consoles]
+
+   M --> R[Action in Real World
+   • Data changes
+   • Customer impact
+   • External side effects]
+
+   T --> R
+
+   R -.-> L[Post-hoc Evidence
+   • Logs
+   • Tickets
+   • Chat records
+   • Human memory]
+```
+
+**After:**
+```mermaid
+flowchart TB
+   %% Governance (Advisory Only)
+   P[Policy & Governance
+   • Intent & constraints
+   • Risk thresholds
+   • Escalation rules
+   • Advisory only]
+
+
+   %% AI & Agent Systems
+   subgraph AI["AI & Agent Systems"]
+       LG[LangGraph
+       • Stateful workflows
+       • Long-running graphs]
+
+
+       VE[Vellum
+       • Prompt systems
+       • LLM pipelines]
+
+
+       CC[Claude Cowork
+       • Digital coworker
+       • Tool-using agent]
+   end
+
+
+   %% Human Authority
+   H[Human Operator
+   • Reviews context
+   • Exercises judgment
+   • Accountable actor]
+
+
+   %% Execution Management
+   M[Execution Management
+   • Workflow orchestration
+   • Permission requests
+   • Awaits authority]
+
+
+   %% Gantral Authority Boundary
+   subgraph Gantral["Gantral — Execution-Time Authority"]
+       G[Commitment Boundary
+       • Pause execution
+       • Require explicit decision
+       • Approve / Reject / Escalate
+       • Record authority deterministically]
+   end
+
+
+   %% Authorized Executors
+   subgraph X["Authorized Executors"]
+       XR[Automated Executors
+       • Jobs
+       • Pipelines
+       • Agent runners]
+
+
+       HX[Human Executors
+       • CLI
+       • UI
+       • Manual actions]
+   end
+
+
+   %% Real World & Evidence
+   R[Real-World Actions
+   • Code changes
+   • File edits
+   • Infra updates
+   • External effects]
+
+
+   E[Execution Evidence
+   • Logs - automated
+   • Commits / Artifacts
+   • Tickets
+   • Human attestations]
+
+
+   D[Deterministic Authority Record
+   • Who authorized
+   • What was approved
+   • When & under what conditions
+   • References to execution evidence]
+
+
+   %% Flows
+   LG --> M
+   VE --> M
+   CC -->|tool calls| M
+
+
+   H --> M
+   P -.-> G
+
+
+   M --> G
+
+
+   G -->|Authorized| XR
+   G -->|Authorized| HX
+
+
+   XR --> R
+   HX --> R
+
+
+   R --> E
+
+
+   E -.-> D
+   G -.-> D
+
+
+   G -->|Pause / Escalate| H
+```
+
+---
+
 ## The Core Distinction: Authority vs Intelligence
 
 Gantral introduces a strict separation between **Intelligence** and **Authority**.
@@ -168,7 +336,7 @@ Gantral explicitly does **not**:
 - make autonomous decisions
 - guarantee correctness or compliance
 
-Gantral records *authority*, not intent or correctness.
+Gantral records **authority**, not intent, interpretation, or correctness.
 
 ---
 
