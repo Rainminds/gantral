@@ -1,6 +1,10 @@
 package artifact
 
-import "github.com/Rainminds/gantral/pkg/models"
+import (
+	"context"
+
+	"github.com/Rainminds/gantral/pkg/models"
+)
 
 // ArtifactEmitter defines the contract for emitting immutable commitment artifacts.
 // It is the primary interface for the "Evidence Emitter" component required by Phase 6.
@@ -20,6 +24,7 @@ type ArtifactEmitter interface {
 	//   - *models.CommitmentArtifact: The sealed artifact.
 	//   - error: If any step fails (serialization, IO, etc.). Fail-Closed.
 	EmitArtifact(
+		ctx context.Context,
 		instanceID string,
 		prevHash string,
 		state string,
