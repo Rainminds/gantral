@@ -73,7 +73,9 @@ func Test_Survival_After_DB_Wipe(t *testing.T) {
 	// Phase 1: Operational
 	store1, _ := NewStore(tmpDir)
 	art := models.NewCommitmentArtifact("inst-db-wipe", "prev", "APPROVED", "v1", "ctx", "actor")
-	art.CalculateHashAndSetID()
+	if err := art.CalculateHashAndSetID(); err != nil {
+		t.Fatal(err)
+	}
 
 	if err := store1.Write(context.Background(), art); err != nil {
 		t.Fatal(err)
@@ -115,11 +117,15 @@ func Test_Atomic_Failure(t *testing.T) {
 
 	// Create a subdirectory that is read-only
 	readOnlyDir := filepath.Join(tmpDir, "locked")
-	os.Mkdir(readOnlyDir, 0555) // Read + Execute only, No Write
+	if err := os.Mkdir(readOnlyDir, 0555); err != nil {
+		t.Fatal(err)
+	} // Read + Execute only, No Write
 
 	store, _ := NewStore(readOnlyDir)
 	art := models.NewCommitmentArtifact("inst-fail", "0000", "APPROVED", "v1", "ctx", "act")
-	art.CalculateHashAndSetID()
+	if err := art.CalculateHashAndSetID(); err != nil {
+		t.Fatal(err)
+	}
 
 	// 2. Attempt write
 	// Expected to fail because we can't create the underlying file
