@@ -1,7 +1,7 @@
 # Gantral – Commitment Artifact & Offline Verifier Implementation Specification
 
 Version: v1.0 (Verifier-Executable)  
-Status: Normative implementation specification
+Status: **Implemented** in `cmd/gantral-verify`
 
 Audience:  
 • AI coding assistants implementing Gantral  
@@ -117,6 +117,23 @@ Verifier responsibilities:
 • Recompute hashes  
 • Validate hash chain  
 • Validate sequence ordering
+
+### **CLI Usage (Reference Implementation)**
+
+The `gantral-verify` tool implements this specification.
+
+```bash
+# Build
+go build -o gantral-verify ./cmd/gantral-verify
+
+# Verify File
+./gantral-verify file ./evidence/art-123.json
+# Output: ✅ VALID | ID: ...
+
+# Verify Chain
+./gantral-verify chain ./evidence/
+# Output: ✅ CHAIN VALID | Count: 5
+```
 
 ## **9\. Verifier Outcome Semantics**
 

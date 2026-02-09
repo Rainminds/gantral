@@ -91,7 +91,7 @@ This document outlines the authoritative build plan for Gantral. We follow a str
 
 - [x] **6.1 Commitment Artifact Implementation**: Implemented a concrete, inspectable commitment artifact emitted atomically with authority transitions.
 - [x] **6.2 Artifact Storage & Log Independence**: Ensured artifacts are independent of operational logs and databases; deleting the DB must not invalidate artifacts.
-- [ ] **6.3 Offline Verification Tooling**: Enable third-party verification without Gantral access via a standalone CLI/library (`gantral-verify`).
+- [x] **6.3 Offline Verification Tooling**: Enabled third-party verification without Gantral access via a standalone CLI/library (`gantral-verify`).
 - [ ] **6.4 Authority-Only Replay Enforcement**: Guarantee replay depends solely on authority artifacts, excluding agent memory and logs.
 - [ ] **6.5 Fail-Closed Guarantees**: Eliminate ambiguous execution paths; execution must terminate on missing/partial artifacts or hash mismatches.
 - [ ] **6.6 Auditor Verification Demo**: Demonstrate offline verification from an auditor’s perspective (shut down Gantral → verify artifact).

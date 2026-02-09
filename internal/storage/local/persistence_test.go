@@ -17,7 +17,7 @@ func setupTestStore(t *testing.T) (*Store, string) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	t.Cleanup(func() { os.RemoveAll(tmpDir) })
+	t.Cleanup(func() { _ = os.RemoveAll(tmpDir) })
 
 	store, err := NewStore(tmpDir)
 	if err != nil {
@@ -68,7 +68,7 @@ func Test_Survival_After_DB_Wipe(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	// Phase 1: Operational
 	store1, _ := NewStore(tmpDir)
@@ -113,7 +113,7 @@ func Test_Atomic_Failure(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	// Create a subdirectory that is read-only
 	readOnlyDir := filepath.Join(tmpDir, "locked")

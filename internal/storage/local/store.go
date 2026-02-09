@@ -71,8 +71,8 @@ func (s *Store) Write(ctx context.Context, art *models.CommitmentArtifact) error
 	// Cleanup temp file on error
 	defer func() {
 		if tmpFile != nil {
-			tmpFile.Close()    // Close if not already closed
-			os.Remove(tmpName) // Best effort remove
+			_ = tmpFile.Close()    // Close if not already closed
+			_ = os.Remove(tmpName) // Best effort remove
 		}
 	}()
 
