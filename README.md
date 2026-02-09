@@ -124,14 +124,35 @@ Gantral supports long-running approvals via agent-native persistence or split-ag
 
 ## Scope and Boundaries
 
-| Gantral IS                         | Gantral IS NOT                    |
-| ---------------------------------- | --------------------------------- |
 | Execution authority infrastructure | Agent framework                   |
 | Deterministic decision ledger      | Workflow engine                   |
 | HITL enforcement layer             | Autonomous system                 |
 | Federated and self-hosted          | Identity provider or secret store |
+| **Provable admissibility**         | **Black-box logs**                |
 
 These boundaries are intentional and non-negotiable.
+
+---
+
+## Verification & Admissibility
+
+Gantral produces cryptographically verifiable **Commitment Artifacts** that serve as independent evidence of execution authority.
+
+### Principles
+*   **Immutable:** Artifacts cannot be modified after emission.
+*   **Log-Independent:** Verification does not require access to Gantral logs or databases.
+*   **Offline Verifiable:** Auditors can verify chains of custody on an air-gapped machine.
+
+### Offline Verification Tool
+We provide a standalone CLI tool for auditors:
+
+```bash
+# Verify a single artifact file
+go run cmd/gantral-verify/main.go file /path/to/artifact.json
+
+# Verify an entire chain of evidence
+go run cmd/gantral-verify/main.go chain /path/to/artifact_dir/
+```
 
 ---
 

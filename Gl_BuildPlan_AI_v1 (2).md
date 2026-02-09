@@ -392,6 +392,8 @@ This phase MUST NOT alter execution semantics, state machines, or authority rule
 
 ### **Phase 6.1 – Commitment Artifact Implementation**
 
+**Status: COMPLETED**
+
 Objective:  
 Implement a concrete, inspectable commitment artifact emitted atomically with authority transitions.
 
@@ -404,6 +406,8 @@ Acceptance Criteria:
 
 ### **Phase 6.2 – Artifact Storage & Log Independence**
 
+**Status: COMPLETED**
+
 Objective:  
 Ensure artifacts are independent of operational logs and databases.
 
@@ -414,6 +418,8 @@ Acceptance Criteria:
 • DB records are non-authoritative indices only
 
 ### **Phase 6.3 – Offline Verification Tooling**
+
+**Status: COMPLETED**
 
 Objective:  
 Enable third-party verification without Gantral access.
