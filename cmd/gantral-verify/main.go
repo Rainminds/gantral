@@ -83,7 +83,7 @@ without requiring access to the operational database.`,
 					// We need to parse it again to get the struct, or VerifyArtifact could return it.
 					// For simplicity, strict parse here.
 					var art models.CommitmentArtifact
-					json.Unmarshal(data, &art)
+					_ = json.Unmarshal(data, &art)
 					artifacts = append(artifacts, art)
 				} else {
 					fmt.Printf("❌ INVALID INDIVIDUAL ARTIFACT: %s\n", f.Name())

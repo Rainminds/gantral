@@ -44,7 +44,7 @@ func Test_Offline_Verification(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer os.Remove(tmpFile.Name())
-	tmpFile.Write(data)
+	_, _ = tmpFile.Write(data)
 	tmpFile.Close()
 
 	// 2. Run the `gantral-verify` binary against it
@@ -85,7 +85,7 @@ func Test_Tampered_File(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer os.Remove(tmpFile.Name())
-	tmpFile.WriteString(tamperedJSON)
+	_, _ = tmpFile.WriteString(tamperedJSON)
 	tmpFile.Close()
 
 	// 3. Run `gantral-verify`
@@ -115,20 +115,20 @@ func Test_Chain_Verification(t *testing.T) {
 
 	// A
 	artA := models.NewCommitmentArtifact("inst", "genesis", "RUNNING", "v1", "ctxA", "sys")
-	artA.CalculateHashAndSetID()
-	os.WriteFile(filepath.Join(tmpDir, "1_A.json"), mustMarshal(artA), 0644)
+	_ = artA.CalculateHashAndSetID()
+	_ = os.WriteFile(filepath.Join(tmpDir, "1_A.json"), mustMarshal(artA), 0644)
 	time.Sleep(10 * time.Millisecond)
 
 	// B
 	artB := models.NewCommitmentArtifact("inst", artA.ArtifactID, "APPROVED", "v1", "ctxB", "sys")
-	artB.CalculateHashAndSetID()
-	os.WriteFile(filepath.Join(tmpDir, "2_B.json"), mustMarshal(artB), 0644)
+	_ = artB.CalculateHashAndSetID()
+	_ = os.WriteFile(filepath.Join(tmpDir, "2_B.json"), mustMarshal(artB), 0644)
 	time.Sleep(10 * time.Millisecond)
 
 	// C
 	artC := models.NewCommitmentArtifact("inst", artB.ArtifactID, "COMPLETED", "v1", "ctxC", "sys")
-	artC.CalculateHashAndSetID()
-	os.WriteFile(filepath.Join(tmpDir, "3_C.json"), mustMarshal(artC), 0644)
+	_ = artC.CalculateHashAndSetID()
+	_ = os.WriteFile(filepath.Join(tmpDir, "3_C.json"), mustMarshal(artC), 0644)
 
 	// Run Verify Chain
 	cmd := exec.Command(binPath, "chain", tmpDir)
