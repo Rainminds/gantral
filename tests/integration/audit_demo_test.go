@@ -1,4 +1,6 @@
-package e2e
+//go:build integration
+
+package integration_test
 
 import (
 	"os"

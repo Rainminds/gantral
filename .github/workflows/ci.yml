@@ -53,15 +53,15 @@ jobs:
       - name: Build
         run: make build
 
-      - name: Test Unit
-        run: make test
+      - name: Test Tier 1 (Unit & Deterministic)
+        run: make test-tier1
 
-      - name: Test Integration & E2E
-        run: make test-integration
+      - name: Test Tier 2 (Integration & Runtime)
+        run: make test-tier2
 
       - name: Coverage Check
         run: |
-          DATABASE_URL="$DATABASE_URL" TEMPORAL_HOST_PORT="$TEMPORAL_HOST_PORT" go test -coverpkg=./... -coverprofile=coverage.raw.out ./...
+          DATABASE_URL="$DATABASE_URL" TEMPORAL_HOST_PORT="$TEMPORAL_HOST_PORT" go test -tags=integration -coverpkg=./... -coverprofile=coverage.raw.out ./...
           # Exclude generated code (infra/db), wiring (infra), entrypoints (cmd), and boilerplate (pkg/logger)
           # Also excluding root main.go if present in the coverage profile as 'github.com/Rainminds/gantral/main.go'
           grep -v -E "infra/|cmd/|pkg/logger/|pkg/config/|sdk/|github.com/Rainminds/gantral/main.go" coverage.raw.out > coverage.out

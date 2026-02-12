@@ -181,6 +181,30 @@ The adoption section describes how organizations:
 
 ---
 
+## Testing & Constitutional Enforcement
+
+In Gantral, testing is not Quality Assurance (QA).  
+It is the **mechanical enforcement of the Admissible Execution standard**.
+
+
+Our testing infrastructure is designed to prove that authority invariants hold
+even under adversarial conditions, focusing on fail-closed behavior and determinism.
+
+
+- **[Testing Architecture Blueprint](testing/testing-architecture-blueprint.md)**  
+  The 7-layer architecture defining unit, integration, and adversarial test boundaries.
+
+
+- **[Master Test Inventory](testing/master-test-inventory.md)**  
+  The exhaustive catalog of required tests (Sections A-Z) covering state machine logic,
+  fail-closed behaviors, replay determinism, and chaos engineering.
+
+
+- **[Test Execution Strategy](testing/test-execution-strategy.md)**  
+  The tiered execution model (Tiers 1-6) ensuring rigor without paralyzing development velocity.
+
+---
+
 ## Governance
 
 - **[Policy vs Authority](./governance/policy-vs-authority.md)**  

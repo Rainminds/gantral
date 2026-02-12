@@ -16,7 +16,17 @@ It defines **when execution may proceed** and **how that decision is recorded**.
 
 ---
 
+
+### Running Tests
+
+- **Tier 1 (Fast, Deterministic)**: `make test-tier1`
+- **Tier 2 (Integration)**: `make test-tier2`
+- **All Tests**: `make test`
+
+---
+
 ## Why Gantral Exists
+
 
 As AI systems are embedded into real operational workflows, organizations encounter execution-time governance failures that existing tools do not address.
 
