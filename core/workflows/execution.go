@@ -1,11 +1,13 @@
 package workflows
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/Rainminds/gantral/core/activities"
 	"github.com/Rainminds/gantral/core/engine"
 	"github.com/Rainminds/gantral/core/policy"
+	"github.com/Rainminds/gantral/pkg/models"
 	"go.temporal.io/sdk/temporal"
 	"go.temporal.io/sdk/workflow"
 )
@@ -49,20 +51,14 @@ func GantralExecutionWorkflow(ctx workflow.Context, input WorkflowInput) (Workfl
 	ctx = workflow.WithActivityOptions(ctx, ao)
 
 	// B. Policy Evaluation (Deterministic Logic)
-	// We evaluate purely in code since policy dictionary is passed in input.
-	// If policy engine required external calls, we'd use Activity.
-	// Replicating logic from core/policy/engine.go here for determinism or calling a shared deterministic function.
+	// We call the shared, pure function from core/policy.
+	// This ensures logic parity with the Engine and is safe for Replay (pure function).
+	evalResult := policy.EvaluatePure(input.Policy)
 
-	// Inline logic to ensure safety:
-	shouldPause := false
-	nextState := engine.StateRunning
-	reason := "Policy allows automatic execution"
-
-	if input.Policy.Materiality == policy.MaterialityHigh || input.Policy.RequiresHumanApproval {
-		shouldPause = true
-		nextState = engine.StateWaitingForHuman
-		reason = "Execution paused by policy"
-	}
+	shouldPause := evalResult.ShouldPause
+	// Convert policy string state to engine state if necessary, but string matches
+	nextState := engine.State(evalResult.NextState)
+	reason := evalResult.Reason
 
 	policyResult := map[string]interface{}{
 		"should_pause": shouldPause,
@@ -93,15 +89,18 @@ func GantralExecutionWorkflow(ctx workflow.Context, input WorkflowInput) (Workfl
 	if shouldPause {
 		logger.Info("Blocking for Human Decision", "instance_id", inst.ID)
 
-		// Defaults
-		const ApprovalTimeout = 24 * time.Hour
+		// Defaults (Configurable Timeout)
+		approvalTimeout := 24 * time.Hour
+		if input.Policy.ApprovalTimeoutSeconds > 0 {
+			approvalTimeout = time.Duration(input.Policy.ApprovalTimeoutSeconds) * time.Second
+		}
 		var decisionInput activities.RecordDecisionInput
 
 		// Setup Selector
 		msg := "HITL Decision Received"
 		selector := workflow.NewSelector(ctx)
 		signalChan := workflow.GetSignalChannel(ctx, SignalHumanDecision)
-		timerFuture := workflow.NewTimer(ctx, ApprovalTimeout)
+		timerFuture := workflow.NewTimer(ctx, approvalTimeout)
 
 		// 1. Handle Signal
 		selector.AddReceive(signalChan, func(c workflow.ReceiveChannel, more bool) {
@@ -116,20 +115,29 @@ func GantralExecutionWorkflow(ctx workflow.Context, input WorkflowInput) (Workfl
 				InstanceID:    inst.ID,
 				DecisionType:  engine.DecisionReject,
 				ActorID:       "SYSTEM",
-				Justification: "Approval Timeout (24h) Exceeded",
+				Justification: fmt.Sprintf("Approval Timeout (%s) Exceeded", approvalTimeout),
 				Role:          "SYSTEM",
 			}
 		})
 
-		// Wait for one
-		selector.Select(ctx)
-		logger.Info(msg, "instance_id", inst.ID)
+		// Wait for one (Loop for validation)
+		for {
+			selector.Select(ctx)
 
-		// Validate (if strictly from signal, if timeout we constructed valid input)
-		if decisionInput.InstanceID != inst.ID && decisionInput.ActorID != "SYSTEM" {
-			logger.Warn("Received signal for wrong instance", "expected", inst.ID, "got", decisionInput.InstanceID)
-			// For robustness, we could loop back but assuming happy path or timeout for now.
+			// 3. Validate
+			// If it was a timeout (SYSTEM actor), it's valid.
+			if decisionInput.ActorID == "SYSTEM" {
+				break
+			}
+			// If it was a signal, check InstanceID
+			if decisionInput.InstanceID == inst.ID {
+				break
+			}
+
+			// Invalid signal: Log and continue waiting
+			logger.Warn("Received signal for wrong instance or invalid payload", "expected", inst.ID, "got", decisionInput.InstanceID)
 		}
+		logger.Info(msg, "instance_id", inst.ID)
 
 		// Ensure InstanceID is set for Timeout case if it wasn't
 		if decisionInput.InstanceID == "" {
@@ -137,11 +145,13 @@ func GantralExecutionWorkflow(ctx workflow.Context, input WorkflowInput) (Workfl
 		}
 
 		// Record Decision via Activity
-		err := workflow.ExecuteActivity(ctx, a.RecordDecision, decisionInput).Get(ctx, nil)
+		var artifact models.CommitmentArtifact
+		err := workflow.ExecuteActivity(ctx, a.RecordDecision, decisionInput).Get(ctx, &artifact)
 		if err != nil {
 			logger.Error("Failed to record decision", "error", err)
 			return WorkflowResult{}, err
 		}
+		logger.Info("Decision Recorded & Artifact Emitted", "artifact_id", artifact.ArtifactID, "state", artifact.AuthorityState)
 
 		// Update local state based on decision
 		switch decisionInput.DecisionType {

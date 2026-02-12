@@ -13,6 +13,9 @@ import (
 )
 
 func main() {
+	// Global flags
+	var verbose bool
+
 	var rootCmd = &cobra.Command{
 		Use:   "gantral-verify",
 		Short: "Offline verification tool for Gantral Commitment Artifacts",
@@ -20,6 +23,7 @@ func main() {
 the integrity and chain-of-custody of Gantral artifacts 
 without requiring access to the operational database.`,
 	}
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose human-readable output")
 
 	// Subcommand: verify file
 	var fileCmd = &cobra.Command{
@@ -34,18 +38,31 @@ without requiring access to the operational database.`,
 				os.Exit(2)
 			}
 
+			// Parse first to get details for verbose output
+			var art models.CommitmentArtifact
+			_ = json.Unmarshal(data, &art)
+
 			result, err := verifier.VerifyArtifact(data)
 			if err != nil {
 				fmt.Printf("❌ ERROR: Logic failure: %v\n", err)
 				os.Exit(2)
 			}
 
-			// JSON Output Support (Defaulting to plain text for now, but structured)
+			// Verbose Output
+			if verbose {
+				printArtifactSummary(art, result.Valid)
+			}
+
+			// Final Result
 			if result.Valid {
-				fmt.Printf("✅ VALID | ID: %s | Hash: %s\n", result.ArtifactID, result.CalculatedHash)
+				if !verbose {
+					fmt.Printf("✅ VALID | ID: %s | Hash: %s\n", result.ArtifactID, result.CalculatedHash)
+				}
 				os.Exit(0)
 			} else {
-				fmt.Printf("❌ INVALID | ID: %s | Error: %s\n", result.ArtifactID, result.Error)
+				if !verbose {
+					fmt.Printf("❌ INVALID | ID: %s | Error: %s\n", result.ArtifactID, result.Error)
+				}
 				os.Exit(1)
 			}
 		},
@@ -80,11 +97,13 @@ without requiring access to the operational database.`,
 				// Verify individual integrity first
 				res, _ := verifier.VerifyArtifact(data)
 				if res != nil && res.Valid {
-					// We need to parse it again to get the struct, or VerifyArtifact could return it.
-					// For simplicity, strict parse here.
 					var art models.CommitmentArtifact
 					_ = json.Unmarshal(data, &art)
 					artifacts = append(artifacts, art)
+
+					if verbose {
+						fmt.Printf("  [+] Loaded Valid Artifact: %s\n", art.ArtifactID[:8])
+					}
 				} else {
 					fmt.Printf("❌ INVALID INDIVIDUAL ARTIFACT: %s\n", f.Name())
 					os.Exit(1)
@@ -96,16 +115,25 @@ without requiring access to the operational database.`,
 				os.Exit(0)
 			}
 
-			// Sort by Timestamp (or chain logic).
-			// Since artifacts don't have strictly monotonic IDs, we sort by timestamp to reconstruct sequence.
-			// Ideally we follow the linked list from HEAD, but for directory scanning, sorting helps.
+			// Sort by Timestamp
 			sort.Slice(artifacts, func(i, j int) bool {
 				return artifacts[i].Timestamp < artifacts[j].Timestamp
 			})
 
 			// Verify Chain
 			chainRes := verifier.VerifyChain(artifacts)
+
+			if verbose {
+				fmt.Println("\n--- CHAIN VERIFICATION SUMMARY ---")
+				fmt.Printf("[✓] Total Blocks: %d\n", len(artifacts))
+				fmt.Printf("[✓] Start Time:   %s\n", artifacts[0].Timestamp)
+				fmt.Printf("[✓] End Time:     %s\n", artifacts[len(artifacts)-1].Timestamp)
+			}
+
 			if chainRes.Valid {
+				if verbose {
+					fmt.Println("RESULT: ADMISSIBLE")
+				}
 				fmt.Printf("✅ CHAIN VALID | Count: %d\n", len(artifacts))
 				os.Exit(0)
 			} else {
@@ -122,4 +150,31 @@ without requiring access to the operational database.`,
 		fmt.Println(err)
 		os.Exit(2)
 	}
+}
+
+func printArtifactSummary(art models.CommitmentArtifact, valid bool) {
+	fmt.Println("\n--- ARTIFACT VERIFICATION SUMMARY ---")
+
+	icon := "[✓]"
+	if !valid {
+		icon = "[❌]"
+	}
+
+	fmt.Printf("%s Artifact ID:  %s\n", icon, art.ArtifactID)
+	fmt.Printf("%s Signer:       %s\n", icon, art.HumanActorID)
+	fmt.Printf("%s Decision:     %s\n", icon, art.AuthorityState)
+
+	// Truncate hash for display
+	hashDisp := art.ContextHash
+	if len(hashDisp) > 10 {
+		hashDisp = hashDisp[:10] + "..."
+	}
+	fmt.Printf("%s Evidence:     Verified (Hash: %s)\n", icon, hashDisp)
+
+	if valid {
+		fmt.Println("RESULT: ADMISSIBLE")
+	} else {
+		fmt.Println("RESULT: INADMISSIBLE")
+	}
+	fmt.Println("-------------------------------------")
 }

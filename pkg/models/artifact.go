@@ -12,6 +12,10 @@ import (
 // SchemaVersionV1 defines the current schema version for commitment artifacts.
 const SchemaVersionV1 = "v1"
 
+// GenesisHash is the SHA-256 hash of comparable length (64 chars) consisting of zeros.
+// It is used as the PrevArtifactHash for the first artifact in a chain.
+const GenesisHash = "0000000000000000000000000000000000000000000000000000000000000000"
+
 // CommitmentArtifact represents the immutable proof of an execution authority transition.
 // It serves as the root of trust for auditability and verification.
 //
@@ -44,10 +48,6 @@ type CommitmentArtifact struct {
 
 	// Timestamp is the exact time of emission (RFC3339).
 	Timestamp string `json:"timestamp"`
-
-	// ArtifactHash is the self-hash of the artifact payload.
-	// It mirrors ArtifactID in this v1 implementation.
-	ArtifactHash string `json:"artifact_hash"`
 }
 
 // NewCommitmentArtifact creates a new artifact with the given fields.
@@ -85,7 +85,6 @@ func (a *CommitmentArtifact) CalculateHashAndSetID() error {
 	hash := sha256.Sum256(payloadBytes)
 	hashString := hex.EncodeToString(hash[:])
 
-	a.ArtifactHash = hashString
 	a.ArtifactID = hashString
 	return nil
 }
@@ -109,7 +108,7 @@ func (a *CommitmentArtifact) CanonicalPayload() ([]byte, error) {
 	}
 	// Note: PrevArtifactHash can be empty for the first artifact (Genesis),
 	// but strictly speaking, explicit nil handling should be done by caller.
-	// We allow empty string as "Genesis" if that's the design, or enforce "000..." if needed.
+	// We allow empty string or GenesisHash. Ideally, use models.GenesisHash.
 	// For now, we allow it but ensure it's included in the map.
 
 	// 2. Construct map for sorted keys
@@ -146,7 +145,6 @@ func (a *CommitmentArtifact) MarshalJSON() ([]byte, error) {
 		"context_hash":       a.ContextHash,
 		"human_actor_id":     a.HumanActorID,
 		"timestamp":          a.Timestamp,
-		"artifact_hash":      a.ArtifactHash,
 	}
 	return json.Marshal(msg)
 }

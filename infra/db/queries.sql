@@ -5,9 +5,10 @@ INSERT INTO instances (
     state,
     trigger_context,
     policy_context,
-    policy_version_id
+    policy_version_id,
+    last_artifact_hash
 ) VALUES (
-    $1, $2, $3, $4, $5, $6
+    $1, $2, $3, $4, $5, $6, $7
 )
 RETURNING *;
 
@@ -17,7 +18,7 @@ WHERE id = $1 LIMIT 1;
 
 -- name: UpdateInstanceState :exec
 UPDATE instances
-SET state = $2, updated_at = NOW()
+SET state = $2, last_artifact_hash = $3, updated_at = NOW()
 WHERE id = $1;
 
 -- name: CreateDecision :one
@@ -30,7 +31,7 @@ RETURNING *;
 
 -- name: GetDecisionsByInstance :many
 SELECT * FROM decisions
-WHERE instance_id = $1
+WHERE instance_id = $1;
 
 -- name: ListInstances :many
 SELECT * FROM instances
@@ -43,3 +44,8 @@ INSERT INTO audit_events (
     $1, $2, $3, $4
 )
 RETURNING *;
+
+-- name: GetAuditEvents :many
+SELECT * FROM audit_events
+WHERE instance_id = $1
+ORDER BY timestamp ASC;

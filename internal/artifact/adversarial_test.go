@@ -46,8 +46,9 @@ func Test_TamperResistance(t *testing.T) {
 	if recalcArt.ArtifactID == validArt.ArtifactID {
 		t.Fatal("Tamper Resistance FAILED: Hash collision or logic ignored change.")
 	}
-	if recalcArt.ArtifactHash == validArt.ArtifactHash {
-		t.Fatal("Tamper Resistance FAILED: Content change did not change hash.")
+	// Content change MUST change ID in v1
+	if recalcArt.ArtifactID == validArt.ArtifactID {
+		t.Fatal("Tamper Resistance FAILED: Content change did not change ID.")
 	}
 }
 
@@ -55,7 +56,7 @@ func Test_ChainBreakage(t *testing.T) {
 	m := NewManager(&MockStore{})
 
 	// 1. Create Artifact A
-	artA, _ := m.EmitArtifact(context.Background(), "inst-1", "genesis", "RUNNING", "v1", "ctx-A", "sys")
+	artA, _ := m.EmitArtifact(context.Background(), "inst-1", models.GenesisHash, "RUNNING", "v1", "ctx-A", "sys")
 
 	// 2. Create Artifact B pointing to Artifact A
 	artB, _ := m.EmitArtifact(context.Background(), "inst-1", artA.ArtifactID, "APPROVED", "v1", "ctx-B", "human")
@@ -119,7 +120,7 @@ func Test_ReplayDeterminism(t *testing.T) {
 	if err := art.CalculateHashAndSetID(); err != nil {
 		t.Fatal(err)
 	}
-	expectedHash := art.ArtifactHash
+	expectedHash := art.ArtifactID
 
 	// 2. Re-run verification logic
 	recalcArt := models.NewCommitmentArtifact("i1", "p1", "s1", "pv1", "c1", "a1")
@@ -130,7 +131,7 @@ func Test_ReplayDeterminism(t *testing.T) {
 	}
 
 	// 3. ASSERT valid
-	if recalcArt.ArtifactHash != expectedHash {
-		t.Errorf("Replay Determinism FAILED: \nExpected: %s\nGot:      %s", expectedHash, recalcArt.ArtifactHash)
+	if recalcArt.ArtifactID != expectedHash {
+		t.Errorf("Replay Determinism FAILED: \nExpected: %s\nGot:      %s", expectedHash, recalcArt.ArtifactID)
 	}
 }

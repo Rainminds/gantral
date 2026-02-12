@@ -5,6 +5,7 @@ CREATE TABLE instances (
     trigger_context JSONB NOT NULL,
     policy_context JSONB DEFAULT '{}' NOT NULL,
     policy_version_id TEXT NOT NULL DEFAULT '',
+    last_artifact_hash TEXT NOT NULL DEFAULT '',
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

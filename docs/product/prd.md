@@ -109,6 +109,8 @@ It does not visualize, explain, or manage it for humans.
 
 When execution authority is exercised, Gantral emits a **commitment artifact**.
 
+Human authority transitions must capture attributable reasoning sufficient to demonstrate active judgement, not merely procedural approval.
+
 This artifact:
 
 - is emitted **atomically** with the authority state transition
@@ -119,6 +121,8 @@ This artifact:
 If authority cannot be enforced **and** recorded:
 
 > **Execution must not proceed.**
+
+Commitment artifacts are structured to contain decision-grade evidence only. Telemetry, logs, and agent reasoning traces are out-of-scope and non-authoritative.
 
 Gantral is designed to **fail closed**.
 Ambiguity results in refusal or inconclusive outcomes, not best-effort execution.

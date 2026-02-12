@@ -42,12 +42,7 @@ func TestEmitArtifact_Success(t *testing.T) {
 	if art.ArtifactID == "" {
 		t.Error("ArtifactID should be populated")
 	}
-	if art.ArtifactHash == "" {
-		t.Error("ArtifactHash should be populated")
-	}
-	if art.ArtifactID != art.ArtifactHash {
-		t.Error("ArtifactID should equal ArtifactHash in v1")
-	}
+	// ArtifactHash removed in v1model
 	if art.ArtifactVersion != "v1" {
 		t.Errorf("Expected version v1, got %s", art.ArtifactVersion)
 	}
@@ -129,7 +124,7 @@ func TestArtifact_JSONStructure(t *testing.T) {
 	required := []string{
 		"artifact_version", "artifact_id", "instance_id",
 		"prev_artifact_hash", "authority_state", "policy_version_id",
-		"context_hash", "human_actor_id", "timestamp", "artifact_hash",
+		"context_hash", "human_actor_id", "timestamp",
 	}
 
 	for _, field := range required {

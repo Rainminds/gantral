@@ -3,6 +3,7 @@ package engine
 import (
 	"context"
 	"fmt"
+	"strings"
 )
 
 // DecisionType defines the type of decision made.
@@ -14,6 +15,21 @@ const (
 	DecisionOverride DecisionType = "OVERRIDE"
 )
 
+// CalculateNextState determines the target state based on the decision type.
+// This logic is shared between the Engine (transactional update) and Activities (Artifact emission).
+func CalculateNextState(decisionType DecisionType) (State, error) {
+	switch decisionType {
+	case DecisionApprove:
+		return StateApproved, nil
+	case DecisionReject:
+		return StateRejected, nil
+	case DecisionOverride:
+		return StateOverridden, nil
+	default:
+		return "", fmt.Errorf("invalid decision type: %s", decisionType)
+	}
+}
+
 // RecordDecisionCmd is the input for recording a decision.
 type RecordDecisionCmd struct {
 	InstanceID      string
@@ -24,6 +40,7 @@ type RecordDecisionCmd struct {
 	ContextSnapshot map[string]interface{}
 	ContextDelta    map[string]interface{}
 	PolicyVersionID string
+	NewArtifactHash string // The hash of the artifact emitted for this decision (for chain linking)
 }
 
 // RecordDecision records a human decision and updates the instance state accordingly.
@@ -40,18 +57,18 @@ func (e *Engine) RecordDecision(ctx context.Context, cmd RecordDecisionCmd) (*In
 		return nil, fmt.Errorf("instance is not waiting for human decision (state: %s)", instance.State)
 	}
 
-	var nextState State
-	switch cmd.Type {
-	case DecisionApprove:
-		nextState = StateApproved
-	case DecisionReject:
-		nextState = StateRejected
-	case DecisionOverride:
-		nextState = StateOverridden
-	default:
-		return nil, fmt.Errorf("invalid decision type: %s", cmd.Type)
+	// 3. Enforce Invariants
+	if cmd.Type == DecisionApprove || cmd.Type == DecisionOverride {
+		if len(strings.TrimSpace(cmd.Justification)) == 0 {
+			return nil, fmt.Errorf("justification is required for decision type %s", cmd.Type)
+		}
 	}
 
-	// 3. Delegate to Store for Transactional Update
+	nextState, err := CalculateNextState(cmd.Type)
+	if err != nil {
+		return nil, err
+	}
+
+	// 4. Delegate to Store for Transactional Update
 	return e.store.RecordDecision(ctx, cmd, nextState)
 }

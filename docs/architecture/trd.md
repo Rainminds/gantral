@@ -101,6 +101,9 @@ The following invariants must hold across all implementations:
 - **No secret persistence**  
   Gantral stores only secret references; resolution occurs at execution edges.
 
+- **Determinism & Evidence**
+  Human authority must produce structured, attributable reasoning. Approval without justification may be configured as invalid.
+
 Violating these invariants invalidates the system.
 
 ---

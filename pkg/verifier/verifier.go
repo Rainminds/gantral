@@ -57,11 +57,11 @@ func VerifyArtifact(data []byte) (*VerificationResult, error) {
 	}
 
 	// 4. Compare
-	if checkArt.ArtifactHash != claimedID {
+	if checkArt.ArtifactID != claimedID {
 		return &VerificationResult{
 			Valid:          false,
 			ArtifactID:     claimedID,
-			CalculatedHash: checkArt.ArtifactHash,
+			CalculatedHash: checkArt.ArtifactID,
 			Error:          "hash mismatch: integrity compromised",
 		}, nil
 	}
@@ -69,7 +69,7 @@ func VerifyArtifact(data []byte) (*VerificationResult, error) {
 	return &VerificationResult{
 		Valid:          true,
 		ArtifactID:     claimedID,
-		CalculatedHash: checkArt.ArtifactHash,
+		CalculatedHash: checkArt.ArtifactID,
 	}, nil
 }
 

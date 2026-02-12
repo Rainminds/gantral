@@ -12,6 +12,7 @@ import (
 	"github.com/Rainminds/gantral/core/policy"
 	"github.com/Rainminds/gantral/core/ports"
 	"github.com/Rainminds/gantral/core/workflows"
+	"github.com/Rainminds/gantral/internal/middleware"
 	"github.com/google/uuid"
 	"go.temporal.io/api/serviceerror"
 	"go.temporal.io/sdk/client"
@@ -82,9 +83,11 @@ func (h *Handler) CreateInstance(w http.ResponseWriter, r *http.Request) {
 
 // RecordDecisionRequest defines the payload for a human decision.
 type RecordDecisionRequest struct {
-	Type          string `json:"type"`
-	ActorID       string `json:"actor_id"`
-	Justification string `json:"justification"`
+	Type            string                 `json:"type"`
+	ActorID         string                 `json:"actor_id"`
+	Justification   string                 `json:"justification"`
+	PolicyVersionID string                 `json:"policy_version_id"`
+	ContextSnapshot map[string]interface{} `json:"context_snapshot"`
 }
 
 // RecordDecision handles POST /instances/{id}/decisions.
@@ -102,6 +105,12 @@ func (h *Handler) RecordDecision(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Extract Role from Context
+	role := "unknown_via_api"
+	if identity, err := middleware.GetIdentity(r.Context()); err == nil && len(identity.Roles) > 0 {
+		role = identity.Roles[0] // Use primary role
+	}
+
 	// Map to Signal Input
 	var dType engine.DecisionType
 	switch req.Type {
@@ -117,12 +126,13 @@ func (h *Handler) RecordDecision(w http.ResponseWriter, r *http.Request) {
 	}
 
 	signalArg := activities.RecordDecisionInput{
-		InstanceID:    instanceID,
-		DecisionType:  dType,
-		ActorID:       req.ActorID,
-		Justification: req.Justification,
-		Role:          "unknown_via_api",
-		// PolicyVersionID, ContextSnapshot etc left empty for now as API doesn't provide them
+		InstanceID:      instanceID,
+		DecisionType:    dType,
+		ActorID:         req.ActorID,
+		Justification:   req.Justification,
+		Role:            role,
+		PolicyVersionID: req.PolicyVersionID,
+		ContextSnapshot: req.ContextSnapshot,
 	}
 
 	err := h.TemporalClient.SignalWorkflow(r.Context(), instanceID, "", workflows.SignalHumanDecision, signalArg)

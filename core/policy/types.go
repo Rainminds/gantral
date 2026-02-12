@@ -11,9 +11,10 @@ const (
 
 // Policy defines the governance rules for execution.
 type Policy struct {
-	ID                    string           `json:"id"`
-	Materiality           MaterialityLevel `json:"materiality"`
-	RequiresHumanApproval bool             `json:"requires_human_approval"`
+	ID                     string           `json:"id"`
+	Materiality            MaterialityLevel `json:"materiality"`
+	RequiresHumanApproval  bool             `json:"requires_human_approval,omitempty"`
+	ApprovalTimeoutSeconds int64            `json:"approval_timeout_seconds,omitempty"` // Default 24h if 0
 }
 
 // EvaluationResult captures the decision made by the Policy Engine.

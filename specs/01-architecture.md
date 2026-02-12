@@ -102,6 +102,9 @@ The following invariants must hold across all implementations:
 - **No secret persistence**  
   Gantral stores only references; secrets resolve at execution edges  
 
+- **Determinism & Evidence**
+  Human authority must produce structured, attributable reasoning. Approval without justification may be configured as invalid.
+
 ---
 
 ### Agent-Native Persistence (Critical Invariant)

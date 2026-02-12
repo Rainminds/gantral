@@ -114,7 +114,7 @@ func Test_Chain_Verification(t *testing.T) {
 	// Models sets timestamp to Now(). We sleep slightly to ensure order.
 
 	// A
-	artA := models.NewCommitmentArtifact("inst", "genesis", "RUNNING", "v1", "ctxA", "sys")
+	artA := models.NewCommitmentArtifact("inst", models.GenesisHash, "RUNNING", "v1", "ctxA", "sys")
 	_ = artA.CalculateHashAndSetID()
 	_ = os.WriteFile(filepath.Join(tmpDir, "1_A.json"), mustMarshal(artA), 0644)
 	time.Sleep(10 * time.Millisecond)
