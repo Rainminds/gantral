@@ -132,8 +132,3 @@ func TestVerifyChain_BrokenLink(t *testing.T) {
 	assert.False(t, report.Valid)
 	assert.Equal(t, 1, report.BrokenIndex)
 }
-
-func toJson(v interface{}) []byte {
-	d, _ := json.Marshal(v)
-	return d
-}
