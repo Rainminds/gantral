@@ -1,0 +1,1 @@
+ALTER TABLE instances ADD COLUMN IF NOT EXISTS last_artifact_hash TEXT NOT NULL DEFAULT '';

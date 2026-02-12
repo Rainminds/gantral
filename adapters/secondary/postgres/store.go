@@ -9,7 +9,6 @@ import (
 	"github.com/Rainminds/gantral/core/engine"
 	"github.com/Rainminds/gantral/core/ports"
 	"github.com/Rainminds/gantral/infra/db"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -56,15 +55,13 @@ func (s *Store) CreateInstance(ctx context.Context, inst *engine.Instance) error
 
 	// 1. Create Instance
 	_, err = qtx.CreateInstance(ctx, db.CreateInstanceParams{
-		ID:             inst.ID,
-		WorkflowID:     inst.WorkflowID,
-		State:          string(inst.State),
-		TriggerContext: triggerBytes,
-		PolicyContext:  policyBytes,
-		PolicyVersionID: pgtype.Text{
-			String: inst.PolicyVersionID,
-			Valid:  true,
-		},
+		ID:               inst.ID,
+		WorkflowID:       inst.WorkflowID,
+		State:            string(inst.State),
+		TriggerContext:   triggerBytes,
+		PolicyContext:    policyBytes,
+		PolicyVersionID:  inst.PolicyVersionID,
+		LastArtifactHash: inst.LastArtifactHash,
 	})
 	if err != nil {
 		return err
@@ -141,10 +138,17 @@ func (s *Store) RecordDecision(ctx context.Context, cmd engine.RecordDecisionCmd
 		return nil, fmt.Errorf("failed to create decision: %w", err)
 	}
 
+	// 1.5 Fetch current state for audit log (to handle Overrides correct)
+	currentInst, err := qtx.GetInstance(ctx, cmd.InstanceID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch current instance state: %w", err)
+	}
+
 	// 2. Update Instance State
 	err = qtx.UpdateInstanceState(ctx, db.UpdateInstanceStateParams{
-		ID:    cmd.InstanceID,
-		State: string(nextState),
+		ID:               cmd.InstanceID,
+		State:            string(nextState),
+		LastArtifactHash: cmd.NewArtifactHash,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to update instance state: %w", err)
@@ -155,7 +159,7 @@ func (s *Store) RecordDecision(ctx context.Context, cmd engine.RecordDecisionCmd
 		"decision_id":   decisionID,
 		"decision_type": cmd.Type,
 		"actor_id":      cmd.ActorID,
-		"from_state":    "WAITING_FOR_HUMAN", // Known previous state
+		"from_state":    currentInst.State,
 		"to_state":      nextState,
 	}
 	payloadBytes, _ := json.Marshal(eventPayload)
@@ -180,29 +184,14 @@ func (s *Store) RecordDecision(ctx context.Context, cmd engine.RecordDecisionCmd
 }
 
 func (s *Store) GetAuditEvents(ctx context.Context, instanceID string) ([]engine.AuditEvent, error) {
-	// Using raw query as sqlc generation is not currently automated in this environment.
-	// This implements ports.InstanceStore.GetAuditEvents.
-
-	const listAuditEventsValues = `
-		SELECT id, instance_id, event_type, payload, timestamp
-		FROM audit_events
-		WHERE instance_id = $1
-		ORDER BY timestamp ASC
-	`
-
-	rows, err := s.pool.Query(ctx, listAuditEventsValues, instanceID)
+	// Implements ports.InstanceStore.GetAuditEvents using generated SQLC code.
+	rows, err := s.Queries.GetAuditEvents(ctx, instanceID)
 	if err != nil {
 		return nil, fmt.Errorf("query audit events: %w", err)
 	}
-	defer rows.Close()
 
 	var events []engine.AuditEvent
-	for rows.Next() {
-		var r db.AuditEvent
-		if err := rows.Scan(&r.ID, &r.InstanceID, &r.EventType, &r.Payload, &r.Timestamp); err != nil {
-			return nil, fmt.Errorf("scan audit event: %w", err)
-		}
-
+	for _, r := range rows {
 		var payload map[string]interface{}
 		_ = json.Unmarshal(r.Payload, &payload)
 
@@ -224,12 +213,14 @@ func mapDBInstance(row db.Instance) *engine.Instance {
 	_ = json.Unmarshal(row.PolicyContext, &policy)
 
 	return &engine.Instance{
-		ID:             row.ID,
-		WorkflowID:     row.WorkflowID,
-		State:          engine.State(row.State),
-		TriggerContext: trigger,
-		PolicyContext:  policy,
-		CreatedAt:      row.CreatedAt.Time,
-		UpdatedAt:      row.UpdatedAt.Time,
+		ID:               row.ID,
+		WorkflowID:       row.WorkflowID,
+		State:            engine.State(row.State),
+		TriggerContext:   trigger,
+		PolicyContext:    policy,
+		PolicyVersionID:  row.PolicyVersionID,
+		LastArtifactHash: row.LastArtifactHash,
+		CreatedAt:        row.CreatedAt.Time,
+		UpdatedAt:        row.UpdatedAt.Time,
 	}
 }

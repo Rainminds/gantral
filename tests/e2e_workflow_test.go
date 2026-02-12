@@ -19,6 +19,8 @@ import (
 	"github.com/Rainminds/gantral/core/policy"
 	"github.com/Rainminds/gantral/core/workflows"
 	"github.com/Rainminds/gantral/infra"
+	"github.com/Rainminds/gantral/internal/artifact"
+	"github.com/Rainminds/gantral/internal/storage/local"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"go.temporal.io/api/enums/v1"
@@ -74,7 +76,23 @@ func Test_EndToEnd_HITL(t *testing.T) {
 	// 4. Start Worker (In-Process)
 	w := worker.New(c, taskQueue, worker.Options{})
 	w.RegisterWorkflow(workflows.GantralExecutionWorkflow)
-	w.RegisterActivity(&activities.ExecutionActivities{DB: store})
+	// 4b. Initialize Artifact Store (Temp Dir)
+	tmpDir, err := os.MkdirTemp("", "gantral-e2e-artifacts-*")
+	if err != nil {
+		t.Fatalf("Failed to create temp artifact dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	artifactStore, err := local.NewStore(tmpDir)
+	if err != nil {
+		t.Fatalf("Failed to init artifact store: %v", err)
+	}
+	artifactManager := artifact.NewManager(artifactStore)
+
+	w.RegisterActivity(&activities.ExecutionActivities{
+		DB:              store,
+		ArtifactEmitter: artifactManager,
+	})
 
 	if err := w.Start(); err != nil {
 		t.Fatalf("Failed to start worker: %v", err)

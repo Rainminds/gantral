@@ -31,18 +31,18 @@ func Test_Adversarial_Overwrite(t *testing.T) {
 	ctx := context.Background()
 
 	// 1. Write Artifact A (ID: "123")
-	artA := models.NewCommitmentArtifact("inst-1", "genesis", "APPROVED", "v1", "ctx-A", "user")
+	artA := models.NewCommitmentArtifact("inst-1", models.GenesisHash, "APPROVED", "v1", "ctx-A", "user")
 	artA.ArtifactID = "123" // Force ID for collision testing
-	artA.ArtifactHash = "hash-A"
+	// artA.ArtifactHash removed
 
 	if err := store.Write(ctx, artA); err != nil {
 		t.Fatalf("Failed first write: %v", err)
 	}
 
 	// 2. Create a *different* Artifact B with the same ID ("123")
-	artB := models.NewCommitmentArtifact("inst-1", "genesis", "REJECTED", "v1", "ctx-B", "attacker")
+	artB := models.NewCommitmentArtifact("inst-1", models.GenesisHash, "REJECTED", "v1", "ctx-B", "attacker")
 	artB.ArtifactID = "123" // Same ID
-	artB.ArtifactHash = "hash-B"
+	// artB.ArtifactHash removed
 
 	// 3. Attempt to Write Artifact B
 	err := store.Write(ctx, artB)
@@ -99,7 +99,7 @@ func Test_Survival_After_DB_Wipe(t *testing.T) {
 	}
 
 	// 5. ASSERT: Artifact is retrieved and Hash verifies
-	if retrievedArt.ArtifactHash != art.ArtifactHash {
+	if retrievedArt.ArtifactID != art.ArtifactID {
 		t.Error("Hash mismatch on retrieval")
 	}
 }

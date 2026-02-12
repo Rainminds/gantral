@@ -91,3 +91,46 @@ func TestRecordDecision(t *testing.T) {
 		})
 	}
 }
+
+func TestRecordDecision_MissingJustification(t *testing.T) {
+	// Setup
+	store := NewMemoryStore()
+	e := NewEngine(store)
+	ctx := context.Background()
+
+	// 1. Create Instance in Waiting State
+	inst := &Instance{
+		ID:    "inst-justification-test",
+		State: StateWaitingForHuman,
+	}
+	_ = store.CreateInstance(ctx, inst)
+
+	// 2. Attempt APPROVE with empty justification
+	cmdApprove := RecordDecisionCmd{
+		InstanceID:    inst.ID,
+		Type:          DecisionApprove,
+		ActorID:       "user-1",
+		Justification: "   ", // Whitespace only
+	}
+	_, err := e.RecordDecision(ctx, cmdApprove)
+	if err == nil {
+		t.Fatal("Expected error for APPROVE with empty justification, got nil")
+	}
+
+	// 3. Attempt OVERRIDE with empty justification
+	cmdOverride := RecordDecisionCmd{
+		InstanceID:    inst.ID,
+		Type:          DecisionOverride,
+		ActorID:       "admin-1",
+		Justification: "",
+	}
+	_, err = e.RecordDecision(ctx, cmdOverride)
+	if err == nil {
+		t.Fatal("Expected error for OVERRIDE with empty justification, got nil")
+	}
+
+	// 4. Attempt REJECT with empty justification (Should be allowed? User implies check for Approve/Override. Usually Reject also needs it but user query specifically asked for Approve/Override)
+	// "Is justification required (non-null, non-empty) for APPROVE decisions? Is justification required for OVERRIDE decisions?"
+	// Let's enforce for all for consistency, or strictly follow user. User asked "If ANY of the above are false".
+	// Let's stick to Approve/Override for now.
+}

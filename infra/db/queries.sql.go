@@ -7,9 +7,41 @@ package db
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const createAuditEvent = `-- name: CreateAuditEvent :one
+INSERT INTO audit_events (
+    id, instance_id, event_type, payload
+) VALUES (
+    $1, $2, $3, $4
+)
+RETURNING id, instance_id, event_type, payload, timestamp
+`
+
+type CreateAuditEventParams struct {
+	ID         string
+	InstanceID string
+	EventType  string
+	Payload    []byte
+}
+
+func (q *Queries) CreateAuditEvent(ctx context.Context, arg CreateAuditEventParams) (AuditEvent, error) {
+	row := q.db.QueryRow(ctx, createAuditEvent,
+		arg.ID,
+		arg.InstanceID,
+		arg.EventType,
+		arg.Payload,
+	)
+	var i AuditEvent
+	err := row.Scan(
+		&i.ID,
+		&i.InstanceID,
+		&i.EventType,
+		&i.Payload,
+		&i.Timestamp,
+	)
+	return i, err
+}
 
 const createDecision = `-- name: CreateDecision :one
 INSERT INTO decisions (
@@ -67,20 +99,22 @@ INSERT INTO instances (
     state,
     trigger_context,
     policy_context,
-    policy_version_id
+    policy_version_id,
+    last_artifact_hash
 ) VALUES (
-    $1, $2, $3, $4, $5, $6
+    $1, $2, $3, $4, $5, $6, $7
 )
-RETURNING id, workflow_id, state, trigger_context, policy_context, policy_version_id, created_at, updated_at
+RETURNING id, workflow_id, state, trigger_context, policy_context, policy_version_id, last_artifact_hash, created_at, updated_at
 `
 
 type CreateInstanceParams struct {
-	ID              string
-	WorkflowID      string
-	State           string
-	TriggerContext  []byte
-	PolicyContext   []byte
-	PolicyVersionID pgtype.Text
+	ID               string
+	WorkflowID       string
+	State            string
+	TriggerContext   []byte
+	PolicyContext    []byte
+	PolicyVersionID  string
+	LastArtifactHash string
 }
 
 func (q *Queries) CreateInstance(ctx context.Context, arg CreateInstanceParams) (Instance, error) {
@@ -91,6 +125,7 @@ func (q *Queries) CreateInstance(ctx context.Context, arg CreateInstanceParams) 
 		arg.TriggerContext,
 		arg.PolicyContext,
 		arg.PolicyVersionID,
+		arg.LastArtifactHash,
 	)
 	var i Instance
 	err := row.Scan(
@@ -100,16 +135,48 @@ func (q *Queries) CreateInstance(ctx context.Context, arg CreateInstanceParams) 
 		&i.TriggerContext,
 		&i.PolicyContext,
 		&i.PolicyVersionID,
+		&i.LastArtifactHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
 	return i, err
 }
 
+const getAuditEvents = `-- name: GetAuditEvents :many
+SELECT id, instance_id, event_type, payload, timestamp FROM audit_events
+WHERE instance_id = $1
+ORDER BY timestamp ASC
+`
+
+func (q *Queries) GetAuditEvents(ctx context.Context, instanceID string) ([]AuditEvent, error) {
+	rows, err := q.db.Query(ctx, getAuditEvents, instanceID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []AuditEvent
+	for rows.Next() {
+		var i AuditEvent
+		if err := rows.Scan(
+			&i.ID,
+			&i.InstanceID,
+			&i.EventType,
+			&i.Payload,
+			&i.Timestamp,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getDecisionsByInstance = `-- name: GetDecisionsByInstance :many
 SELECT id, instance_id, type, actor_id, justification, role, context_snapshot, context_delta, policy_version_id, created_at FROM decisions
 WHERE instance_id = $1
-ORDER BY created_at DESC
 `
 
 func (q *Queries) GetDecisionsByInstance(ctx context.Context, instanceID string) ([]Decision, error) {
@@ -144,7 +211,7 @@ func (q *Queries) GetDecisionsByInstance(ctx context.Context, instanceID string)
 }
 
 const getInstance = `-- name: GetInstance :one
-SELECT id, workflow_id, state, trigger_context, policy_context, policy_version_id, created_at, updated_at FROM instances
+SELECT id, workflow_id, state, trigger_context, policy_context, policy_version_id, last_artifact_hash, created_at, updated_at FROM instances
 WHERE id = $1 LIMIT 1
 `
 
@@ -158,6 +225,7 @@ func (q *Queries) GetInstance(ctx context.Context, id string) (Instance, error) 
 		&i.TriggerContext,
 		&i.PolicyContext,
 		&i.PolicyVersionID,
+		&i.LastArtifactHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -165,7 +233,7 @@ func (q *Queries) GetInstance(ctx context.Context, id string) (Instance, error) 
 }
 
 const listInstances = `-- name: ListInstances :many
-SELECT id, workflow_id, state, trigger_context, policy_context, policy_version_id, created_at, updated_at FROM instances
+SELECT id, workflow_id, state, trigger_context, policy_context, policy_version_id, last_artifact_hash, created_at, updated_at FROM instances
 ORDER BY created_at DESC
 `
 
@@ -185,6 +253,7 @@ func (q *Queries) ListInstances(ctx context.Context) ([]Instance, error) {
 			&i.TriggerContext,
 			&i.PolicyContext,
 			&i.PolicyVersionID,
+			&i.LastArtifactHash,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -200,58 +269,17 @@ func (q *Queries) ListInstances(ctx context.Context) ([]Instance, error) {
 
 const updateInstanceState = `-- name: UpdateInstanceState :exec
 UPDATE instances
-SET state = $2, updated_at = NOW()
+SET state = $2, last_artifact_hash = $3, updated_at = NOW()
 WHERE id = $1
 `
 
 type UpdateInstanceStateParams struct {
-	ID    string
-	State string
+	ID               string
+	State            string
+	LastArtifactHash string
 }
 
 func (q *Queries) UpdateInstanceState(ctx context.Context, arg UpdateInstanceStateParams) error {
-	_, err := q.db.Exec(ctx, updateInstanceState, arg.ID, arg.State)
+	_, err := q.db.Exec(ctx, updateInstanceState, arg.ID, arg.State, arg.LastArtifactHash)
 	return err
-}
-
-const createAuditEvent = `-- name: CreateAuditEvent :one
-INSERT INTO audit_events (
-    id, instance_id, event_type, payload
-) VALUES (
-    $1, $2, $3, $4
-)
-RETURNING id, instance_id, event_type, payload, timestamp
-`
-
-type CreateAuditEventParams struct {
-	ID         string
-	InstanceID string
-	EventType  string
-	Payload    []byte
-}
-
-type AuditEvent struct {
-	ID         string
-	InstanceID string
-	EventType  string
-	Payload    []byte
-	Timestamp  pgtype.Timestamp
-}
-
-func (q *Queries) CreateAuditEvent(ctx context.Context, arg CreateAuditEventParams) (AuditEvent, error) {
-	row := q.db.QueryRow(ctx, createAuditEvent,
-		arg.ID,
-		arg.InstanceID,
-		arg.EventType,
-		arg.Payload,
-	)
-	var i AuditEvent
-	err := row.Scan(
-		&i.ID,
-		&i.InstanceID,
-		&i.EventType,
-		&i.Payload,
-		&i.Timestamp,
-	)
-	return i, err
 }

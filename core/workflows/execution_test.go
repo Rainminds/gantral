@@ -8,6 +8,7 @@ import (
 	"github.com/Rainminds/gantral/core/activities"
 	"github.com/Rainminds/gantral/core/engine"
 	"github.com/Rainminds/gantral/core/policy"
+	"github.com/Rainminds/gantral/pkg/models"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"go.temporal.io/sdk/testsuite"
@@ -93,7 +94,10 @@ func (s *UnitTestSuite) Test_HITL_Flow_Approved() {
 		mock.MatchedBy(func(arg activities.RecordDecisionInput) bool {
 			return arg.InstanceID == "inst-hitl-1" && arg.DecisionType == engine.DecisionApprove
 		}),
-	).Return(nil) // Success
+	).Return(&models.CommitmentArtifact{
+		ArtifactID:     "art-mock-hitl",
+		AuthorityState: "APPROVED",
+	}, nil) // Success
 
 	// Register Delayed Signal
 	s.env.RegisterDelayedCallback(func() {
@@ -163,7 +167,10 @@ func (s *UnitTestSuite) Test_HITL_Timeout() {
 				arg.DecisionType == engine.DecisionReject &&
 				arg.ActorID == "SYSTEM"
 		}),
-	).Return(nil)
+	).Return(&models.CommitmentArtifact{
+		ArtifactID:     "art-mock-timeout",
+		AuthorityState: "REJECTED",
+	}, nil)
 
 	// Note: No signal sent. We rely on time skipping.
 	// Temporal TestEnv automatically skips time if workflow is blocked on timer.

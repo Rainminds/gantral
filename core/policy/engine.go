@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+
+	"github.com/Rainminds/gantral/pkg/constants"
 )
 
 // Engine is responsible for evaluating policies against execution requests.
@@ -16,20 +18,10 @@ func NewEngine() *Engine {
 
 // Evaluate checks the policy rules and determines the next execution state.
 func (e *Engine) Evaluate(ctx context.Context, p Policy) (EvaluationResult, error) {
-	result := EvaluationResult{
-		ShouldPause: false,
-		NextState:   "RUNNING",
-		Reason:      "Policy allows automatic execution",
-	}
+	// Delegate to pure function for core logic
+	result := EvaluatePure(p)
 
-	// Rule: HIGH materiality OR explicit human approval requirement pauses execution.
-	if p.Materiality == MaterialityHigh || p.RequiresHumanApproval {
-		result.ShouldPause = true
-		result.NextState = "WAITING_FOR_HUMAN"
-		result.Reason = fmt.Sprintf("Execution paused: Materiality=%s, RequiresApproval=%v", p.Materiality, p.RequiresHumanApproval)
-	}
-
-	// Observability
+	// Observability (Side Effect)
 	slog.Info("policy evaluated",
 		"policy_id", p.ID,
 		"decision", result.NextState,
@@ -37,4 +29,23 @@ func (e *Engine) Evaluate(ctx context.Context, p Policy) (EvaluationResult, erro
 	)
 
 	return result, nil
+}
+
+// EvaluatePure contains the deterministic logic for policy evaluation.
+// It must have NO side effects (no logging, no I/O) to be safe for Replay.
+func EvaluatePure(p Policy) EvaluationResult {
+	result := EvaluationResult{
+		ShouldPause: false,
+		NextState:   constants.StateRunning,
+		Reason:      "Policy allows automatic execution",
+	}
+
+	// Rule: HIGH materiality OR explicit human approval requirement pauses execution.
+	if p.Materiality == MaterialityHigh || p.RequiresHumanApproval {
+		result.ShouldPause = true
+		result.NextState = constants.StateWaitingForHuman
+		result.Reason = fmt.Sprintf("Execution paused: Materiality=%s, RequiresApproval=%v", p.Materiality, p.RequiresHumanApproval)
+	}
+
+	return result
 }

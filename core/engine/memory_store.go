@@ -60,6 +60,9 @@ func (s *MemoryStore) RecordDecision(ctx context.Context, cmd RecordDecisionCmd,
 	}
 
 	inst.State = nextState
+	if cmd.NewArtifactHash != "" {
+		inst.LastArtifactHash = cmd.NewArtifactHash
+	}
 	// In a real store, we would also save the decision record
 
 	s.instances[cmd.InstanceID] = copyInstance(inst)

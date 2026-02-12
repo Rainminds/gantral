@@ -1,0 +1,131 @@
+=== RUN   Test_EndToEnd_HITL
+    e2e_workflow_test.go:38: DATABASE_URL not set, using default: postgres://postgres:changeme@127.0.0.1:5432/gantral?sslmode=disable
+2026/02/12 22:27:11 INFO  No logger configured for temporal client. Created default one.
+{"time":"2026-02-12T22:27:11.122235+05:30","level":"INFO","msg":"Starting E2E Test","task_queue":"e2e-test-f252a83f-d603-4fa1-9b94-b8bebf9dbede"}
+2026/02/12 22:27:11 INFO  Started Worker Namespace default TaskQueue e2e-test-f252a83f-d603-4fa1-9b94-b8bebf9dbede WorkerID 53622@AP-MBP.local@
+2026/02/12 22:27:11 INFO Workflow Started instance_id=inst-9c1571ed-71bb-40b7-9977-d2b6c46e6f4f run_id=019c52c9-0326-786f-9d8a-2064bbacba4b
+    e2e_workflow_test.go:118: Created Instance: inst-9c1571ed-71bb-40b7-9977-d2b6c46e6f4f
+{"time":"2026-02-12T22:27:11.214409+05:30","level":"INFO","msg":"Waiting for PAUSE state..."}
+2026/02/12 22:27:11 INFO  Starting Gantral Execution Workflow Namespace default TaskQueue e2e-test-f252a83f-d603-4fa1-9b94-b8bebf9dbede WorkerID 53622@AP-MBP.local@ WorkflowType GantralExecutionWorkflow WorkflowID inst-9c1571ed-71bb-40b7-9977-d2b6c46e6f4f RunID 019c52c9-0326-786f-9d8a-2064bbacba4b Attempt 1 workflow_id e2e-wf-82367bf6-2850-45a1-b5f6-1e7f3aae2d83
+2026/02/12 22:27:11 DEBUG ExecuteActivity Namespace default TaskQueue e2e-test-f252a83f-d603-4fa1-9b94-b8bebf9dbede WorkerID 53622@AP-MBP.local@ WorkflowType GantralExecutionWorkflow WorkflowID inst-9c1571ed-71bb-40b7-9977-d2b6c46e6f4f RunID 019c52c9-0326-786f-9d8a-2064bbacba4b Attempt 1 ActivityID 5 ActivityType PersistInstance
+2026/02/12 22:27:11 INFO  Persisting new instance Namespace default TaskQueue e2e-test-f252a83f-d603-4fa1-9b94-b8bebf9dbede WorkerID 53622@AP-MBP.local@ ActivityID 5 ActivityType PersistInstance Attempt 1 WorkflowType GantralExecutionWorkflow WorkflowID inst-9c1571ed-71bb-40b7-9977-d2b6c46e6f4f RunID 019c52c9-0326-786f-9d8a-2064bbacba4b workflow_id e2e-wf-82367bf6-2850-45a1-b5f6-1e7f3aae2d83
+2026/02/12 22:27:11 INFO  Blocking for Human Decision Namespace default TaskQueue e2e-test-f252a83f-d603-4fa1-9b94-b8bebf9dbede WorkerID 53622@AP-MBP.local@ WorkflowType GantralExecutionWorkflow WorkflowID inst-9c1571ed-71bb-40b7-9977-d2b6c46e6f4f RunID 019c52c9-0326-786f-9d8a-2064bbacba4b Attempt 1 instance_id inst-9c1571ed-71bb-40b7-9977-d2b6c46e6f4f
+2026/02/12 22:27:11 DEBUG NewTimer Namespace default TaskQueue e2e-test-f252a83f-d603-4fa1-9b94-b8bebf9dbede WorkerID 53622@AP-MBP.local@ WorkflowType GantralExecutionWorkflow WorkflowID inst-9c1571ed-71bb-40b7-9977-d2b6c46e6f4f RunID 019c52c9-0326-786f-9d8a-2064bbacba4b Attempt 1 TimerID 11 Duration 24h0m0s
+{"time":"2026-02-12T22:27:11.735164+05:30","level":"INFO","msg":"Recording Decision: APPROVE"}
+{"time":"2026-02-12T22:27:11.758688+05:30","level":"INFO","msg":"Waiting for COMPLETION..."}
+2026/02/12 22:27:11 INFO  HITL Decision Received Namespace default TaskQueue e2e-test-f252a83f-d603-4fa1-9b94-b8bebf9dbede WorkerID 53622@AP-MBP.local@ WorkflowType GantralExecutionWorkflow WorkflowID inst-9c1571ed-71bb-40b7-9977-d2b6c46e6f4f RunID 019c52c9-0326-786f-9d8a-2064bbacba4b Attempt 1 instance_id inst-9c1571ed-71bb-40b7-9977-d2b6c46e6f4f
+2026/02/12 22:27:11 DEBUG ExecuteActivity Namespace default TaskQueue e2e-test-f252a83f-d603-4fa1-9b94-b8bebf9dbede WorkerID 53622@AP-MBP.local@ WorkflowType GantralExecutionWorkflow WorkflowID inst-9c1571ed-71bb-40b7-9977-d2b6c46e6f4f RunID 019c52c9-0326-786f-9d8a-2064bbacba4b Attempt 1 ActivityID 16 ActivityType RecordDecision
+2026/02/12 22:27:11 INFO  Recording decision Namespace default TaskQueue e2e-test-f252a83f-d603-4fa1-9b94-b8bebf9dbede WorkerID 53622@AP-MBP.local@ ActivityID 16 ActivityType RecordDecision Attempt 1 WorkflowType GantralExecutionWorkflow WorkflowID inst-9c1571ed-71bb-40b7-9977-d2b6c46e6f4f RunID 019c52c9-0326-786f-9d8a-2064bbacba4b instance_id inst-9c1571ed-71bb-40b7-9977-d2b6c46e6f4f type APPROVE
+2026/02/12 22:27:11 ERROR Activity panic. Namespace default TaskQueue e2e-test-f252a83f-d603-4fa1-9b94-b8bebf9dbede WorkerID 53622@AP-MBP.local@ WorkflowID inst-9c1571ed-71bb-40b7-9977-d2b6c46e6f4f RunID 019c52c9-0326-786f-9d8a-2064bbacba4b ActivityType RecordDecision Attempt 1 PanicError runtime error: invalid memory address or nil pointer dereference PanicStack activity for e2e-test-f252a83f-d603-4fa1-9b94-b8bebf9dbede [panic]:
+github.com/Rainminds/gantral/core/activities.(*ExecutionActivities).RecordDecision(0xc000110040, {0x103605ab0, 0xc0003f7740}, {{0xc00067e6f0, 0x29}, {0xc000126b58, 0x7}, {0xc000126b60, 0xa}, {0xc000126b70, ...}, ...})
+	/Users/apkb/Documents/workspace/gantral/code/gantral/core/activities/execution.go:107 +0x2b4
+reflect.Value.call({0x1033eefc0?, 0xc0003b0180?, 0xc0005f96b8?}, {0x103129079, 0x4}, {0xc0003f77a0, 0x2, 0x16?})
+	/usr/local/Cellar/go/1.25.2/libexec/src/reflect/value.go:581 +0xcc6
+reflect.Value.Call({0x1033eefc0?, 0xc0003b0180?, 0xc0007bc090?}, {0xc0003f77a0?, 0xc0007b0980?, 0xc0007bc0b8?})
+	/usr/local/Cellar/go/1.25.2/libexec/src/reflect/value.go:365 +0xb9
+go.temporal.io/sdk/internal.executeFunction({0x1033eefc0, 0xc0003b0180?}, {0xc0003039c0?, 0x2, 0x1033ca600?})
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_worker.go:2262 +0x305
+go.temporal.io/sdk/internal.executeFunctionWithContext({0x103605ab0, 0xc0003f7740}, {0x1033eefc0, 0xc0003b0180}, {0xc000590780, 0x1, 0x1})
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_worker.go:2246 +0x1b8
+go.temporal.io/sdk/internal.(*activityEnvironmentInterceptor).ExecuteActivity(0xc000594580, {0x103605b58?, 0xc000319030?}, 0xc000313830)
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_activity.go:350 +0x67
+go.temporal.io/sdk/internal.(*activityExecutor).ExecuteWithActualArgs(0xc000600630, {0x103605b58, 0xc000319030}, {0xc000590780, 0x1, 0x1})
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_worker.go:1112 +0x14b
+go.temporal.io/sdk/internal.(*activityExecutor).Execute(0xc000600630, {0x103605b58, 0xc000319030}, 0xc00060fe80)
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_worker.go:1098 +0x20e
+go.temporal.io/sdk/internal.(*activityTaskHandlerImpl).Execute(0xc000322000, {0xc000142030, 0x2d}, 0xc000322380)
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_task_handlers.go:2307 +0xb39
+go.temporal.io/sdk/internal.(*activityTaskPoller).ProcessTask(0xc0003be270, {0x10340e640, 0xc00030af20})
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_task_pollers.go:1240 +0x26d
+go.temporal.io/sdk/internal.(*baseWorker).processTaskAsync.func1()
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_worker_base.go:541 +0x12f
+created by go.temporal.io/sdk/internal.(*baseWorker).processTaskAsync in goroutine 28
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_worker_base.go:520 +0x8c
+2026/02/12 22:27:12 INFO  Recording decision Namespace default TaskQueue e2e-test-f252a83f-d603-4fa1-9b94-b8bebf9dbede WorkerID 53622@AP-MBP.local@ ActivityID 16 ActivityType RecordDecision Attempt 2 WorkflowType GantralExecutionWorkflow WorkflowID inst-9c1571ed-71bb-40b7-9977-d2b6c46e6f4f RunID 019c52c9-0326-786f-9d8a-2064bbacba4b instance_id inst-9c1571ed-71bb-40b7-9977-d2b6c46e6f4f type APPROVE
+2026/02/12 22:27:12 ERROR Activity panic. Namespace default TaskQueue e2e-test-f252a83f-d603-4fa1-9b94-b8bebf9dbede WorkerID 53622@AP-MBP.local@ WorkflowID inst-9c1571ed-71bb-40b7-9977-d2b6c46e6f4f RunID 019c52c9-0326-786f-9d8a-2064bbacba4b ActivityType RecordDecision Attempt 2 PanicError runtime error: invalid memory address or nil pointer dereference PanicStack activity for e2e-test-f252a83f-d603-4fa1-9b94-b8bebf9dbede [panic]:
+github.com/Rainminds/gantral/core/activities.(*ExecutionActivities).RecordDecision(0xc000110040, {0x103605ab0, 0xc0005503c0}, {{0xc000045080, 0x29}, {0xc0002d8ee0, 0x7}, {0xc0002d8ef0, 0xa}, {0xc0002d8f00, ...}, ...})
+	/Users/apkb/Documents/workspace/gantral/code/gantral/core/activities/execution.go:107 +0x2b4
+reflect.Value.call({0x1033eefc0?, 0xc0003b0180?, 0xc0001f16b8?}, {0x103129079, 0x4}, {0xc0005503f0, 0x2, 0x16?})
+	/usr/local/Cellar/go/1.25.2/libexec/src/reflect/value.go:581 +0xcc6
+reflect.Value.Call({0x1033eefc0?, 0xc0003b0180?, 0xc000549170?}, {0xc0005503f0?, 0xc00054c300?, 0xc000549198?})
+	/usr/local/Cellar/go/1.25.2/libexec/src/reflect/value.go:365 +0xb9
+go.temporal.io/sdk/internal.executeFunction({0x1033eefc0, 0xc0003b0180?}, {0xc0000a0960?, 0x2, 0x1033ca600?})
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_worker.go:2262 +0x305
+go.temporal.io/sdk/internal.executeFunctionWithContext({0x103605ab0, 0xc0005503c0}, {0x1033eefc0, 0xc0003b0180}, {0xc00030b150, 0x1, 0x1})
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_worker.go:2246 +0x1b8
+go.temporal.io/sdk/internal.(*activityEnvironmentInterceptor).ExecuteActivity(0xc000061680, {0x103605b58?, 0xc0002d7ea0?}, 0xc0001314a0)
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_activity.go:350 +0x67
+go.temporal.io/sdk/internal.(*activityExecutor).ExecuteWithActualArgs(0xc000600630, {0x103605b58, 0xc0002d7ea0}, {0xc00030b150, 0x1, 0x1})
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_worker.go:1112 +0x14b
+go.temporal.io/sdk/internal.(*activityExecutor).Execute(0xc000600630, {0x103605b58, 0xc0002d7ea0}, 0xc000594ac0)
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_worker.go:1098 +0x20e
+go.temporal.io/sdk/internal.(*activityTaskHandlerImpl).Execute(0xc000322000, {0xc000142030, 0x2d}, 0xc00044e1c0)
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_task_handlers.go:2307 +0xb39
+go.temporal.io/sdk/internal.(*activityTaskPoller).ProcessTask(0xc0003be270, {0x10340e640, 0xc0005910d0})
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_task_pollers.go:1240 +0x26d
+go.temporal.io/sdk/internal.(*baseWorker).processTaskAsync.func1()
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_worker_base.go:541 +0x12f
+created by go.temporal.io/sdk/internal.(*baseWorker).processTaskAsync in goroutine 28
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_worker_base.go:520 +0x8c
+2026/02/12 22:27:14 INFO  Recording decision Namespace default TaskQueue e2e-test-f252a83f-d603-4fa1-9b94-b8bebf9dbede WorkerID 53622@AP-MBP.local@ ActivityID 16 ActivityType RecordDecision Attempt 3 WorkflowType GantralExecutionWorkflow WorkflowID inst-9c1571ed-71bb-40b7-9977-d2b6c46e6f4f RunID 019c52c9-0326-786f-9d8a-2064bbacba4b instance_id inst-9c1571ed-71bb-40b7-9977-d2b6c46e6f4f type APPROVE
+2026/02/12 22:27:14 ERROR Activity panic. Namespace default TaskQueue e2e-test-f252a83f-d603-4fa1-9b94-b8bebf9dbede WorkerID 53622@AP-MBP.local@ WorkflowID inst-9c1571ed-71bb-40b7-9977-d2b6c46e6f4f RunID 019c52c9-0326-786f-9d8a-2064bbacba4b ActivityType RecordDecision Attempt 3 PanicError runtime error: invalid memory address or nil pointer dereference PanicStack activity for e2e-test-f252a83f-d603-4fa1-9b94-b8bebf9dbede [panic]:
+github.com/Rainminds/gantral/core/activities.(*ExecutionActivities).RecordDecision(0xc000110040, {0x103605ab0, 0xc000550c00}, {{0xc000045170, 0x29}, {0xc0002d90f0, 0x7}, {0xc0002d9120, 0xa}, {0xc0002d9130, ...}, ...})
+	/Users/apkb/Documents/workspace/gantral/code/gantral/core/activities/execution.go:107 +0x2b4
+reflect.Value.call({0x1033eefc0?, 0xc0003b0180?, 0xc0001f16b8?}, {0x103129079, 0x4}, {0xc000550c30, 0x2, 0x16?})
+	/usr/local/Cellar/go/1.25.2/libexec/src/reflect/value.go:581 +0xcc6
+reflect.Value.Call({0x1033eefc0?, 0xc0003b0180?, 0xc000549710?}, {0xc000550c30?, 0xc00054c600?, 0xc000549738?})
+	/usr/local/Cellar/go/1.25.2/libexec/src/reflect/value.go:365 +0xb9
+go.temporal.io/sdk/internal.executeFunction({0x1033eefc0, 0xc0003b0180?}, {0xc0000a0e00?, 0x2, 0x1033ca600?})
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_worker.go:2262 +0x305
+go.temporal.io/sdk/internal.executeFunctionWithContext({0x103605ab0, 0xc000550c00}, {0x1033eefc0, 0xc0003b0180}, {0xc00030b510, 0x1, 0x1})
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_worker.go:2246 +0x1b8
+go.temporal.io/sdk/internal.(*activityEnvironmentInterceptor).ExecuteActivity(0xc000061b00, {0x103605b58?, 0xc0000f2460?}, 0xc000131530)
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_activity.go:350 +0x67
+go.temporal.io/sdk/internal.(*activityExecutor).ExecuteWithActualArgs(0xc000600630, {0x103605b58, 0xc0000f2460}, {0xc00030b510, 0x1, 0x1})
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_worker.go:1112 +0x14b
+go.temporal.io/sdk/internal.(*activityExecutor).Execute(0xc000600630, {0x103605b58, 0xc0000f2460}, 0xc000594f40)
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_worker.go:1098 +0x20e
+go.temporal.io/sdk/internal.(*activityTaskHandlerImpl).Execute(0xc000322000, {0xc000142030, 0x2d}, 0xc00054e000)
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_task_handlers.go:2307 +0xb39
+go.temporal.io/sdk/internal.(*activityTaskPoller).ProcessTask(0xc0003be270, {0x10340e640, 0xc0005912b0})
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_task_pollers.go:1240 +0x26d
+go.temporal.io/sdk/internal.(*baseWorker).processTaskAsync.func1()
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_worker_base.go:541 +0x12f
+created by go.temporal.io/sdk/internal.(*baseWorker).processTaskAsync in goroutine 28
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_worker_base.go:520 +0x8c
+2026/02/12 22:27:18 INFO  Recording decision Namespace default TaskQueue e2e-test-f252a83f-d603-4fa1-9b94-b8bebf9dbede WorkerID 53622@AP-MBP.local@ ActivityID 16 ActivityType RecordDecision Attempt 4 WorkflowType GantralExecutionWorkflow WorkflowID inst-9c1571ed-71bb-40b7-9977-d2b6c46e6f4f RunID 019c52c9-0326-786f-9d8a-2064bbacba4b instance_id inst-9c1571ed-71bb-40b7-9977-d2b6c46e6f4f type APPROVE
+2026/02/12 22:27:18 ERROR Activity panic. Namespace default TaskQueue e2e-test-f252a83f-d603-4fa1-9b94-b8bebf9dbede WorkerID 53622@AP-MBP.local@ WorkflowID inst-9c1571ed-71bb-40b7-9977-d2b6c46e6f4f RunID 019c52c9-0326-786f-9d8a-2064bbacba4b ActivityType RecordDecision Attempt 4 PanicError runtime error: invalid memory address or nil pointer dereference PanicStack activity for e2e-test-f252a83f-d603-4fa1-9b94-b8bebf9dbede [panic]:
+github.com/Rainminds/gantral/core/activities.(*ExecutionActivities).RecordDecision(0xc000110040, {0x103605ab0, 0xc000550f30}, {{0xc0000451a0, 0x29}, {0xc0002d91e0, 0x7}, {0xc0002d91f0, 0xa}, {0xc0002d9200, ...}, ...})
+	/Users/apkb/Documents/workspace/gantral/code/gantral/core/activities/execution.go:107 +0x2b4
+reflect.Value.call({0x1033eefc0?, 0xc0003b0180?, 0xc0001f16b8?}, {0x103129079, 0x4}, {0xc000550f60, 0x2, 0x16?})
+	/usr/local/Cellar/go/1.25.2/libexec/src/reflect/value.go:581 +0xcc6
+reflect.Value.Call({0x1033eefc0?, 0xc0003b0180?, 0xc0005497a0?}, {0xc000550f60?, 0xc00054c880?, 0xc0005497c8?})
+	/usr/local/Cellar/go/1.25.2/libexec/src/reflect/value.go:365 +0xb9
+go.temporal.io/sdk/internal.executeFunction({0x1033eefc0, 0xc0003b0180?}, {0xc0000a0e80?, 0x2, 0x1033ca600?})
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_worker.go:2262 +0x305
+go.temporal.io/sdk/internal.executeFunctionWithContext({0x103605ab0, 0xc000550f30}, {0x1033eefc0, 0xc0003b0180}, {0xc00030b670, 0x1, 0x1})
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_worker.go:2246 +0x1b8
+go.temporal.io/sdk/internal.(*activityEnvironmentInterceptor).ExecuteActivity(0xc000061c00, {0x103605b58?, 0xc0000f25b0?}, 0xc000131560)
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_activity.go:350 +0x67
+go.temporal.io/sdk/internal.(*activityExecutor).ExecuteWithActualArgs(0xc000600630, {0x103605b58, 0xc0000f25b0}, {0xc00030b670, 0x1, 0x1})
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_worker.go:1112 +0x14b
+go.temporal.io/sdk/internal.(*activityExecutor).Execute(0xc000600630, {0x103605b58, 0xc0000f25b0}, 0xc00045afc0)
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_worker.go:1098 +0x20e
+go.temporal.io/sdk/internal.(*activityTaskHandlerImpl).Execute(0xc000322000, {0xc000142030, 0x2d}, 0xc00086e1c0)
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_task_handlers.go:2307 +0xb39
+go.temporal.io/sdk/internal.(*activityTaskPoller).ProcessTask(0xc0003be270, {0x10340e640, 0xc000763720})
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_task_pollers.go:1240 +0x26d
+go.temporal.io/sdk/internal.(*baseWorker).processTaskAsync.func1()
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_worker_base.go:541 +0x12f
+created by go.temporal.io/sdk/internal.(*baseWorker).processTaskAsync in goroutine 28
+	/Users/apkb/go/pkg/mod/go.temporal.io/sdk@v1.38.0/internal/internal_worker_base.go:520 +0x8c
+    e2e_workflow_test.go:168: 
+        	Error Trace:	/Users/apkb/Documents/workspace/gantral/code/gantral/tests/e2e_workflow_test.go:168
+        	Error:      	Condition never satisfied
+        	Test:       	Test_EndToEnd_HITL
+        	Messages:   	Instance should be APPROVED and Workflow COMPLETED
+2026/02/12 22:27:21 INFO  Stopped Worker Namespace default TaskQueue e2e-test-f252a83f-d603-4fa1-9b94-b8bebf9dbede WorkerID 53622@AP-MBP.local@
+--- FAIL: Test_EndToEnd_HITL (10.74s)
+FAIL
+FAIL	github.com/Rainminds/gantral/tests	11.499s
+FAIL

@@ -1,0 +1,11 @@
+{
+  "artifact_id": "dcf44c1f061fd88211dad310ca5a9769add5645e2c5493a55af0a707e895f9b5",
+  "artifact_version": "v1",
+  "authority_state": "APPROVED",
+  "context_hash": "sha256-hash-of-evidence",
+  "human_actor_id": "admin-alice",
+  "instance_id": "inst-demo-1",
+  "policy_version_id": "v1",
+  "prev_artifact_hash": "",
+  "timestamp": "2026-02-12T17:11:21Z"
+}

@@ -8,6 +8,14 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type AuditEvent struct {
+	ID         string
+	InstanceID string
+	EventType  string
+	Payload    []byte
+	Timestamp  pgtype.Timestamptz
+}
+
 type Decision struct {
 	ID              string
 	InstanceID      string
@@ -22,12 +30,13 @@ type Decision struct {
 }
 
 type Instance struct {
-	ID              string
-	WorkflowID      string
-	State           string
-	TriggerContext  []byte
-	PolicyContext   []byte
-	PolicyVersionID pgtype.Text
-	CreatedAt       pgtype.Timestamptz
-	UpdatedAt       pgtype.Timestamptz
+	ID               string
+	WorkflowID       string
+	State            string
+	TriggerContext   []byte
+	PolicyContext    []byte
+	PolicyVersionID  string
+	LastArtifactHash string
+	CreatedAt        pgtype.Timestamptz
+	UpdatedAt        pgtype.Timestamptz
 }

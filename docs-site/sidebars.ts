@@ -127,6 +127,21 @@ const sidebars: SidebarsConfig = {
         'contributors/design-philosophy',
       ],
     },
+
+    // --- Testing ---
+    {
+      type: 'category',
+      label: 'Testing',
+      link: {
+        type: 'doc',
+        id: 'testing/README',
+      },
+      items: [
+        'testing/TESTING_ARCHITECTURE_BLUEPRINT',
+        'testing/MASTER_TEST_INVENTORY',
+        'testing/TEST_EXECUTION_STRATEGY',
+      ],
+    },
   ],
 };
 
