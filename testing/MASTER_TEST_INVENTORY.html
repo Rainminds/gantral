@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-testing/MASTER_TEST_INVENTORY" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.2">
+<title data-rh="true">Exhaustive Master Test Inventory | Gantral</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://docs.gantral.org/img/gantral-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://docs.gantral.org/img/gantral-social-card.jpg"><meta data-rh="true" property="og:url" content="https://docs.gantral.org/testing/MASTER_TEST_INVENTORY"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Exhaustive Master Test Inventory | Gantral"><meta data-rh="true" name="description" content="Version: v1.0 (Baseline Enforcement Model)"><meta data-rh="true" property="og:description" content="Version: v1.0 (Baseline Enforcement Model)"><link data-rh="true" rel="icon" href="/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://docs.gantral.org/testing/MASTER_TEST_INVENTORY"><link data-rh="true" rel="alternate" href="https://docs.gantral.org/testing/MASTER_TEST_INVENTORY" hreflang="en"><link data-rh="true" rel="alternate" href="https://docs.gantral.org/testing/MASTER_TEST_INVENTORY" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Testing","item":"https://docs.gantral.org/testing/"},{"@type":"ListItem","position":2,"name":"Exhaustive Master Test Inventory","item":"https://docs.gantral.org/testing/MASTER_TEST_INVENTORY"}]}</script><link rel="stylesheet" href="/assets/css/styles.8cf77017.css">
+<script src="/assets/js/runtime~main.2f06d63a.js" defer="defer"></script>
+<script src="/assets/js/main.41500e5f.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")),document.documentElement.setAttribute("data-theme-choice",t||"system")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><link rel="preload" as="image" href="/img/logo.svg"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/"><div class="navbar__logo"><img src="/img/logo.svg" alt="Gantral Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/img/logo.svg" alt="Gantral Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">gantral</b></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/">Documentation</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><a href="https://git.gantral.org" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">Git<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/"><span title="Welcome" class="linkLabel_WmDU">Welcome</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist" href="/verifiability"><span title="Verifiability" class="categoryLinkLabel_W154">Verifiability</span></a><button aria-label="Expand sidebar category &#x27;Verifiability&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/positioning/ai-execution-control-plane-summary"><span title="Positioning" class="categoryLinkLabel_W154">Positioning</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/architecture/trd"><span title="Architecture" class="categoryLinkLabel_W154">Architecture</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/governance/policy-vs-authority"><span title="Governance" class="categoryLinkLabel_W154">Governance</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/adoption"><span title="Adoption" class="categoryLinkLabel_W154">Adoption</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/guides/auditor-verification"><span title="Guides" class="categoryLinkLabel_W154">Guides</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/product/prd"><span title="Product" class="categoryLinkLabel_W154">Product</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/executive"><span title="Executive" class="categoryLinkLabel_W154">Executive</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/contributors/getting-started"><span title="Contributing" class="categoryLinkLabel_W154">Contributing</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--active" href="/testing"><span title="Testing" class="categoryLinkLabel_W154">Testing</span></a><button aria-label="Collapse sidebar category &#x27;Testing&#x27;" aria-expanded="true" type="button" class="clean-btn menu__caret"></button></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/testing/TESTING_ARCHITECTURE_BLUEPRINT"><span title="Testing Architecture Blueprint" class="linkLabel_WmDU">Testing Architecture Blueprint</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/testing/MASTER_TEST_INVENTORY"><span title="Exhaustive Master Test Inventory" class="linkLabel_WmDU">Exhaustive Master Test Inventory</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/testing/TEST_EXECUTION_STRATEGY"><span title="Test Execution Strategy" class="linkLabel_WmDU">Test Execution Strategy</span></a></li></ul></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="Breadcrumbs"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><a class="breadcrumbs__link" href="/testing"><span>Testing</span></a></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">Exhaustive Master Test Inventory</span></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>Exhaustive Master Test Inventory</h1></header>
+<p>Version: v1.0 (Baseline Enforcement Model)</p>
+<hr>
+<h1><strong>Purpose</strong></h1>
+<p>This document defines the complete, adversarially hardened, operationally mature test inventory for Gantral.</p>
+<p>It ensures:</p>
+<ul>
+<li class="">Authority invariants are mechanically enforced</li>
+<li class="">Replay is deterministic and cryptographically stable</li>
+<li class="">Canonicalization is explicit and versioned</li>
+<li class="">Artifact integrity survives hostile reconstruction</li>
+<li class="">Identity drift does not weaken admissibility</li>
+<li class="">Storage and concurrency failures are fail-closed</li>
+<li class="">Verifier cannot be exploited</li>
+<li class="">Schema evolution does not silently weaken guarantees</li>
+<li class="">Temporal runtime behavior remains deterministic</li>
+<li class="">Federated runners operate safely</li>
+<li class="">Agent integrations preserve execution isolation</li>
+<li class="">Performance and load do not compromise correctness</li>
+<li class="">Observability is correct and non-leaking</li>
+<li class="">Disaster recovery preserves admissibility</li>
+<li class="">Compatibility and upgrade paths do not introduce drift</li>
+<li class="">Chaos conditions do not violate authority guarantees</li>
+</ul>
+<p>If a test class is not defined here, it is considered out of scope.</p>
+<hr>
+<h1><strong>SECTION A – State Machine Tests</strong></h1>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="valid-transitions"><strong>Valid Transitions</strong><a href="#valid-transitions" class="hash-link" aria-label="Direct link to valid-transitions" title="Direct link to valid-transitions" translate="no">​</a></h2>
+<ul>
+<li class="">CREATED → RUNNING</li>
+<li class="">RUNNING → WAITING_FOR_HUMAN</li>
+<li class="">WAITING_FOR_HUMAN → APPROVED</li>
+<li class="">WAITING_FOR_HUMAN → REJECTED</li>
+<li class="">WAITING_FOR_HUMAN → OVERRIDDEN</li>
+<li class="">APPROVED → RESUMED</li>
+<li class="">OVERRIDDEN → RESUMED</li>
+<li class="">RESUMED → RUNNING</li>
+<li class="">RUNNING → COMPLETED</li>
+<li class="">RUNNING → TERMINATED</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="invalid-transitions-must-panic-or-terminate"><strong>Invalid Transitions (Must Panic or Terminate)</strong><a href="#invalid-transitions-must-panic-or-terminate" class="hash-link" aria-label="Direct link to invalid-transitions-must-panic-or-terminate" title="Direct link to invalid-transitions-must-panic-or-terminate" translate="no">​</a></h2>
+<ul>
+<li class="">RUNNING → APPROVED</li>
+<li class="">RUNNING → REJECTED</li>
+<li class="">COMPLETED → RUNNING</li>
+<li class="">TERMINATED → RUNNING</li>
+<li class="">WAITING_FOR_HUMAN → RUNNING</li>
+<li class="">CREATED → COMPLETED</li>
+<li class="">Any transition from COMPLETED</li>
+<li class="">Any transition from TERMINATED</li>
+<li class="">Duplicate identical transition</li>
+<li class="">Transition skipping intermediate state</li>
+</ul>
+<hr>
+<h1><strong>SECTION B – HITL Tests</strong></h1>
+<ul>
+<li class="">No execution without valid decision</li>
+<li class="">Approval requires non-empty justification</li>
+<li class="">Override requires context_delta</li>
+<li class="">Concurrent approvals → only first valid</li>
+<li class="">Concurrent override + reject → deterministic resolution</li>
+<li class="">Missing identity → reject</li>
+<li class="">Role mismatch → reject</li>
+<li class="">Escalation updates eligible roles correctly</li>
+<li class="">Timeout before approval → follow policy behavior</li>
+<li class="">Rejection → TERMINATED</li>
+<li class="">Override → RESUMED with context_delta applied</li>
+<li class="">Approval after timeout → rejected</li>
+<li class="">Approval after termination → rejected</li>
+<li class="">Approval by non-eligible role → rejected</li>
+<li class="">Decision captures identity snapshot</li>
+<li class="">Decision captures role snapshot</li>
+<li class="">HITL signal during replay handled deterministically</li>
+<li class="">HITL query during WAITING_FOR_HUMAN consistent snapshot</li>
+<li class="">SLA breach metric emitted correctly</li>
+<li class="">Approval after workflow restart deterministic</li>
+<li class="">Whitespace-only justification rejected</li>
+<li class="">Empty string rejected</li>
+<li class="">Justification must exceed configurable minimum length (if enforced)</li>
+<li class="">Override requires both context_delta and justification</li>
+</ul>
+<hr>
+<h1><strong>SECTION C – Policy Engine Integration Tests</strong></h1>
+<ul>
+<li class="">ALLOW → continue</li>
+<li class="">REQUIRE_HUMAN → WAITING_FOR_HUMAN</li>
+<li class="">DENY → TERMINATED</li>
+<li class="">Timeout present → schedule TIMEOUT event</li>
+<li class="">Escalation roles applied correctly</li>
+<li class="">Policy version recorded in decision</li>
+<li class="">Policy evaluator unavailable (high materiality) → fail closed</li>
+<li class="">Policy evaluator unavailable (low materiality) → configurable</li>
+<li class="">Policy cannot emit artifacts</li>
+<li class="">Policy cannot mutate execution state</li>
+<li class="">Policy cannot override authority</li>
+<li class="">OPA Rego syntax error → fail closed</li>
+<li class="">OPA timeout → fail closed</li>
+<li class="">OPA service restart mid-evaluation → fail closed</li>
+<li class="">Policy schema mismatch → reject</li>
+<li class="">Unknown policy decision → fail closed</li>
+<li class="">Policy output strictly validated</li>
+<li class="">Multiple policy conflicts resolved deterministically</li>
+<li class="">Policy dry_run does not alter authority</li>
+<li class="">Policy deterministic across repeated evaluation</li>
+</ul>
+<hr>
+<h1><strong>SECTION D – Artifact Tests</strong></h1>
+<ul>
+<li class="">Artifact emitted on APPROVED</li>
+<li class="">Artifact emitted on REJECTED</li>
+<li class="">Artifact emitted on OVERRIDDEN</li>
+<li class="">No artifact on ALLOW</li>
+<li class="">Artifact hash correct</li>
+<li class="">prev_artifact_hash correct</li>
+<li class="">Artifact version embedded</li>
+<li class="">Canonicalization version embedded</li>
+<li class="">Hash algorithm version embedded</li>
+<li class="">Tampered authority_state → INVALID</li>
+<li class="">Tampered policy_version_id → INVALID</li>
+<li class="">Tampered timestamp → INVALID</li>
+<li class="">Missing artifact → execution fails</li>
+<li class="">Artifact emission failure → execution aborts</li>
+<li class="">Artifact write failure → execution aborts</li>
+<li class="">No retry on artifact failure</li>
+<li class="">Duplicate artifact emission rejected</li>
+<li class="">Artifact emission atomic with state transition</li>
+<li class="">Artifact immutability enforced</li>
+<li class="">Artifact hash computed before persistence</li>
+<li class="">No partial artifact commit</li>
+<li class="">Justification included in context_hash</li>
+<li class="">Tampered justification → INVALID replay</li>
+<li class="">Justification canonicalization deterministic</li>
+</ul>
+<hr>
+<h1><strong>SECTION E – Replay Tests</strong></h1>
+<ul>
+<li class="">Replay valid chain → VALID</li>
+<li class="">Replay modified artifact → INVALID</li>
+<li class="">Replay missing artifact → INVALID</li>
+<li class="">Replay without DB → VALID</li>
+<li class="">Replay without workflow runtime → VALID</li>
+<li class="">Replay after workflow refactor → VALID</li>
+<li class="">Replay ignores agent memory</li>
+<li class="">Replay ignores logs</li>
+<li class="">Replay ignores telemetry</li>
+<li class="">Replay deterministic across runs</li>
+<li class="">Replay fails if canonicalization version mismatched</li>
+<li class="">Replay fails if hash algorithm mismatched</li>
+<li class="">Replay fails if artifact schema unknown</li>
+<li class="">Replay after runtime version upgrade consistent</li>
+<li class="">Replay under alternate JSON parser consistent</li>
+<li class="">Replay under load deterministic</li>
+<li class="">Replay performance bounded</li>
+</ul>
+<hr>
+<h1><strong>SECTION F – Fail-Closed Tests</strong></h1>
+<ul>
+<li class="">Ambiguous authority → TERMINATED</li>
+<li class="">Missing policy decision → TERMINATED</li>
+<li class="">Missing artifact → TERMINATED</li>
+<li class="">Hash mismatch → INVALID</li>
+<li class="">Partial artifact chain → INVALID</li>
+<li class="">Corrupt artifact JSON → INVALID</li>
+<li class="">Unknown state in artifact → INVALID</li>
+<li class="">Unknown enum value → INVALID</li>
+<li class="">Incomplete artifact → INVALID</li>
+<li class="">Nil pointer in transition → terminate</li>
+<li class="">Missing canonicalization version → terminate</li>
+</ul>
+<hr>
+<h1><strong>SECTION G – Identity &amp; Security Tests</strong></h1>
+<ul>
+<li class="">OIDC identity required</li>
+<li class="">No local user accepted</li>
+<li class="">Service identity accepted</li>
+<li class="">Team isolation enforced</li>
+<li class="">Role mismatch denied</li>
+<li class="">OIDC token expiry during WAITING_FOR_HUMAN handled</li>
+<li class="">JWT signature manipulation rejected</li>
+<li class="">JWT algorithm downgrade rejected</li>
+<li class="">Privilege escalation attempt rejected</li>
+<li class="">Service identity impersonation rejected</li>
+<li class="">Approval with expired token rejected</li>
+<li class="">Replay valid without IdP availability</li>
+<li class="">Identity deletion does not invalidate artifact</li>
+<li class="">Role removal does not invalidate artifact</li>
+<li class="">Identity snapshot bound to artifact</li>
+</ul>
+<hr>
+<h1><strong>SECTION H – Temporal Determinism &amp; Workflow Runtime Tests</strong></h1>
+<ul>
+<li class="">No time.Now in workflow logic</li>
+<li class="">No random()</li>
+<li class="">No nondeterministic map iteration</li>
+<li class="">No external I/O inside deterministic workflow</li>
+<li class="">Replay produces identical workflow history</li>
+<li class="">Workflow panic on nondeterminism</li>
+<li class="">Activity retry deterministic</li>
+<li class="">Activity failure propagation correct</li>
+<li class="">Signal handling deterministic</li>
+<li class="">Query handling deterministic</li>
+<li class="">Workflow version upgrade preserves replay</li>
+<li class="">ContinueAsNew deterministic</li>
+<li class="">Workflow cancellation deterministic</li>
+<li class="">Timer handling deterministic</li>
+<li class="">Workflow history corruption detected</li>
+</ul>
+<hr>
+<h1><strong>SECTION I – Adversarial Tests</strong></h1>
+<ul>
+<li class="">Replace artifact in chain</li>
+<li class="">Inject fake artifact</li>
+<li class="">Reorder artifact chain</li>
+<li class="">Substitute logs</li>
+<li class="">Delete DB records</li>
+<li class="">Remove first artifact</li>
+<li class="">Modify only last artifact</li>
+<li class="">Truncate chain</li>
+<li class="">Double approval attempt</li>
+<li class="">Race between timeout and approval</li>
+<li class="">Authority revoked during WAITING_FOR_HUMAN</li>
+<li class="">Network partition simulation</li>
+<li class="">Partial artifact write interruption</li>
+<li class="">Duplicate artifact chain insertion</li>
+<li class="">Forked artifact chain detection</li>
+<li class="">Artifact replay across instances rejected</li>
+</ul>
+<hr>
+<h1><strong>SECTION J – End-to-End Tests</strong></h1>
+<ul>
+<li class="">WAITING_FOR_HUMAN visible</li>
+<li class="">Approval required</li>
+<li class="">Artifact generated</li>
+<li class="">Offline verify works</li>
+<li class="">System shutdown → verify works</li>
+<li class="">DB deletion → verify works</li>
+<li class="">Rolling restart during WAITING_FOR_HUMAN</li>
+<li class="">Restart during artifact emission</li>
+<li class="">Backup restore → replay valid</li>
+</ul>
+<hr>
+<h1><strong>SECTION K – Canonicalization &amp; Deterministic Serialization Tests</strong></h1>
+<ul>
+<li class="">Same map different key order → identical canonical bytes</li>
+<li class="">Nested map ordering deterministic</li>
+<li class="">Deep nesting deterministic</li>
+<li class="">Struct reordering deterministic</li>
+<li class="">Canonical output stable across runtimes</li>
+<li class="">Cross-language canonical equivalence (Go, Python, Rust, Node)</li>
+<li class="">Numeric normalization deterministic</li>
+<li class="">NaN/Infinity rejected</li>
+<li class="">-0 normalized or rejected</li>
+<li class="">UTF-8 normalization stable</li>
+<li class="">Escaped vs unescaped equivalent</li>
+<li class="">Duplicate keys rejected</li>
+<li class="">Canonical hash stable across reserialization</li>
+<li class="">Canonicalization does not rely on runtime map iteration</li>
+<li class="">Deterministic byte stream guaranteed</li>
+</ul>
+<hr>
+<h1><strong>SECTION L – Schema Versioning &amp; Migration Tests</strong></h1>
+<ul>
+<li class="">Artifact schema version embedded</li>
+<li class="">Unknown schema rejected</li>
+<li class="">Backward-compatible additions supported</li>
+<li class="">Field removal rejected</li>
+<li class="">Multi-version coexistence supported</li>
+<li class="">Upgrade/downgrade compatibility matrix validated</li>
+<li class="">Canonicalization version migration safe</li>
+<li class="">Hash algorithm migration safe</li>
+<li class="">DB migration rollback safe</li>
+<li class="">Forward compatibility validated</li>
+</ul>
+<hr>
+<h1><strong>SECTION M – Cryptographic Integrity Tests</strong></h1>
+<ul>
+<li class="">SHA-256 enforced</li>
+<li class="">Wrong algorithm rejected</li>
+<li class="">Truncated hash rejected</li>
+<li class="">Mixed encoding rejected</li>
+<li class="">Case sensitivity enforced</li>
+<li class="">Empty hash rejected</li>
+<li class="">Duplicate hash field rejected</li>
+<li class="">Hash normalization strict</li>
+</ul>
+<hr>
+<h1><strong>SECTION N – Temporal Consistency Tests</strong></h1>
+<ul>
+<li class="">Artifact timestamp monotonic</li>
+<li class="">Timestamp &gt;= instance creation</li>
+<li class="">Timestamp &lt;= termination</li>
+<li class="">Duplicate timestamps deterministic</li>
+<li class="">UTC normalization enforced</li>
+<li class="">Clock skew simulated</li>
+<li class="">Leap second normalized</li>
+</ul>
+<hr>
+<h1><strong>SECTION O – Concurrency &amp; Atomicity Tests</strong></h1>
+<ul>
+<li class="">Atomic commit across DB + storage</li>
+<li class="">Concurrent artifact emission safe</li>
+<li class="">Concurrent resume prevented</li>
+<li class="">Lock contention safe</li>
+<li class="">Parallel instance creation safe</li>
+<li class="">Replay cannot occur mid-commit</li>
+<li class="">Distributed runner race resolution deterministic</li>
+</ul>
+<hr>
+<h1><strong>SECTION P – Storage Integrity &amp; Disaster Recovery Tests</strong></h1>
+<ul>
+<li class="">Write-once storage enforced</li>
+<li class="">Overwrite attempt rejected</li>
+<li class="">Partial write detected</li>
+<li class="">Corrupt blob detected</li>
+<li class="">Artifact deletion detected</li>
+<li class="">Cross-region replication consistent</li>
+<li class="">Backup/restore preserves replay validity</li>
+<li class="">Storage permission changes detected</li>
+</ul>
+<hr>
+<h1><strong>SECTION Q – Identity Drift &amp; Historical Verification Tests</strong></h1>
+<ul>
+<li class="">Replay valid without live IdP</li>
+<li class="">Organization rename safe</li>
+<li class="">Team deletion safe</li>
+<li class="">Role mapping change safe</li>
+<li class="">Identity federation provider migration safe</li>
+<li class="">Historical verification independent of identity system</li>
+</ul>
+<hr>
+<h1><strong>SECTION R – Verifier Robustness Tests</strong></h1>
+<ul>
+<li class="">Maximum artifact size enforced</li>
+<li class="">Maximum nesting depth enforced</li>
+<li class="">JSON bomb attack rejected</li>
+<li class="">Malformed UTF-8 rejected</li>
+<li class="">Control characters rejected</li>
+<li class="">Schema spoofing rejected</li>
+<li class="">Continuous fuzz corpus integration</li>
+<li class="">Malicious payload injection rejected</li>
+</ul>
+<hr>
+<h1><strong>SECTION S – Numeric &amp; Semantic Ambiguity Tests</strong></h1>
+<ul>
+<li class="">-0 deterministic</li>
+<li class="">Large integers preserved exactly</li>
+<li class="">Scientific notation deterministic</li>
+<li class="">&quot;1&quot; vs 1 distinguished</li>
+<li class="">Null vs absent field distinguished</li>
+<li class="">Boolean vs string distinguished</li>
+<li class="">Deep map[string]interface<!-- --> determinism enforced</li>
+<li class="">Mixed-type arrays deterministic</li>
+</ul>
+<hr>
+<h1><strong>SECTION T – Runner &amp; Federated Execution Tests</strong></h1>
+<ul>
+<li class="">Runner registration validated</li>
+<li class="">Runner heartbeat enforced</li>
+<li class="">Task queue distribution correct</li>
+<li class="">Runner failure → task reassigned</li>
+<li class="">Secret resolution at runner boundary only</li>
+<li class="">No secret persistence in control plane</li>
+<li class="">Evidence capture reference only</li>
+<li class="">Runner impersonation rejected</li>
+<li class="">Cross-team isolation enforced</li>
+<li class="">Multiple runners same instance prevented</li>
+</ul>
+<hr>
+<h1><strong>SECTION U – Agent Integration Tests</strong></h1>
+<p>Persistent agent:</p>
+<ul>
+<li class="">Checkpoint saved</li>
+<li class="">Process exits on WAITING_FOR_HUMAN</li>
+<li class="">Resume starts new process</li>
+<li class="">Agent state not stored in Gantral</li>
+</ul>
+<p>Split-agent:</p>
+<ul>
+<li class="">Pre-approval agent exits cleanly</li>
+<li class="">Minimal context persisted</li>
+<li class="">Post-approval resumes correctly</li>
+<li class="">No agent memory leakage</li>
+</ul>
+<p>General:</p>
+<ul>
+<li class="">Agent failure does not bypass authority</li>
+<li class="">Agent upgrade safe</li>
+<li class="">Agent restart safe</li>
+</ul>
+<hr>
+<h1><strong>SECTION V – Performance &amp; Load Tests</strong></h1>
+<ul>
+<li class="">High concurrency instance creation</li>
+<li class="">Artifact emission under load</li>
+<li class="">Policy evaluation under load</li>
+<li class="">Replay under load</li>
+<li class="">DB connection exhaustion handled</li>
+<li class="">Storage latency spike handled</li>
+<li class="">Lock contention stress tested</li>
+<li class="">SLA under concurrency verified</li>
+<li class="">Performance regression detection in CI</li>
+</ul>
+<hr>
+<h1><strong>SECTION W – Observability &amp; Telemetry Tests</strong></h1>
+<ul>
+<li class="">Metrics emitted for state transitions</li>
+<li class="">HITL wait metrics accurate</li>
+<li class="">Policy decision metrics accurate</li>
+<li class="">Artifact emission metrics accurate</li>
+<li class="">Trace propagation correct</li>
+<li class="">No sensitive data in telemetry</li>
+<li class="">Alert on SLA breach triggered correctly</li>
+<li class="">Audit log completeness verified</li>
+</ul>
+<hr>
+<h1><strong>SECTION X – Compatibility &amp; Upgrade Matrix Tests</strong></h1>
+<ul>
+<li class="">Go minor version compatibility</li>
+<li class="">OS compatibility</li>
+<li class="">Architecture compatibility</li>
+<li class="">Rolling upgrade safe</li>
+<li class="">Version skew tolerated</li>
+<li class="">Upgrade during WAITING_FOR_HUMAN safe</li>
+<li class="">Downgrade handling deterministic</li>
+<li class="">Dependency version bump safe</li>
+</ul>
+<hr>
+<h1><strong>SECTION Y – Chaos &amp; Fault Injection Tests</strong></h1>
+<ul>
+<li class="">Random component restart</li>
+<li class="">Network partition</li>
+<li class="">DB latency spike</li>
+<li class="">Storage latency spike</li>
+<li class="">Policy engine crash</li>
+<li class="">Runner crash mid-execution</li>
+<li class="">Clock skew injection</li>
+<li class="">Randomized failure injection</li>
+<li class="">Recovery preserves correctness</li>
+</ul>
+<hr>
+<h1><strong>SECTION Z – Deterministic Boundary &amp; Residual Edge Case Tests</strong></h1>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="z1--justification-boundary-conditions"><strong>Z1 – Justification Boundary Conditions</strong><a href="#z1--justification-boundary-conditions" class="hash-link" aria-label="Direct link to z1--justification-boundary-conditions" title="Direct link to z1--justification-boundary-conditions" translate="no">​</a></h2>
+<ul>
+<li class="">Whitespace-only justification rejected (already covered; reaffirmed)</li>
+<li class="">Justification exceeding maximum configured length → rejected</li>
+<li class="">Extremely large justification input (DoS attempt) → rejected</li>
+<li class="">Justification truncation must never occur silently</li>
+<li class="">Justification line ending normalization (CRLF vs LF) deterministic</li>
+<li class="">Justification included in canonical context before hashing</li>
+<li class="">Tampered justification → INVALID replay</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="z2--context_delta-determinism--integrity"><strong>Z2 – context_delta Determinism &amp; Integrity</strong><a href="#z2--context_delta-determinism--integrity" class="hash-link" aria-label="Direct link to z2--context_delta-determinism--integrity" title="Direct link to z2--context_delta-determinism--integrity" translate="no">​</a></h2>
+<ul>
+<li class="">context_delta included in context_hash</li>
+<li class="">context_delta canonicalization deterministic</li>
+<li class="">Deeply nested context_delta deterministic</li>
+<li class="">context_delta duplicate keys rejected</li>
+<li class="">Tampered context_delta → INVALID replay</li>
+<li class="">Override without context_delta → rejected</li>
+<li class="">context_delta conflicting key overwrite attempt → rejected</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="z3--authority-decision-object-immutability"><strong>Z3 – Authority Decision Object Immutability</strong><a href="#z3--authority-decision-object-immutability" class="hash-link" aria-label="Direct link to z3--authority-decision-object-immutability" title="Direct link to z3--authority-decision-object-immutability" translate="no">​</a></h2>
+<ul>
+<li class="">Full authority decision object canonicalized before hashing</li>
+<li class="">Mutation of decision object after artifact emission → INVALID replay</li>
+<li class="">Decision object snapshot immutable once artifact committed</li>
+<li class="">Decision identity + role + justification bound into artifact hash</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="z4--multi-artifact-chain-edge-cases"><strong>Z4 – Multi-Artifact Chain Edge Cases</strong><a href="#z4--multi-artifact-chain-edge-cases" class="hash-link" aria-label="Direct link to z4--multi-artifact-chain-edge-cases" title="Direct link to z4--multi-artifact-chain-edge-cases" translate="no">​</a></h2>
+<ul>
+<li class="">Skipped prev_artifact_hash → INVALID</li>
+<li class="">Circular artifact reference → INVALID</li>
+<li class="">Duplicate artifact_id in chain → INVALID</li>
+<li class="">Artifact referencing future artifact → INVALID</li>
+<li class="">Non-sequential chain ordering → INVALID</li>
+<li class="">Artifact chain gap detection</li>
+<li class="">Hash referencing incorrect previous artifact detected</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="z5--replay-idempotency--immutability"><strong>Z5 – Replay Idempotency &amp; Immutability</strong><a href="#z5--replay-idempotency--immutability" class="hash-link" aria-label="Direct link to z5--replay-idempotency--immutability" title="Direct link to z5--replay-idempotency--immutability" translate="no">​</a></h2>
+<ul>
+<li class="">Replay run multiple times → identical result</li>
+<li class="">Replay produces no side effects</li>
+<li class="">Replay does not emit artifacts</li>
+<li class="">Replay does not mutate internal state</li>
+<li class="">Replay failure deterministic across runs</li>
+<li class="">Replay error classification consistent</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="z6--canonical-depth--overflow-protection"><strong>Z6 – Canonical Depth &amp; Overflow Protection</strong><a href="#z6--canonical-depth--overflow-protection" class="hash-link" aria-label="Direct link to z6--canonical-depth--overflow-protection" title="Direct link to z6--canonical-depth--overflow-protection" translate="no">​</a></h2>
+<ul>
+<li class="">Maximum canonicalization depth enforced</li>
+<li class="">Nested array depth limit enforced</li>
+<li class="">Extremely large exponent numeric rejected</li>
+<li class="">Numeric overflow rejected</li>
+<li class="">Canonicalization stack overflow prevented</li>
+<li class="">Canonicalization memory bounded</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="z7--deterministic-sorting--locale-independence"><strong>Z7 – Deterministic Sorting &amp; Locale Independence</strong><a href="#z7--deterministic-sorting--locale-independence" class="hash-link" aria-label="Direct link to z7--deterministic-sorting--locale-independence" title="Direct link to z7--deterministic-sorting--locale-independence" translate="no">​</a></h2>
+<ul>
+<li class="">Key sorting independent of locale</li>
+<li class="">Sorting consistent across environments</li>
+<li class="">Duplicate key conflict rejected before sorting</li>
+<li class="">Stable lexicographic ordering guaranteed</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="z8--deterministic-error-semantics"><strong>Z8 – Deterministic Error Semantics</strong><a href="#z8--deterministic-error-semantics" class="hash-link" aria-label="Direct link to z8--deterministic-error-semantics" title="Direct link to z8--deterministic-error-semantics" translate="no">​</a></h2>
+<ul>
+<li class="">All ambiguous errors terminate execution</li>
+<li class="">No warning-level bypass permitted</li>
+<li class="">No best-effort downgrade paths</li>
+<li class="">Error classification stable across runs</li>
+<li class="">Error codes deterministic for identical inputs</li>
+</ul></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/testing/TESTING_ARCHITECTURE_BLUEPRINT"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">Testing Architecture Blueprint</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/testing/TEST_EXECUTION_STRATEGY"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">Test Execution Strategy</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#valid-transitions" class="table-of-contents__link toc-highlight"><strong>Valid Transitions</strong></a></li><li><a href="#invalid-transitions-must-panic-or-terminate" class="table-of-contents__link toc-highlight"><strong>Invalid Transitions (Must Panic or Terminate)</strong></a></li><li><a href="#z1--justification-boundary-conditions" class="table-of-contents__link toc-highlight"><strong>Z1 – Justification Boundary Conditions</strong></a></li><li><a href="#z2--context_delta-determinism--integrity" class="table-of-contents__link toc-highlight"><strong>Z2 – context_delta Determinism &amp; Integrity</strong></a></li><li><a href="#z3--authority-decision-object-immutability" class="table-of-contents__link toc-highlight"><strong>Z3 – Authority Decision Object Immutability</strong></a></li><li><a href="#z4--multi-artifact-chain-edge-cases" class="table-of-contents__link toc-highlight"><strong>Z4 – Multi-Artifact Chain Edge Cases</strong></a></li><li><a href="#z5--replay-idempotency--immutability" class="table-of-contents__link toc-highlight"><strong>Z5 – Replay Idempotency &amp; Immutability</strong></a></li><li><a href="#z6--canonical-depth--overflow-protection" class="table-of-contents__link toc-highlight"><strong>Z6 – Canonical Depth &amp; Overflow Protection</strong></a></li><li><a href="#z7--deterministic-sorting--locale-independence" class="table-of-contents__link toc-highlight"><strong>Z7 – Deterministic Sorting &amp; Locale Independence</strong></a></li><li><a href="#z8--deterministic-error-semantics" class="table-of-contents__link toc-highlight"><strong>Z8 – Deterministic Error Semantics</strong></a></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Community</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://git.gantral.org" target="_blank" rel="noopener noreferrer" class="footer__link-item">Git<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 Gantral, Inc. Built with Docusaurus.</div></div></div></footer></div>
+</body>
+</html>
