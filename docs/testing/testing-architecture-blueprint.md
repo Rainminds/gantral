@@ -259,7 +259,7 @@ CI must fail if:
 ### Co-located Unit Tests (`*_test.go`)
 Location: Next to production code (e.g., `core/engine/machine_test.go`)
 Purpose: Test individual functions/methods in isolation
-Scope: Single package, internal API, fast (<10ms), no dependencies
+Scope: Single package, internal API, fast (\<10ms), no dependencies
 Package: Same as production code (e.g., `package engine`)
 Coverage: Edge cases, validation, error handling, business logic
 

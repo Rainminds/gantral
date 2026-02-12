@@ -137,9 +137,9 @@ const sidebars: SidebarsConfig = {
         id: 'testing/README',
       },
       items: [
-        'testing/TESTING_ARCHITECTURE_BLUEPRINT',
-        'testing/MASTER_TEST_INVENTORY',
-        'testing/TEST_EXECUTION_STRATEGY',
+        'testing/testing-architecture-blueprint',
+        'testing/master-test-inventory',
+        'testing/test-execution-strategy',
       ],
     },
   ],
