@@ -44,6 +44,7 @@ func TestRecordDecision(t *testing.T) {
 				Type:          DecisionOverride,
 				ActorID:       "admin",
 				Justification: "Emergency",
+				ContextDelta:  map[string]interface{}{"reason": "emergency"},
 			},
 			expectedState: StateOverridden,
 			expectError:   false,

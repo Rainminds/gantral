@@ -53,11 +53,11 @@ jobs:
       - name: Build
         run: make build
 
-      - name: Test Unit
-        run: make test
+      - name: Test Tier 1 (Unit & Deterministic)
+        run: make test-tier1
 
-      - name: Test Integration & E2E
-        run: make test-integration
+      - name: Test Tier 2 (Integration & Runtime)
+        run: make test-tier2
 
       - name: Coverage Check
         run: |

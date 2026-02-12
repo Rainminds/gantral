@@ -254,3 +254,24 @@ CI must fail if:
 * Hash mutation tests pass unexpectedly  
 * Any nondeterminism detected
 
+## **7\. Test Organization
+
+### Co-located Unit Tests (`*_test.go`)
+Location: Next to production code (e.g., `core/engine/machine_test.go`)
+Purpose: Test individual functions/methods in isolation
+Scope: Single package, internal API, fast (<10ms), no dependencies
+Package: Same as production code (e.g., `package engine`)
+Coverage: Edge cases, validation, error handling, business logic
+
+### Organized Tests (`/tests/*`)
+Location: Centralized test directory
+Purpose: Test system-level behavior, invariants, integration
+Scope: Multi-package, external API, requires dependencies
+Package: External test package (e.g., `package statemachine_test`, `package integration_test`)
+Coverage: State machine matrix, artifact integrity, replay, E2E
+
+### Decision Rule
+- If testing **internal function** → co-located `*_test.go`
+- If testing **system invariant** → `/tests/` organized
+- If testing **cross-package** → `/tests/` organized
+- If requiring **DB/Temporal/OPA** → `/tests/integration/`
