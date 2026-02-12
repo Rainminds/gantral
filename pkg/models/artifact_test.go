@@ -94,7 +94,9 @@ func TestArtifact_CalculateHashAndSetID(t *testing.T) {
 
 func TestArtifact_MarshalJSON(t *testing.T) {
 	art := NewCommitmentArtifact("inst-1", GenesisHash, "APPROVED", "v1", "ctx-1", "user-1")
-	art.CalculateHashAndSetID()
+	if err := art.CalculateHashAndSetID(); err != nil {
+		t.Fatalf("failed to calculate hash: %v", err)
+	}
 
 	data, err := json.Marshal(art)
 	if err != nil {
