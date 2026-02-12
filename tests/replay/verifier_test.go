@@ -48,8 +48,6 @@ func Test_Replay_FailClosed_CorruptJSON_SectionF(t *testing.T) {
 		if res != nil && res.Valid {
 			t.Error("Malformed JSON marked as valid!")
 		}
-	} else {
-		// Expected error
 	}
 
 	// 2. Missing ID
@@ -66,7 +64,9 @@ func Test_Replay_FailClosed_HashMismatch_SectionF(t *testing.T) {
 	t.Parallel()
 	validJSON := loadGoldenJSON(t)
 	var art models.CommitmentArtifact
-	json.Unmarshal(validJSON, &art)
+	if err := json.Unmarshal(validJSON, &art); err != nil {
+		t.Fatalf("Failed to unmarshal valid JSON: %v", err)
+	}
 
 	// Tamper with content but keep ID
 	art.AuthorityState = "REJECTED"
@@ -89,15 +89,21 @@ func Test_Replay_Chain_Linking_SectionE(t *testing.T) {
 
 	// 1. Genesis
 	art1 := models.NewCommitmentArtifact("inst-1", models.GenesisHash, "CREATED", "v1", "ctx1", "user1")
-	art1.CalculateHashAndSetID()
+	if err := art1.CalculateHashAndSetID(); err != nil {
+		t.Fatalf("Failed to calculate hash: %v", err)
+	}
 
 	// 2. Running
 	art2 := models.NewCommitmentArtifact("inst-1", art1.ArtifactID, "RUNNING", "v1", "ctx2", "user1")
-	art2.CalculateHashAndSetID()
+	if err := art2.CalculateHashAndSetID(); err != nil {
+		t.Fatalf("Failed to calculate hash: %v", err)
+	}
 
 	// 3. Waiting
 	art3 := models.NewCommitmentArtifact("inst-1", art2.ArtifactID, "WAITING", "v1", "ctx3", "user1")
-	art3.CalculateHashAndSetID()
+	if err := art3.CalculateHashAndSetID(); err != nil {
+		t.Fatalf("Failed to calculate hash: %v", err)
+	}
 
 	chain := []models.CommitmentArtifact{*art1, *art2, *art3}
 
@@ -132,7 +138,10 @@ func Test_Schema_Version_Check_SectionL(t *testing.T) {
 	art := models.NewCommitmentArtifact("inst", models.GenesisHash, "S", "v", "c", "u")
 	art.ArtifactVersion = "" // Clear it
 	// Calculate ID will include empty version
-	art.CalculateHashAndSetID()
+	if err := art.CalculateHashAndSetID(); err != nil {
+		t.Fatalf("Failed to calculate hash: %v", err)
+	}
+	_ = art // Mark as used for now if not further tested
 
 	// Note: Currently `VerifyArtifact` doesn't explicitly check `ArtifactVersion != ""` inside the function in the snippet I saw.
 	// It checks ArtifactID != "".

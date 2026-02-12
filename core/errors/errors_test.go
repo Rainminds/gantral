@@ -5,33 +5,49 @@ import (
 	"testing"
 )
 
-func TestIs(t *testing.T) {
-	base := errors.New("base")
-	wrapped := Wrap(base, "wrapped")
-
-	if !Is(wrapped, base) {
-		t.Error("expected wrapped error to match base")
+func TestSentinelErrors(t *testing.T) {
+	tests := []struct {
+		err      error
+		expected string
+	}{
+		{ErrNotFound, "resource not found"},
+		{ErrInvalidInput, "invalid input"},
+		{ErrConflict, "resource conflict"},
+		{ErrInternal, "internal system error"},
+		{ErrUnauthorized, "unauthorized"},
 	}
-	if Is(wrapped, errors.New("other")) {
-		t.Error("expected wrapped error not to match other")
+
+	for _, tt := range tests {
+		if tt.err.Error() != tt.expected {
+			t.Errorf("expected %q, got %q", tt.expected, tt.err.Error())
+		}
 	}
 }
 
-func TestWrap(t *testing.T) {
-	t.Run("Wrap non-nil", func(t *testing.T) {
-		base := errors.New("base")
-		wrapped := Wrap(base, "context")
-		if wrapped == nil {
-			t.Fatal("expected non-nil error")
-		}
-		if wrapped.Error() != "context: base" {
-			t.Errorf("expected 'context: base', got %q", wrapped.Error())
-		}
-	})
+func TestIsComplicated(t *testing.T) {
+	err := Wrap(ErrNotFound, "failed to fetch user")
+	if !Is(err, ErrNotFound) {
+		t.Error("expected wrapped error to be ErrNotFound")
+	}
 
-	t.Run("Wrap nil", func(t *testing.T) {
-		if Wrap(nil, "msg") != nil {
-			t.Error("expected nil when wrapping nil error")
-		}
-	})
+	deep := Wrap(err, "outer context")
+	if !Is(deep, ErrNotFound) {
+		t.Error("expected deeply wrapped error to be ErrNotFound")
+	}
+
+	if Is(deep, ErrInternal) {
+		t.Error("did not expect ErrInternal")
+	}
+}
+
+func TestWrapComplicated(t *testing.T) {
+	if Wrap(nil, "something") != nil {
+		t.Error("expected nil")
+	}
+
+	err := errors.New("original")
+	wrapped := Wrap(err, "context")
+	if !errors.Is(wrapped, err) {
+		t.Error("expected wrapped error to wrap original")
+	}
 }

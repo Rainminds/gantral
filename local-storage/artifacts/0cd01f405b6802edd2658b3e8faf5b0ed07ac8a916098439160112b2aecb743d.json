@@ -1,5 +1,5 @@
 {
-  "artifact_id": "6db2286bc10c23f5fbf814ce06095e3acf253e82749b4789aa9ade4d07b276b3",
+  "artifact_id": "0cd01f405b6802edd2658b3e8faf5b0ed07ac8a916098439160112b2aecb743d",
   "artifact_version": "v1",
   "authority_state": "APPROVED",
   "context_hash": "sha256-hash-of-evidence",
@@ -7,5 +7,5 @@
   "instance_id": "inst-demo-1",
   "policy_version_id": "v1",
   "prev_artifact_hash": "",
-  "timestamp": "2026-02-12T18:12:27Z"
+  "timestamp": "2026-02-12T18:37:27Z"
 }

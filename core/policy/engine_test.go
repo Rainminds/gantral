@@ -62,3 +62,27 @@ func TestEvaluate(t *testing.T) {
 		})
 	}
 }
+
+func TestEvaluatePure_Exhaustive(t *testing.T) {
+	tests := []struct {
+		name     string
+		policy   Policy
+		expected bool
+	}{
+		{"Low Materiality", Policy{Materiality: MaterialityLow}, false},
+		{"Medium Materiality", Policy{Materiality: MaterialityMedium}, false},
+		{"High Materiality", Policy{Materiality: MaterialityHigh}, true},
+		{"Low with Human", Policy{Materiality: MaterialityLow, RequiresHumanApproval: true}, true},
+		{"Medium with Human", Policy{Materiality: MaterialityMedium, RequiresHumanApproval: true}, true},
+		{"High with Human", Policy{Materiality: MaterialityHigh, RequiresHumanApproval: true}, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := EvaluatePure(tt.policy)
+			if result.ShouldPause != tt.expected {
+				t.Errorf("expected pause %v, got %v", tt.expected, result.ShouldPause)
+			}
+		})
+	}
+}

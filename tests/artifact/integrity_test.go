@@ -149,11 +149,7 @@ func Test_Artifact_Tamper_Fails_SectionD(t *testing.T) {
 			tamperedJSON, _ := json.Marshal(tampered)
 
 			// Verify -> MUST FAIL because ID is still the old one, but content changed
-			res, err := verifier.VerifyArtifact(tamperedJSON)
-			if err != nil {
-				// VerifyArtifact might return error for malformed JSON, but for hash mismatch it usually returns Valid=false
-				// If it returns error, that's also acceptable "fail closed", but typically we expect Valid=false
-			}
+			res, _ := verifier.VerifyArtifact(tamperedJSON)
 
 			if res != nil && res.Valid {
 				t.Errorf("Tampered artifact %s was marked VALID! This is a critical failure.", tc.name)
