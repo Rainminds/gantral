@@ -111,21 +111,25 @@ test_core:
     DATABASE_URL: "postgres://postgres:changeme@postgres:5432/gantral?sslmode=disable"
   script:
     - apt-get update && apt-get install -y bc procps
-    - # 1. Setup Temporal CLI
-    - curl -sSf https://temporal.download/cli.sh | sh
-    - export PATH="$HOME/.temporalio/bin:$PATH"
-    - # 2. Start Temporal Dev Server
-    - nohup temporal server start-dev --ip 0.0.0.0 --port 7233 &
-    - sleep 10
-    - # 3. Run Tests
-    - make test-tier1
-    - make test-tier2
-    - # 4. Coverage Check
-    - go test -tags=integration -coverpkg=./... -coverprofile=coverage.raw.out ./...
-    - grep -v -E "infra/|cmd/|pkg/logger/|pkg/config/|sdk/|github.com/Rainminds/gantral/main.go" coverage.raw.out > coverage.out
-    - TOTAL=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//')
-    - echo "Total Coverage (Filtered): $TOTAL%"
     - |
+      # 1. Setup Temporal CLI
+      curl -sSf https://temporal.download/cli.sh | sh
+      export PATH="$HOME/.temporalio/bin:$PATH"
+
+      # 2. Start Temporal Dev Server
+      nohup temporal server start-dev --ip 0.0.0.0 --port 7233 &
+      sleep 10
+
+      # 3. Run Tests
+      make test-tier1
+      make test-tier2
+
+      # 4. Coverage Check
+      go test -tags=integration -coverpkg=./... -coverprofile=coverage.raw.out ./...
+      grep -v -E "infra/|cmd/|pkg/logger/|pkg/config/|sdk/|github.com/Rainminds/gantral/main.go" coverage.raw.out > coverage.out
+      TOTAL=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//')
+      echo "Total Coverage (Filtered): $TOTAL%"
+
       if (( $(echo "$TOTAL < 70.0" | bc -l) )); then
         echo "Coverage below 70%"
         exit 1

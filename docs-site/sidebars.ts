@@ -54,6 +54,7 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Architecture',
       items: [
+        'architecture/gantral-implementation-paper',
         'architecture/trd',
         'architecture/authority-state-machine',
         'architecture/execution-authority-vs-agent-memory',
