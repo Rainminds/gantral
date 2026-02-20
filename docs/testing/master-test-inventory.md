@@ -1,6 +1,6 @@
 # Exhaustive Master Test Inventory
 
-Version: v1.0 (Baseline Enforcement Model)
+Version: v2.0 (Baseline Enforcement Model)
 
 ---
 
@@ -477,11 +477,17 @@ General:
 ## **Z1 – Justification Boundary Conditions**
 
 * Whitespace-only justification rejected (already covered; reaffirmed)
+
 * Justification exceeding maximum configured length → rejected
+
 * Extremely large justification input (DoS attempt) → rejected
+
 * Justification truncation must never occur silently
+
 * Justification line ending normalization (CRLF vs LF) deterministic
+
 * Justification included in canonical context before hashing
+
 * Tampered justification → INVALID replay
 
 ---
@@ -489,11 +495,17 @@ General:
 ## **Z2 – context\_delta Determinism & Integrity**
 
 * context\_delta included in context\_hash
+
 * context\_delta canonicalization deterministic
+
 * Deeply nested context\_delta deterministic
+
 * context\_delta duplicate keys rejected
+
 * Tampered context\_delta → INVALID replay
+
 * Override without context\_delta → rejected
+
 * context\_delta conflicting key overwrite attempt → rejected
 
 ---
@@ -501,8 +513,11 @@ General:
 ## **Z3 – Authority Decision Object Immutability**
 
 * Full authority decision object canonicalized before hashing
+
 * Mutation of decision object after artifact emission → INVALID replay
+
 * Decision object snapshot immutable once artifact committed
+
 * Decision identity \+ role \+ justification bound into artifact hash
 
 ---
@@ -510,11 +525,17 @@ General:
 ## **Z4 – Multi-Artifact Chain Edge Cases**
 
 * Skipped prev\_artifact\_hash → INVALID
+
 * Circular artifact reference → INVALID
+
 * Duplicate artifact\_id in chain → INVALID
+
 * Artifact referencing future artifact → INVALID
+
 * Non-sequential chain ordering → INVALID
+
 * Artifact chain gap detection
+
 * Hash referencing incorrect previous artifact detected
 
 ---
@@ -522,10 +543,15 @@ General:
 ## **Z5 – Replay Idempotency & Immutability**
 
 * Replay run multiple times → identical result
+
 * Replay produces no side effects
+
 * Replay does not emit artifacts
+
 * Replay does not mutate internal state
+
 * Replay failure deterministic across runs
+
 * Replay error classification consistent
 
 ---
@@ -533,10 +559,15 @@ General:
 ## **Z6 – Canonical Depth & Overflow Protection**
 
 * Maximum canonicalization depth enforced
+
 * Nested array depth limit enforced
+
 * Extremely large exponent numeric rejected
+
 * Numeric overflow rejected
+
 * Canonicalization stack overflow prevented
+
 * Canonicalization memory bounded
 
 ---
@@ -544,8 +575,11 @@ General:
 ## **Z7 – Deterministic Sorting & Locale Independence**
 
 * Key sorting independent of locale
+
 * Sorting consistent across environments
+
 * Duplicate key conflict rejected before sorting
+
 * Stable lexicographic ordering guaranteed
 
 ---
@@ -553,8 +587,231 @@ General:
 ## **Z8 – Deterministic Error Semantics**
 
 * All ambiguous errors terminate execution
+
 * No warning-level bypass permitted
+
 * No best-effort downgrade paths
+
 * Error classification stable across runs
+
 * Error codes deterministic for identical inputs
+
+---
+
+# **SECTION AA – Authority Exclusivity Tests**
+
+Authority must exist exclusively as canonical workflow state.
+
+● Authority decision cannot exist without state transition  
+● State transition to APPROVED / REJECTED / OVERRIDDEN must emit artifact  
+● Manual DB authority insertion → replay INVALID  
+● Manual artifact insertion without canonical state progression → replay INVALID  
+● Authority record cannot be persisted independently of workflow state  
+● Authority state cannot be synthesized during replay  
+● Artifact emission without prior WAITING\_FOR\_HUMAN → INVALID  
+● Duplicate authority decision without state change → rejected  
+● External system cannot inject authority decision  
+● Authority cannot exist outside enumerated transition relation
+
+---
+
+# **SECTION AB – Storage Ordering Independence Tests**
+
+Replay must not depend on storage iteration order.
+
+● Artifact files shuffled arbitrarily → replay VALID  
+● Artifact files reversed order → replay VALID  
+● Extraneous unrelated artifact in directory → ignored  
+● Replay independent of filesystem ordering  
+● Replay independent of object storage listing order  
+● Replay independent of timestamp-based sorting  
+● Missing intermediate artifact due to listing truncation → INVALID  
+● Partial object listing must not produce best-effort replay  
+● Replay must reconstruct chain via hash linkage only
+
+---
+
+# **SECTION AC – Context Snapshot Binding Consistency Tests**
+
+Policy evaluation input and artifact context snapshot must be identical.
+
+● Snapshot captured before policy evaluation  
+● Snapshot used for policy evaluation equals snapshot hashed in artifact  
+● Mutation between evaluation and artifact emission → execution aborts  
+● Snapshot excludes agent internal memory  
+● Snapshot excludes telemetry fields  
+● Snapshot includes materiality input  
+● Snapshot includes policy evaluation parameters  
+● Snapshot mutation after artifact emission → INVALID replay  
+● Snapshot canonicalization deterministic before hashing  
+● Snapshot must not depend on runtime memory layout
+
+---
+
+# **SECTION AD – Policy Advisory Boundary Hardening Tests**
+
+Policy must remain advisory only.
+
+● Policy cannot directly approve execution  
+● Policy cannot directly emit artifact  
+● Policy cannot mutate workflow state  
+● Policy returning synthetic artifact-like payload → rejected  
+● Policy returning “approved” without state transition → rejected  
+● REQUIRE\_HUMAN returned but no WAITING\_FOR\_HUMAN transition → execution fails  
+● Malformed policy response → fail closed  
+● Policy output containing unknown fields → rejected  
+● Policy engine compromise simulation → authority unaffected  
+● Policy cannot override canonical state machine
+
+---
+
+# **SECTION AE – Database Contradiction & Non-Authoritative Index Tests**
+
+Database is non-authoritative.
+
+● DB shows APPROVED but artifact missing → replay INVALID  
+● DB missing record but artifact chain intact → replay VALID  
+● DB mutated authority state contradicting artifact → replay INVALID  
+● DB deletion does not invalidate artifact replay  
+● DB rollback does not affect artifact replay  
+● DB corruption must not influence replay result  
+● Replay must not read DB under any condition  
+● Replay must succeed in read-only environment
+
+---
+
+# **SECTION AF – CLI Verification Contract Tests**
+
+Replay CLI behavior must be deterministic and stable.
+
+● `gantral verify` outputs only VALID / INVALID / INCONCLUSIVE  
+● Exit code mapping deterministic  
+● Exit codes stable across versions  
+● CLI output ordering deterministic  
+● CLI must not emit artifacts  
+● CLI must not modify filesystem  
+● CLI must not access network  
+● CLI error classification deterministic  
+● CLI large artifact input bounded  
+● CLI behavior consistent under different shells
+
+---
+
+# **SECTION AG – Unified Visibility Guarantees Tests**
+
+Unified visibility is required but must not affect admissibility.
+
+● WAITING\_FOR\_HUMAN instances visible  
+● Authority progression visible historically  
+● Visibility API reflects canonical workflow state  
+● Visibility cannot contradict artifact chain  
+● Visibility failure does not alter execution state  
+● Visibility failure does not affect replay  
+● Visibility cannot expose sensitive context snapshot contents  
+● Visibility pagination deterministic  
+● Visibility cannot fabricate authority states
+
+---
+
+# **SECTION AH – Agent Memory Isolation Tests**
+
+Agent internal memory must never influence authority evidence.
+
+● Agent internal reasoning not included in artifact  
+● Attempt to include agent memory in snapshot → rejected  
+● Agent memory mutation after approval → replay unaffected  
+● Agent restart does not alter artifact hash  
+● Agent retry cannot bypass authority boundary  
+● Agent tool trace injection → rejected  
+● Agent upgrade does not alter prior artifact replay  
+● Agent crash does not create partial authority
+
+---
+
+# **SECTION AI – Cross-Region & Replication Integrity Tests**
+
+Artifact store must remain authoritative under replication scenarios.
+
+● Incomplete cross-region replication → replay INVALID  
+● Replica lag must not produce partial replay  
+● Region failover with complete chain → replay VALID  
+● Region failover with missing artifact → INVALID  
+● Artifact replication race condition detected  
+● Replication reorder does not affect replay  
+● Object storage eventual consistency cannot weaken admissibility
+
+---
+
+# **SECTION AJ – Auditor Scenario Validation Tests**
+
+Auditor guarantees must be executable.
+
+● Replay valid with IdP offline  
+● Replay valid with policy bundle unavailable  
+● Replay valid with logs deleted  
+● Replay valid with runtime unavailable  
+● Replay valid with database destroyed  
+● Identity rename does not affect replay  
+● Role removal does not affect replay  
+● Organization rename does not affect replay  
+● Artifact alone sufficient for authority reconstruction  
+● Replay produces identical result under hostile reconstruction
+
+---
+
+# **SECTION AK – Replay Determinism Under Malformed Storage Tests**
+
+● Corrupted directory listing → INVALID  
+● Missing first artifact → INVALID  
+● Multiple potential chain heads → INVALID  
+● Forked chain detection → INVALID  
+● Duplicate artifact IDs across instances → INVALID  
+● Artifact file name mismatch with internal artifact\_id → rejected  
+● Replay must never attempt best-effort repair
+
+---
+
+# **SECTION AL – Authority-State Atomicity Boundary Tests**
+
+Atomicity must be absolute.
+
+● Authority state change visible without artifact → forbidden  
+● Artifact persisted without state change → forbidden  
+● Simulated crash between state update and artifact persistence → no partial authority  
+● Retry logic cannot cause double artifact  
+● Partial commit across DB and storage → execution aborts  
+● Concurrent authority transitions prevented
+
+---
+
+# **SECTION AM – Strict Non-Dependence on Logs Tests**
+
+● Replay with log substitution → unaffected  
+● Replay with log deletion → unaffected  
+● Replay must not reference log content  
+● Log tampering must not alter replay result  
+● Log timestamps cannot influence artifact validation
+
+---
+
+# **SECTION AN – Deterministic Workflow Version Binding Tests**
+
+● workflow\_version\_id immutable once instance created  
+● workflow\_version\_id mismatch → INCONCLUSIVE  
+● Artifact must bind workflow\_version\_id  
+● Replay must validate workflow\_version\_id  
+● Silent workflow upgrade without version increment → detected  
+● Replay must not infer workflow version
+
+---
+
+# **SECTION AO – Deterministic Policy Version Binding Tests**
+
+● policy\_version\_id embedded in artifact  
+● policy\_version\_id mismatch → INCONCLUSIVE  
+● Missing policy\_version\_id → INVALID  
+● Policy bundle removal does not affect replay  
+● Replay must not re-evaluate policy
+
+---
 
