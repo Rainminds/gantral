@@ -332,7 +332,7 @@ If artifact persistence fails:
 artifact\_hash\_i \=
 
 * H(payload\_i) if first artifact  
-* H(payload\_i || artifact\_hash\_{i-1}) otherwise
+* H(payload\_i || artifact\_hash\_\{i-1\}) otherwise
 
 Modification of any artifact invalidates subsequent chain.
 

@@ -4,61 +4,102 @@ title: What is Gantral?
 
 # What Is Gantral?
 
-Gantral is an **open-source AI Execution Control Plane**.
+Gantral is an **open-source Execution Authority Kernel**.
 
-It enforces and records **execution-time authority** in AI-assisted and agentic workflows.
+It provides **Deterministic Authority Infrastructure for Scaling AI**.
 
-Gantral exists to ensure that when an AI-enabled system performs a consequential action,
-an organization can later determine — **without relying on trust or narrative**:
-
-- what executed
-- under whose authority
-- with which execution context
-- whether human approval was required
-- whether authority can be independently verified
+Gantral enforces and records **execution-time authority** in AI-assisted and agentic workflows operating in consequential domains.
 
 Gantral does not evaluate model quality, reasoning correctness, or business logic.
-It governs **whether execution is allowed to proceed**.
+
+Gantral governs **whether execution is admissible**.
 
 ---
 
-## The Problem Gantral Solves
+## Why Gantral Exists
 
-As AI systems move from experimentation into operational workflows,
-organizations lose control over **execution authority**, not just model behavior.
+AI adoption does not stall because models fail.
 
-Human approval and accountability often exist only as convention:
-- pull-request reviews
-- chat approvals
-- informal runbooks
-- screenshots and logs
+It stalls when organizations attempt to move from:
 
-These mechanisms:
-- are not technically enforceable
-- are not bound to execution
-- do not produce durable, replayable evidence
+- Low-risk experimentation  
+to  
+- Consequential, high-impact workflows  
 
-At scale, this leads to:
-- fragmented execution control across teams
-- approvals detached from execution context
-- post-incident reconstruction based on inference
+When AI systems begin to:
 
-Gantral exists to make execution authority:
+- Move money  
+- Modify infrastructure  
+- Change access control  
+- Influence regulatory posture  
+- Trigger irreversible operational outcomes  
+
+At that boundary:
+
+AI can act.  
+Humans remain accountable.
+
+Most enterprise stacks today can:
+
+- Orchestrate workflows  
+- Evaluate policy  
+- Apply guardrails  
+- Log events  
+- Produce dashboards  
+
+Very few structurally enforce execution authority.
+
+Authority is reconstructed from logs instead of enforced at runtime.
+
+Gantral exists to ensure that when an AI-enabled system performs a consequential action,
+an organization can later determine — **without relying on trust, narrative, or log stitching**:
+
+- what executed  
+- under whose authority  
+- with which execution context  
+- whether human approval was required  
+- whether authority can be independently verified  
+
+Gantral makes authority:
 
 **explicit · enforced · verifiable**
 
 ---
 
-## The Execution Authority Gap (Before and After)
+## The Execution Authority Gap
 
-Most AI governance failures are not caused by models.
+Most governance failures in AI systems are not caused by models.
+
 They are caused by how execution authority is implicitly assumed.
 
-The diagrams below contrast the common “before” state
-with an execution-time authority model.
+Human approval and accountability often exist only as convention:
 
-**Before:**
-In this model, authority is implied by process and reconstructed after the fact.
+- pull-request reviews  
+- chat approvals  
+- informal runbooks  
+- screenshots and logs  
+
+These mechanisms:
+
+- are not technically enforceable  
+- are not structurally bound to execution  
+- do not produce durable, replayable evidence  
+
+At scale, this leads to:
+
+- fragmented execution control across teams  
+- approvals detached from execution context  
+- post-incident reconstruction based on inference  
+
+Gantral converts authority from convention into infrastructure.
+
+---
+
+## Before and After: Execution Authority
+
+### Before
+
+Authority is implied by process and reconstructed after the fact.
 
 ```mermaid
 flowchart TB
@@ -92,251 +133,213 @@ flowchart TB
    • Tickets
    • Chat records
    • Human memory]
-```
+````
 
-**After:**
+Authority is reconstructed from logs and memory.
+
+---
+
+### After
+
+Authority is enforced as canonical execution state.
+
 ```mermaid
 flowchart TB
-   %% Governance (Advisory Only)
    P[Policy & Governance
    • Intent & constraints
    • Risk thresholds
-   • Escalation rules
    • Advisory only]
 
-
-   %% AI & Agent Systems
    subgraph AI["AI & Agent Systems"]
-       LG[LangGraph
-       • Stateful workflows
-       • Long-running graphs]
-
-
-       VE[Vellum
-       • Prompt systems
-       • LLM pipelines]
-
-
-       CC[Claude Cowork
-       • Digital coworker
-       • Tool-using agent]
+       LG[LangGraph]
+       VE[Vellum]
+       CC[Claude Cowork]
    end
 
-
-   %% Human Authority
    H[Human Operator
    • Reviews context
    • Exercises judgment
    • Accountable actor]
 
-
-   %% Execution Management
-   M[Execution Management
-   • Workflow orchestration
-   • Permission requests
+   M[Workflow Orchestration
    • Awaits authority]
 
-
-   %% Gantral Authority Boundary
    subgraph Gantral["Gantral — Execution-Time Authority"]
-       G[Commitment Boundary
+       G[Authority Boundary
        • Pause execution
        • Require explicit decision
-       • Approve / Reject / Escalate
+       • Approve / Reject / Override
        • Record authority deterministically]
    end
 
-
-   %% Authorized Executors
-   subgraph X["Authorized Executors"]
-       XR[Automated Executors
-       • Jobs
-       • Pipelines
-       • Agent runners]
-
-
-       HX[Human Executors
-       • CLI
-       • UI
-       • Manual actions]
-   end
-
-
-   %% Real World & Evidence
-   R[Real-World Actions
-   • Code changes
-   • File edits
-   • Infra updates
-   • External effects]
-
-
-   E[Execution Evidence
-   • Logs - automated
-   • Commits / Artifacts
-   • Tickets
-   • Human attestations]
-
+   R[Real-World Actions]
 
    D[Deterministic Authority Record
    • Who authorized
    • What was approved
-   • When & under what conditions
-   • References to execution evidence]
+   • When & under what conditions]
 
-
-   %% Flows
    LG --> M
    VE --> M
-   CC -->|tool calls| M
-
+   CC --> M
 
    H --> M
    P -.-> G
 
-
    M --> G
-
-
-   G -->|Authorized| XR
-   G -->|Authorized| HX
-
-
-   XR --> R
-   HX --> R
-
-
-   R --> E
-
-
-   E -.-> D
+   G -->|Authorized| R
    G -.-> D
-
-
    G -->|Pause / Escalate| H
 ```
+
+Authority is not inferred.
+
+It is enforced.
 
 ---
 
 ## The Core Distinction: Authority vs Intelligence
 
-Gantral introduces a strict separation between **Intelligence** and **Authority**.
+Gantral introduces a strict separation between:
 
-- **Agents and AI systems** provide intelligence  
-  (planning, reasoning, proposing actions)
+### Intelligence
 
-- **Gantral** enforces authority  
-  (whether execution may proceed, pause, resume, or terminate)
+* Planning
+* Reasoning
+* Tool selection
+* Action proposals
+
+### Authority
+
+* Whether execution may proceed
+* Whether human approval is required
+* Whether execution must terminate
+* Whether authority can be proven later
+
+Agents provide intelligence.
+
+Gantral enforces authority.
 
 This separation is structural, not conceptual.
-
-Agents may recommend actions.
-Policies may advise escalation.
-Only Gantral enforces execution authority as state.
 
 ---
 
 ## How Execution Is Governed
 
-Gantral does not host agents or workflows.
-It operates as an **execution-time authority layer**.
+Gantral operates as an **execution-time authority layer**.
 
 A typical flow:
 
-1. An agent proposes an action
-2. Execution reaches a governed boundary
-3. Gantral evaluates policy as a *guard*
-4. Execution either:
-   - continues
-   - pauses for human authority
-   - terminates
-5. Authority decisions are enforced via a deterministic state machine
-6. A commitment artifact is emitted when authority is exercised
+1. An agent proposes an action.
+2. Execution reaches a governed boundary.
+3. External policy (e.g., OPA) may evaluate conditions (advisory only).
+4. Gantral enforces one of:
+
+   * Continue
+   * Pause for human authority
+   * Reject / Terminate
+5. Authority transitions are enforced via a deterministic state machine.
+6. A commitment artifact is emitted atomically.
 
 If authority cannot be enforced and recorded,
 execution must not proceed.
 
----
-
-## Federated Execution (Runner Model)
-
-Gantral uses a **federated runner pattern**.
-
-- Agents execute in team-owned infrastructure
-- Gantral does not inspect agent memory or tool payloads
-- Execution is paused or resumed via explicit authority transitions
-- Long waits allow agent processes to exit (zero CPU)
-- Resumption launches a new process with fresh context
-
-Gantral governs **execution permission**, not execution mechanics.
-
----
-
-## The Governance Failure Gantral Addresses
-
-Large organizations encounter two structural failures when scaling AI.
-
----
-
-### 1. Fragmented Execution Control
-
-Without a shared execution authority layer:
-
-- approval logic is embedded in prompts and scripts
-- safety checks are duplicated across teams
-- escalation paths are inconsistent
-- platform teams cannot reason about enforcement guarantees
-
-Gantral externalizes execution authority from agent logic,
-making it deterministic, centrally governed, and auditable.
-
----
-
-### 2. Broken Chain of Authority
-
-Even when humans are involved, authority is often disconnected from execution.
-
-Common failures:
-- approvals based on summaries rather than execution context
-- manual execution outside the approval system
-- logs that explain *what happened* but not *who authorized it*
-
-Gantral binds:
-- execution context references
-- authority decisions
-- execution state transitions
-
-into a single, immutable execution record.
-
-Gantral does not interpret evidence.
-It enforces that **no governed action proceeds without recorded authority**.
+Gantral fails closed.
 
 ---
 
 ## What Gantral Owns
 
-Gantral owns **execution authority**, not intelligence.
+Gantral owns **execution authority invariants**, not lifecycle governance.
 
 It provides:
-- a deterministic authority state machine
-- blocking human-in-the-loop enforcement
-- instance-level execution isolation
-- policy-as-guard integration (e.g. OPA)
-- immutable, replayable authority records
+
+* A deterministic authority state machine
+* Explicit `WAITING_FOR_HUMAN` blocking semantics
+* Explicit `APPROVED / REJECTED / OVERRIDDEN` transitions
+* Identity binding at authority boundaries
+* Policy version binding
+* Workflow version binding
+* Context snapshot binding
+* Atomic authority transition + artifact emission
+* Tamper-evident artifact chains
+* Log-independent replay
+
+Gantral enforces authority correctness **per execution instance**.
+
+---
+
+## Policy Advisory Integration (OPA)
+
+Gantral supports external policy engines in an advisory role.
+
+Policy may be authored in:
+
+* Open Policy Agent (OPA) / Rego
+* Custom enterprise policy services
+
+At authority checkpoints:
+
+* Policy evaluates conditions.
+* Advisory output is returned.
+* `policy_version_id` is bound to the execution instance.
+* Gantral enforces the resulting authority transition structurally.
+
+Policy remains advisory.
+Authority enforcement remains internal and deterministic.
+
+---
+
+## Federated Runner Model
+
+Gantral uses a federated execution model:
+
+* Agents execute in team-owned infrastructure.
+* Gantral does not inspect agent memory or tool payloads.
+* Execution pauses at authority boundaries.
+* Resume signals inject fresh execution context.
+* Long waits allow agent processes to exit cleanly.
+
+Gantral governs **permission to execute**, not execution mechanics.
 
 ---
 
 ## What Gantral Does Not Do
 
-Gantral explicitly does **not**:
+Gantral explicitly does not:
 
-- reason or plan
-- store or inspect agent memory
-- inspect tool payloads
-- author business logic
-- make autonomous decisions
-- guarantee correctness or compliance
+* Manage policy lifecycle
+* Provide dashboards
+* Provide cross-workflow analytics
+* Orchestrate autonomy tiers
+* Replace orchestration engines
+* Inspect model prompts or memory
+* Guarantee regulatory compliance
 
-Gantral records **authority**, not intent, interpretation, or correctness.
+Gantral records and enforces **authority**, not intent, correctness, or compliance status.
+
+---
+
+## When Gantral Is Appropriate
+
+Gantral is designed for workflows that:
+
+* Affect production systems
+* Have regulatory, financial, or security impact
+* Require explicit human accountability
+* Must be auditable months or years later
+
+Gantral is not necessary for:
+
+* Advisory-only agents
+* Exploratory or sandbox workflows
+* Low-impact, reversible actions
+
+Gantral becomes rational infrastructure when:
+
+“Could we independently prove authority correctness without relying on logs?”
+
+must be answered with confidence.
 
 ---
 
@@ -344,47 +347,32 @@ Gantral records **authority**, not intent, interpretation, or correctness.
 
 Useful mental models:
 
-- **“sudo for AI”**  
+* **“sudo for AI”**
   Execution is intercepted and requires authority before proceeding.
 
-- **“Control plane for decisions”**  
-  Authority is enforced as state, not inferred from logs.
+* **“Execution-time constitution”**
+  Authority is enforced as state, not reconstructed from metadata.
 
-- **“Chain of custody for execution”**  
+* **“Chain of custody for automation”**
   Authority is bound to execution at the moment it occurs.
-
----
-
-## When Gantral Is Appropriate
-
-Gantral is designed for actions that:
-
-- affect production systems
-- have regulatory, financial, or security impact
-- require explicit human accountability
-- must be audited months or years later
-
-Gantral is not necessary for:
-- advisory-only agents
-- exploratory or sandbox workflows
-- low-impact or fully reversible actions
 
 ---
 
 ## Where to Go Next
 
-- **Authority & Enforcement**  
+* **Authority & Enforcement**
   See the **[Authority State Machine](../architecture/authority-state-machine.md)**
 
-- **Proof & Audit**  
+* **Proof & Audit**
   Start with **[Verifiability Overview](../verifiability/README.md)**
 
-- **Technical Semantics**  
+* **Technical Semantics**
   Read the **[Technical Reference (TRD)](../architecture/trd.md)**
 
 ---
 
 Gantral is intentionally narrow.
 
-It does not try to make AI safe, correct, or ethical.
-It makes **execution authority explicit, enforceable, and provable**.
+It does not attempt to make AI correct, ethical, or intelligent.
+
+It makes **execution authority deterministic, enforceable, and provable**.
