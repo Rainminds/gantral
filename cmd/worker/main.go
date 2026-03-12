@@ -1,3 +1,12 @@
+/*
+Package main (worker) is the entry point for the Gantral Temporal Worker process.
+
+The worker is responsible for:
+- Connecting to the Temporal cluster and continuously polling a specific Task Queue for work.
+- Hosting and executing the core Workflow definitions (e.g., GantralExecutionWorkflow), which contain the durable state machine logic.
+- Executing the underlying Activities, which perform side-effects such as writing to the Postgres database and generating cryptographic artifacts to building the chain of evidence.
+- Operating fully asynchronously from the API server, scaling independently based on load.
+*/
 package main
 
 import (
@@ -58,7 +67,7 @@ func main() {
 		logger.Error("Failed to initialize artifact store", "error", err)
 		os.Exit(1)
 	}
-	artifactManager := artifact.NewManager(artifactStore)
+	artifactManager := artifact.NewManager(artifactStore, nil, nil)
 	replayGuard := replay.NewReplayGuard(artifactStore)
 
 	// 4. Connect to Temporal

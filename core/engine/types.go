@@ -24,22 +24,32 @@ const (
 
 // Instance represents a concrete execution of a workflow.
 type Instance struct {
-	ID               string                 `json:"id"`
-	WorkflowID       string                 `json:"workflow_id"`
-	State            State                  `json:"state"`
-	TriggerContext   map[string]interface{} `json:"trigger_context"`
-	PolicyContext    map[string]interface{} `json:"policy_context"`
-	PolicyVersionID  string                 `json:"policy_version_id"`
-	LastArtifactHash string                 `json:"last_artifact_hash"`
-	CreatedAt        time.Time              `json:"created_at"`
-	UpdatedAt        time.Time              `json:"updated_at"`
+	ID                string                 `json:"id"`
+	OwningTeamID      string                 `json:"owning_team_id"`
+	WorkflowID        string                 `json:"workflow_id"`
+	WorkflowVersionID string                 `json:"workflow_version_id"`
+	State             State                  `json:"state"`
+	TriggerContext    map[string]interface{} `json:"trigger_context"`
+	PolicyContext     map[string]interface{} `json:"policy_context"`
+	PolicyVersionID   string                 `json:"policy_version_id"`
+	LastArtifactHash  string                 `json:"last_artifact_hash"`
+	CreatedAt         time.Time              `json:"created_at"`
+	UpdatedAt         time.Time              `json:"updated_at"`
 }
+
+// EventType defines the type of an audit event.
+type EventType string
+
+const (
+	EventInstanceCreated  EventType = "INSTANCE_CREATED"
+	EventDecisionRecorded EventType = "DECISION_RECORDED"
+)
 
 // AuditEvent represents an immutable record of a state change or decision.
 type AuditEvent struct {
 	ID         string                 `json:"id"`
 	InstanceID string                 `json:"instance_id"`
-	EventType  string                 `json:"event_type"`
+	EventType  EventType              `json:"event_type"`
 	Payload    map[string]interface{} `json:"payload"`
 	Timestamp  time.Time              `json:"timestamp"`
 }

@@ -40,6 +40,14 @@ dump.rdb
 
 # Gantral Specific
 infra/docker/.env
+/gantral-demo
+/gantral-verify
+/main
+/worker
+local-storage/
+gantral_artifacts/
+*.diff
+*.patch
 
 # Documentation
 docs-site/node_modules

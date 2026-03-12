@@ -4,150 +4,217 @@ title: Implementation Guide
 
 # **Enterprise-Grade Engineering Implementation Guide**
 
-## **Version: v6.1 — Repository-Aligned Edition**
+Version: v8.0 — TRD-Aligned Open Infrastructure Edition  
+Status: Authoritative Engineering Implementation Guide
 
-Status: Authoritative Engineering Implementation Guide  
-Audience:  
-• Core maintainers  
-• AI coding assistants  
-• Platform engineers & SREs  
-• Security reviewers  
-• Enterprise design partners
+Audience
 
-This guide operationalizes the Gantral TRD and Implementation Paper.
+* Core maintainers  
+* AI coding assistants  
+* Platform engineers & SREs  
+* Security reviewers  
+* Enterprise architects  
+* External contributors and design partners
 
-If this guide conflicts with the TRD, the TRD prevails.
+This guide operationalizes the **Gantral Technical Reference Document (TRD)** and the **Gantral Implementation Paper**.
+
+If any behavior described here conflicts with the TRD, **the TRD prevails**.
 
 ---
 
 # **0\. Governing Rules (Non-Negotiable)**
 
-* Fail-closed behavior is mandatory  
-* All authority transitions must be deterministic  
-* Authority transitions and artifact emission must be atomic  
-* Policy engines are advisory only  
-* Logs are never admissible evidence  
-* Replay must require only artifacts  
-* No execution may advance past governed states without artifact persistence  
-* If behavior is ambiguous, execution must stop
-
 Gantral is correctness-first infrastructure.
+
+All implementations must obey the following rules:
+
+* Fail-closed behavior is mandatory.  
+* All authority transitions must be deterministic.  
+* Authority transitions and artifact emission must be atomic.  
+* Policy engines are advisory only.  
+* Logs are never admissible evidence.  
+* Replay must require only commitment artifacts.  
+* No execution may advance past governed states without artifact persistence.  
+* Artifact structure must conform exactly to the TRD Artifact Specification (Appendix A).  
+* If behavior is ambiguous, execution must stop.
 
 ---
 
-# **1\. Implementation Objectives**
+# **1\. Normative Specification References**
+
+The following specifications are defined in the TRD and **MUST NOT be redefined in this document**.
+
+| Topic | Normative Source |
+| ----- | ----- |
+| Canonical execution state machine | TRD §4 |
+| Allowed state transitions | TRD §4.2 |
+| Commitment artifact structure | TRD Appendix A |
+| Artifact hashing model | TRD Appendix A.3 |
+| Artifact signing | TRD Appendix A.4 |
+| Timestamp binding | TRD Appendix A.5 |
+| Canonical serialization rules | TRD Appendix A.9–A.10 |
+| Replay validation rules | TRD §7 |
+
+This implementation guide explains **how to build compliant systems**, not the canonical definitions themselves.
+
+---
+
+# **2\. Implementation Objectives**
 
 The implementation MUST ensure:
 
-1. Policy thresholds are externalized from workflow code  
-2. Authority is canonical workflow state  
-3. workflow\_version\_id and policy\_version\_id are bound at decision time  
-4. Commitment artifacts form a recursive tamper-evident hash chain  
-5. Replay is independent of runtime, database, and logs  
-6. Human authority produces attributable reasoning  
-7. Policy updates do not require workflow redeployment  
-8. Authority visibility is unified across instances
+1. Policy thresholds are externalized from workflow code.  
+2. Authority is canonical workflow state.  
+3. `workflow_version_id` and `policy_version_id` are bound at decision time.  
+4. Commitment artifacts form a tamper-evident hash chain.  
+5. Replay is independent of runtime, database, and logs.  
+6. Human authority produces attributable reasoning.  
+7. Policy updates do not require workflow redeployment.  
+8. Authority visibility is unified across execution instances.
 
 Operational efficiency and admissibility are equal goals.
 
 ---
 
-# **2\. Technology Stack (Mandatory)**
+# **3\. Technology Stack (Mandatory)**
 
-## **2.1 Control Plane Language**
+## **3.1 Control Plane Language**
 
-* Go (required)
+Required: **Go**
 
-Reason:
+Reasons:
 
 * Deterministic concurrency  
 * Strong typing  
 * Mature Temporal SDK  
-* Enterprise readiness
+* Enterprise production suitability
 
 ---
 
-## **2.2 Workflow Runtime**
+## **3.2 Workflow Runtime**
 
-* Temporal (required)  
+Required: **Temporal**
+
+Requirements:
+
 * One workflow per execution instance  
 * Deterministic replay enabled  
 * No non-deterministic logic inside workflow definitions
 
----
+Temporal provides:
 
-## **2.3 Policy Engine**
+* ordering  
+* durability  
+* deterministic replay
 
-* Open Policy Agent (OPA)  
-* Policies authored in Rego  
-* Sidecar or service mode  
-* Policy bundles versioned independently
+Gantral provides:
 
-Policy is advisory only.
-
----
-
-## **2.4 APIs**
-
-* REST (server)  
-* gRPC (internal where applicable)  
-* OpenAPI-compatible external definitions
+* authority enforcement
 
 ---
 
-## **2.5 Datastores**
+## **3.3 Policy Engine**
 
-* PostgreSQL → metadata and indices (non-authoritative)  
-* Object storage → commitment artifacts (authoritative)  
-* Local artifact storage (`local-storage/artifacts`) for development only  
-* Redis (optional, non-authoritative)
+Recommended: **Open Policy Agent (OPA)**
+
+Policies:
+
+* written in Rego  
+* versioned independently  
+* evaluated at authority checkpoints
+
+Policy decisions are **advisory signals only**.
+
+Gantral interprets and enforces them.
 
 ---
 
-## **2.6 Infrastructure**
+## **3.4 APIs**
+
+External:
+
+* REST
+
+Internal:
+
+* gRPC where appropriate
+
+External APIs should expose **OpenAPI-compatible schemas**.
+
+---
+
+## **3.5 Datastores**
+
+Non-authoritative stores:
+
+PostgreSQL  
+Used for:
+
+* metadata  
+* indices  
+* instance queries
+
+Authoritative store:
+
+Object storage (append-only)
+
+Used for:
+
+* commitment artifacts
+
+Optional:
+
+Redis (non-authoritative caching)
+
+---
+
+## **3.6 Infrastructure**
+
+Recommended:
 
 * Kubernetes  
-* Helm (recommended)  
-* CI via GitHub Actions  
-* Signed builds recommended
+* Helm charts  
+* GitHub Actions CI  
+* Signed builds
 
 ---
 
-# **3\. Repository Structure (Authoritative Layout)**
+# **4\. Repository Structure (Authoritative Layout)**
 
-The current repository layout is compliant and structured as follows:
-
-## **3.1 Core Execution Plane**
+## **4.1 Core Execution Plane**
 
 /gantral  
   /cmd  
     /server  
     /worker  
     /gantral-verify  
-    /gantral-demo  
-    /migrate  
+    /migrate
+
   /core  
     /activities  
     /engine  
     /errors  
     /policy  
     /ports  
-    /workflows  
+    /workflows
+
   /adapters  
     /primary  
-    /secondary  
+    /secondary
+
   /infra  
     /db  
-    /migrations  
+    /migrations
+
   /gantral\_artifacts
 
-Core logic MUST remain inside `/core`.
+Core logic MUST reside inside `/core`.
 
-Adapters MUST contain no business logic.
+Adapters must contain **no business logic**.
 
 ---
 
-## **3.2 Internal Packages**
+## **4.2 Internal Packages**
 
 /internal  
   /artifact  
@@ -159,7 +226,7 @@ Adapters MUST contain no business logic.
   /storage  
   /workflow
 
-All authority semantics must reside inside:
+Authority semantics must reside in:
 
 * `/internal/authority`  
 * `/internal/artifact`  
@@ -167,7 +234,7 @@ All authority semantics must reside inside:
 
 ---
 
-## **3.3 Shared Packages**
+## **4.3 Shared Packages**
 
 /pkg  
   /config  
@@ -176,11 +243,11 @@ All authority semantics must reside inside:
   /models  
   /verifier
 
-Verifier logic MUST remain independent of runtime.
+Verifier logic MUST remain **independent of runtime**.
 
 ---
 
-## **3.4 Testing**
+## **4.4 Testing**
 
 /tests  
   /unit  
@@ -191,13 +258,13 @@ Verifier logic MUST remain independent of runtime.
   /golden  
   /helpers
 
-Golden tests must validate artifact chain stability.
+Golden tests must validate **artifact chain stability across versions**.
 
 ---
 
-# **4\. Core Domain Models**
+# **5\. Core Domain Models**
 
-## **4.1 ExecutionInstance**
+## **5.1 ExecutionInstance**
 
 Fields:
 
@@ -210,11 +277,11 @@ Fields:
 * terminated\_at  
 * cost\_metadata
 
-Instances are append-only in state progression.
+Execution instances are **append-only in state progression**.
 
 ---
 
-## **4.2 AuthorityDecision**
+## **5.2 AuthorityDecision**
 
 Fields:
 
@@ -229,41 +296,31 @@ Fields:
 
 Rules:
 
-* justification MUST be non-empty for APPROVE and OVERRIDE unless configured otherwise  
+* justification must be present for APPROVE and OVERRIDE unless explicitly configured otherwise  
 * identity must be validated via OIDC before persistence
 
 ---
 
-## **4.3 CommitmentArtifact**
+## **5.3 Commitment Artifact**
 
-Fields:
+Artifact structure is defined exclusively in the **TRD Appendix A**.
 
-* artifact\_version  
-* artifact\_id  
-* instance\_id  
-* workflow\_version\_id  
-* prev\_artifact\_hash  
-* authority\_state  
-* policy\_version\_id  
-* context\_snapshot\_hash  
-* human\_actor\_id  
-* justification  
-* timestamp  
-* artifact\_hash
+This implementation guide does **not redefine the schema**.
 
-Artifact MUST bind:
+Implementations must:
 
-* workflow version  
-* policy version  
-* authority state  
-* identity  
-* authority-relevant context
+* construct artifacts exactly as specified in the TRD  
+* follow canonical serialization rules  
+* compute artifact hashes exactly as defined in the TRD  
+* include all mandatory fields
+
+The artifact specification in the TRD is the **single normative definition**.
 
 ---
 
-# **5\. Authority State Machine (Executable Rules)**
+# **6\. Authority State Machine (Executable Rules)**
 
-Allowed transitions ONLY:
+Allowed transitions:
 
 CREATED → RUNNING  
 RUNNING → WAITING\_FOR\_HUMAN  
@@ -276,225 +333,246 @@ RESUMED → RUNNING
 RUNNING → COMPLETED  
 RUNNING → TERMINATED
 
-Any other transition MUST panic and terminate execution.
+Any other transition:
+
+→ **terminate execution immediately**
 
 No implicit recovery allowed.
 
 ---
 
-# **6\. Temporal Workflow Implementation**
+# **7\. Temporal Workflow Implementation**
 
-* One Temporal workflow per execution instance  
-* Workflow history authoritative only for ordering  
-* All authority decisions recorded as workflow events  
-* No random values  
-* No wall-clock calls  
-* No external I/O inside workflow logic
+Requirements:
 
-Activities handle external side effects.
+* One workflow per execution instance  
+* Workflow history authoritative for ordering only  
+* Authority decisions recorded as workflow events
 
----
+Forbidden inside workflow logic:
 
-# **7\. Policy Evaluation (OPA)**
+* random values  
+* wall-clock calls  
+* external network calls
 
-## **7.1 Invocation**
-
-* Invoked synchronously during transition guard  
-* Input schema must be versioned  
-* OPA output: ALLOW / REQUIRE\_HUMAN / DENY
-
-## **7.2 Version Binding**
-
-* policy\_version\_id must be retrieved from bundle  
-* policy\_version\_id must be embedded in artifact  
-* Policy changes must not require workflow redeployment
-
-Policy never commits authority.
+External effects must occur in **activities**.
 
 ---
 
-# **8\. Commitment Artifact Emission**
+# **8\. Policy Evaluation**
 
-## **8.1 Atomicity**
+Policy evaluation acts as a **transition guard**.
 
-Authority transition and artifact emission MUST be atomic.
+Inputs include:
+
+* instance\_id  
+* workflow\_version\_id  
+* materiality  
+* actor\_id  
+* roles  
+* policy\_version\_id
+
+Outputs:
+
+* ALLOW  
+* REQUIRE\_HUMAN  
+* DENY
+
+Gantral interprets the signal.
+
+Policy **does not enforce execution**.
+
+---
+
+# **9\. Commitment Artifact Emission**
+
+## **9.1 Atomicity**
+
+Authority transition and artifact emission must be atomic.
 
 If artifact persistence fails:
 
-* State MUST NOT advance  
-* Workflow MUST remain in WAITING\_FOR\_HUMAN  
-* No retry loops
+* state transition must not occur  
+* workflow remains in `WAITING_FOR_HUMAN`
+
+Partial transitions are forbidden.
 
 ---
 
-## **8.2 Hash Chain Model**
+## **9.2 Reference Artifact Emission Algorithm**
 
-artifact\_hash\_i \=
+The following pseudocode illustrates the required artifact emission process.
 
-* H(payload\_i) if first artifact  
-* H(payload\_i || artifact\_hash\_\{i-1\}) otherwise
+The artifact schema and serialization rules are defined in the TRD.
 
-Modification of any artifact invalidates subsequent chain.
+function emitAuthorityArtifact(decision):
+
+  payload \= constructPayload(decision)
+
+  serialized \= canonicalSerialize(payload)
+
+  if prev\_artifact\_hash exists:  
+      artifact\_hash \= H(serialized || prev\_artifact\_hash)  
+  else:  
+      artifact\_hash \= H(serialized)
+
+  signature \= Sign(private\_key, artifact\_hash)
+
+  timestamp\_token \= TSA.timestamp(artifact\_hash)
+
+  artifact \= \{  
+      payload fields,  
+      prev\_artifact\_hash,  
+      artifact\_hash,  
+      artifact\_signature,  
+      timestamp\_token  
+  \}
+
+  persistAppendOnly(artifact)
+
+  return artifact
+
+Implementations must follow the **exact hashing and serialization rules defined in the TRD**.
 
 ---
 
-## **8.3 Artifact Storage**
+## **9.3 Artifact Storage**
 
-Production:
+Production requirements:
 
-* Append-only object storage  
-* Write-once configuration  
-* No mutation APIs
+* append-only object storage  
+* write-once configuration  
+* no mutation APIs
 
 Development:
 
-* local-storage/artifacts (non-authoritative)
+* local artifact directory
 
-`gantral_artifacts` directory must not allow mutation in production mode.
-
----
-
-# **9\. Replay & Verification**
-
-Verifier location:
-
-/pkg/verifier  
-/cmd/gantral-verify
-
-Verifier MUST:
-
-* Operate offline  
-* Require no network  
-* Accept artifact file(s)  
-* Output VALID / INVALID / INCONCLUSIVE
-
-Replay validates:
-
-1. Hash integrity  
-2. Transition validity  
-3. workflow\_version\_id consistency  
-4. policy\_version\_id consistency
-
-Replay reconstructs authority-state projection only.
+Artifacts are the **authoritative record for replay**.
 
 ---
 
-# **10\. Failure Semantics**
+# **10\. Replay & Verification**
 
-Terminate execution on:
+Replay tools must:
 
-* Missing artifact  
-* Hash mismatch  
-* Illegal transition  
-* Identity ambiguity  
-* Policy ambiguity  
-* Version mismatch  
-* Temporal non-determinism
+* operate offline  
+* require no network  
+* accept artifact chains
+
+Outputs:
+
+* VALID  
+* INVALID  
+* INCONCLUSIVE
+
+Replay verifies:
+
+1. hash-chain integrity  
+2. transition validity  
+3. workflow version consistency  
+4. policy version consistency
+
+Replay reconstructs **authority progression only**.
+
+Agent memory is excluded.
+
+---
+
+# **11\. Replay Compatibility Contract**
+
+Gantral guarantees that commitment artifacts remain **replay-verifiable across implementation versions**.
+
+Implementations MUST follow these rules:
+
+1. Artifact fields defined in the TRD MUST NOT be renamed or removed.  
+2. Artifact payload ordering must follow canonical serialization rules defined in the TRD.  
+3. New artifact versions must increment `artifact_version`.  
+4. Replay tools must support verification of all prior artifact versions.  
+5. Replay logic must never depend on:  
+   * runtime state  
+   * databases  
+   * logs  
+   * external services
+
+Independent verifier implementations must be able to validate artifacts using only:
+
+* the artifact chain  
+* the public hashing algorithm  
+* the public signature algorithm
+
+---
+
+# **12\. Failure Semantics**
+
+Execution must terminate on:
+
+* missing artifact  
+* hash mismatch  
+* illegal transition  
+* identity ambiguity  
+* policy ambiguity  
+* version mismatch  
+* Temporal nondeterminism
 
 Fail closed always.
 
 ---
 
-# **11\. Identity & Security**
+# **13\. Identity & Security**
+
+Identity requirements:
 
 * OIDC federation only  
-* No local users  
-* No password storage  
-* No secret persistence  
-* Workload identity required  
-* Artifact emission only after identity validation
+* no local user database  
+* no password storage  
+* workload identity required
+
+Artifact emission occurs **only after identity verification**.
 
 ---
 
-# **12\. Operational Efficiency Requirements**
+# **14\. Operational Efficiency Requirements**
 
-Implementation MUST:
+Gantral must:
 
-* Prevent governance logic inside workflow code  
-* Externalize approval thresholds  
-* Avoid workflow forks based solely on thresholds  
-* Allow policy bundle updates without redeploying workflows
+* prevent governance logic inside workflow code  
+* externalize approval thresholds  
+* avoid workflow forks caused only by policy differences  
+* allow policy updates without redeployment
 
-This reduces:
-
-* Code duplication  
-* Redeployment risk  
-* Governance drift
+This eliminates **policy–code duplication**.
 
 ---
 
-# **13\. Unified Authority Visibility**
+# **15\. Unified Authority Visibility**
 
-System MUST provide:
+Gantral must expose:
 
-* Queryable execution instances  
-* Visible WAITING\_FOR\_HUMAN states  
-* Instance-level isolation  
-* Historical authority progression
+* active execution instances  
+* workflows waiting for authority  
+* historical authority progression
 
-No hidden execution state allowed.
-
----
-
-# **14\. Testing Requirements**
-
-Mandatory tests:
-
-* Transition correctness  
-* Atomic artifact emission  
-* Hash chain validation  
-* Replay determinism  
-* Version consistency  
-* Fuzz tests for artifact corruption  
-* Golden replay stability tests
-
-Replay compatibility cannot break without major version change.
+Gantral intentionally avoids dashboards or analytics layers.
 
 ---
 
-# **15\. AI Coding Assistant Rules**
+# **16\. Implementation Boundary Reminder**
 
-AI assistants MUST:
+Gantral enforces:
 
-* Implement only documented transitions  
-* Never auto-approve  
-* Never infer missing authority  
-* Never embed policy logic in workflows  
-* Fail on ambiguity  
-* Preserve atomicity  
-* Preserve version binding
+* execution authority  
+* deterministic transitions  
+* artifact emission  
+* replayable evidence
 
-Correctness \> convenience.
+Gantral does **not provide**:
 
----
-
-# **16\. Enterprise Deployment Expectations**
-
-Production deployments should:
-
-* Enforce write-once artifact buckets  
-* Separate runtime and control plane  
-* Enable justification enforcement  
-* Pin policy bundle versions  
-* Monitor WAITING\_FOR\_HUMAN backlog
-
-Gantral must be incrementally adoptable.
-
-Agents do not require memory model modification.
-
----
-
-# **17\. Final Statement**
-
-If implemented according to this guide:
-
-* Policy–code duplication is eliminated  
-* Authority becomes canonical state  
-* Chain-of-custody becomes cryptographically verifiable  
-* Replay is independent of logs  
-* Operational fragmentation is structurally removed
-
-Gantral becomes deterministic execution infrastructure by construction.
+* dashboards  
+* policy lifecycle management  
+* cross-workflow analytics  
+* autonomy orchestration  
+* enterprise management UI
 
 ---
 

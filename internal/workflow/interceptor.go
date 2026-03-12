@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"reflect"
 
 	"github.com/Rainminds/gantral/internal/replay"
 	"github.com/Rainminds/gantral/pkg/models"
@@ -63,21 +64,39 @@ func (w *replayWorkflowOutbound) ExecuteActivity(
 	// Call the next interceptor (or SDK core)
 	f := w.Next.ExecuteActivity(ctx, activityType, args...)
 
+	var teamID string
+	if len(args) > 0 {
+		v := reflect.ValueOf(args[0])
+		if v.Kind() == reflect.Struct {
+			f := v.FieldByName("TeamID")
+			if f.IsValid() && f.Kind() == reflect.String {
+				teamID = f.String()
+			}
+		} else if v.Kind() == reflect.Ptr && v.Elem().Kind() == reflect.Struct {
+			f := v.Elem().FieldByName("TeamID")
+			if f.IsValid() && f.Kind() == reflect.String {
+				teamID = f.String()
+			}
+		}
+	}
+
 	// Wrap the future to validate the result upon completion
 	return &replayFuture{
 		Future: f,
 		ctx:    ctx,
 		guard:  w.guard,
 		name:   activityType,
+		teamID: teamID,
 	}
 }
 
 // replayFuture wraps workflow.Future to inspect results.
 type replayFuture struct {
 	workflow.Future
-	ctx   workflow.Context
-	guard *replay.ReplayGuard
-	name  string
+	ctx    workflow.Context
+	guard  *replay.ReplayGuard
+	name   string
+	teamID string
 }
 
 // Get intercepts the result retrieval.
@@ -102,7 +121,7 @@ func (f *replayFuture) Get(ctx workflow.Context, valuePtr interface{}) error {
 	if artifact, ok := extractArtifact(valuePtr); ok {
 		slog.Debug("Validating replayed artifact", "activity", f.name, "id", artifact.ArtifactID)
 		// Use a detached context for the store lookup, as workflow.Context is not compatible.
-		if vErr := f.guard.ValidateReplay(context.Background(), artifact); vErr != nil {
+		if vErr := f.guard.ValidateReplay(context.Background(), f.teamID, artifact); vErr != nil {
 			// FAIL-CLOSED: Panic or Token Cancellation.
 			// Panicking inside a workflow on replay is the standard way to reject deterministic violation.
 			// It crashes the replay, preventing the worker from proceeding on this bad history.
@@ -146,25 +165,36 @@ func extractArtifact(valuePtr interface{}) (*models.CommitmentArtifact, bool) {
 			if hasID && hasState {
 				// Reconstruct for validation
 				// extracting other fields for integrity hash check
-				// extracting other fields for integrity hash check
 				instID, _ := m["instance_id"].(string)
+				wfVerID, _ := m["workflow_version_id"].(string)
 				prevHash, _ := m["prev_artifact_hash"].(string)
 				policyVer, _ := m["policy_version_id"].(string)
-				ctxHash, _ := m["context_hash"].(string)
+				ctxSnapHash, _ := m["context_snapshot_hash"].(string)
 				actorID, _ := m["human_actor_id"].(string)
-				timestamp, _ := m["timestamp"].(string)
+				justification, _ := m["justification"].(string)
+				timestampToken, _ := m["timestamp_token"].(string)
+				timestampAlg, _ := m["timestamp_algorithm"].(string)
 				version, _ := m["artifact_version"].(string)
+				artHash, _ := m["artifact_hash"].(string)
+				artSig, _ := m["artifact_signature"].(string)
+				sigAlg, _ := m["signature_algorithm"].(string)
 
 				return &models.CommitmentArtifact{
-					ArtifactID:       id,
-					AuthorityState:   state,
-					InstanceID:       instID,
-					PrevArtifactHash: prevHash,
-					PolicyVersionID:  policyVer,
-					ContextHash:      ctxHash,
-					HumanActorID:     actorID,
-					Timestamp:        timestamp,
-					ArtifactVersion:  version,
+					ArtifactID:          id,
+					AuthorityState:      state,
+					InstanceID:          instID,
+					WorkflowVersionID:   wfVerID,
+					PrevArtifactHash:    prevHash,
+					PolicyVersionID:     policyVer,
+					ContextSnapshotHash: ctxSnapHash,
+					HumanActorID:        actorID,
+					Justification:       justification,
+					TimestampToken:      timestampToken,
+					TimestampAlgorithm:  timestampAlg,
+					ArtifactVersion:     version,
+					ArtifactHash:        artHash,
+					ArtifactSignature:   artSig,
+					SignatureAlgorithm:  sigAlg,
 				}, true
 			}
 		}

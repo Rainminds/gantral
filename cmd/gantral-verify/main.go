@@ -42,7 +42,8 @@ without requiring access to the operational database.`,
 			var art models.CommitmentArtifact
 			_ = json.Unmarshal(data, &art)
 
-			result, err := verifier.VerifyArtifact(data)
+			v := verifier.New(nil, nil)
+			result, err := v.VerifyArtifact(data)
 			if err != nil {
 				fmt.Printf("❌ ERROR: Logic failure: %v\n", err)
 				os.Exit(2)
@@ -95,7 +96,8 @@ without requiring access to the operational database.`,
 				}
 
 				// Verify individual integrity first
-				res, _ := verifier.VerifyArtifact(data)
+				v := verifier.New(nil, nil)
+				res, _ := v.VerifyArtifact(data)
 				if res != nil && res.Valid {
 					var art models.CommitmentArtifact
 					_ = json.Unmarshal(data, &art)
@@ -117,17 +119,17 @@ without requiring access to the operational database.`,
 
 			// Sort by Timestamp
 			sort.Slice(artifacts, func(i, j int) bool {
-				return artifacts[i].Timestamp < artifacts[j].Timestamp
+				return artifacts[i].TimestampToken < artifacts[j].TimestampToken
 			})
 
-			// Verify Chain
-			chainRes := verifier.VerifyChain(artifacts)
+			v := verifier.New(nil, nil)
+			chainRes := v.VerifyChain(artifacts)
 
 			if verbose {
 				fmt.Println("\n--- CHAIN VERIFICATION SUMMARY ---")
 				fmt.Printf("[✓] Total Blocks: %d\n", len(artifacts))
-				fmt.Printf("[✓] Start Time:   %s\n", artifacts[0].Timestamp)
-				fmt.Printf("[✓] End Time:     %s\n", artifacts[len(artifacts)-1].Timestamp)
+				fmt.Printf("[✓] Start Time:   %s\n", artifacts[0].TimestampToken)
+				fmt.Printf("[✓] End Time:     %s\n", artifacts[len(artifacts)-1].TimestampToken)
 			}
 
 			if chainRes.Valid {
@@ -165,7 +167,7 @@ func printArtifactSummary(art models.CommitmentArtifact, valid bool) {
 	fmt.Printf("%s Decision:     %s\n", icon, art.AuthorityState)
 
 	// Truncate hash for display
-	hashDisp := art.ContextHash
+	hashDisp := art.ContextSnapshotHash
 	if len(hashDisp) > 10 {
 		hashDisp = hashDisp[:10] + "..."
 	}

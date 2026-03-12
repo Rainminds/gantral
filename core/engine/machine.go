@@ -34,9 +34,7 @@ var AllowedTransitions = map[State][]State{
 	StateApproved: {
 		StateResumed,
 	},
-	StateRejected: {
-		StateTerminated, // Or remediation path, but strictly TERMINATED for now based on simple model
-	},
+	StateRejected: {},
 	StateOverridden: {
 		StateResumed,
 	},

@@ -39,13 +39,15 @@ func (s *MemoryStore) GetInstance(ctx context.Context, id string) (*Instance, er
 	return copyInstance(inst), nil
 }
 
-func (s *MemoryStore) ListInstances(ctx context.Context) ([]*Instance, error) {
+func (s *MemoryStore) ListInstances(ctx context.Context, teamID string) ([]*Instance, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
 	var result []*Instance
 	for _, inst := range s.instances {
-		result = append(result, copyInstance(inst))
+		if inst.OwningTeamID == teamID {
+			result = append(result, copyInstance(inst))
+		}
 	}
 	return result, nil
 }

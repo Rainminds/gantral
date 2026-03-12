@@ -56,6 +56,7 @@ func (s *Store) CreateInstance(ctx context.Context, inst *engine.Instance) error
 	// 1. Create Instance
 	_, err = qtx.CreateInstance(ctx, db.CreateInstanceParams{
 		ID:               inst.ID,
+		TeamID:           inst.OwningTeamID,
 		WorkflowID:       inst.WorkflowID,
 		State:            string(inst.State),
 		TriggerContext:   triggerBytes,
@@ -77,7 +78,7 @@ func (s *Store) CreateInstance(ctx context.Context, inst *engine.Instance) error
 	_, err = qtx.CreateAuditEvent(ctx, db.CreateAuditEventParams{
 		ID:         fmt.Sprintf("evt-%d", time.Now().UnixNano()),
 		InstanceID: inst.ID,
-		EventType:  "INSTANCE_CREATED",
+		EventType:  string(engine.EventInstanceCreated),
 		Payload:    payloadBytes,
 	})
 	if err != nil {
@@ -95,8 +96,8 @@ func (s *Store) GetInstance(ctx context.Context, id string) (*engine.Instance, e
 	return mapDBInstance(row), nil
 }
 
-func (s *Store) ListInstances(ctx context.Context) ([]*engine.Instance, error) {
-	rows, err := s.Queries.ListInstances(ctx)
+func (s *Store) ListInstances(ctx context.Context, teamID string) ([]*engine.Instance, error) {
+	rows, err := s.Queries.ListInstances(ctx, teamID)
 	if err != nil {
 		return nil, fmt.Errorf("error listing instances: %w", err)
 	}
@@ -167,7 +168,7 @@ func (s *Store) RecordDecision(ctx context.Context, cmd engine.RecordDecisionCmd
 	_, err = qtx.CreateAuditEvent(ctx, db.CreateAuditEventParams{
 		ID:         fmt.Sprintf("evt-%d", time.Now().UnixNano()),
 		InstanceID: cmd.InstanceID,
-		EventType:  "DECISION_RECORDED",
+		EventType:  string(engine.EventDecisionRecorded),
 		Payload:    payloadBytes,
 	})
 	if err != nil {
@@ -198,7 +199,7 @@ func (s *Store) GetAuditEvents(ctx context.Context, instanceID string) ([]engine
 		events = append(events, engine.AuditEvent{
 			ID:         r.ID,
 			InstanceID: r.InstanceID,
-			EventType:  r.EventType,
+			EventType:  engine.EventType(r.EventType),
 			Payload:    payload,
 			Timestamp:  r.Timestamp.Time,
 		})
@@ -214,6 +215,7 @@ func mapDBInstance(row db.Instance) *engine.Instance {
 
 	return &engine.Instance{
 		ID:               row.ID,
+		OwningTeamID:     row.TeamID,
 		WorkflowID:       row.WorkflowID,
 		State:            engine.State(row.State),
 		TriggerContext:   trigger,

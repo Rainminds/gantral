@@ -54,15 +54,11 @@ def process_execution(inst):
     exc_id = inst["id"]
     state = inst.get("state", "UNKNOWN")
     
-    # Map state to decision for logic compatibility
-    decision = "UNKNOWN"
-    if state == "APPROVED":
-        decision = "APPROVED"
-    elif state == "REJECTED":
-        decision = "REJECTED"
-    elif state == "WAITING_FOR_HUMAN":
-        decision = "WAITING"
-
+    # Direct state mapping per TRD §4.1
+    current_state = state 
+    
+    # We use local_state to track what this runner has ALREADY initiated
+    # to avoid double-execution of Pre/Post agents during polling.
     current_prog = local_state.get(exc_id, "START")
     
     if current_prog == "START":
@@ -81,9 +77,9 @@ def process_execution(inst):
             local_state[exc_id] = "FAILED"
 
     elif current_prog == "PRE_DONE":
-        # We finished PRE. Now we wait for Decision.
-        if decision == "APPROVED":
-            logger.info(f"Instance {exc_id} APPROVED. Launching Post-Agent...")
+        # We finished PRE. Now we wait for Decision (Canonical States).
+        if current_state in ["APPROVED", "RESUMED"]:
+            logger.info(f"Instance {exc_id} {current_state}. Launching Post-Agent...")
             
             env = {"GANTRAL_EXECUTION_ID": exc_id}
             exit_code = run_script("/app/agent-post/agent_post.py", exc_id, env)
@@ -95,12 +91,16 @@ def process_execution(inst):
                  logger.error(f"Agent-Post failed for {exc_id}.")
                  local_state[exc_id] = "FAILED"
         
-        elif decision == "REJECTED":
+        elif current_state == "REJECTED":
             logger.info(f"Instance {exc_id} REJECTED. Cleaning up.")
             local_state[exc_id] = "REJECTED"
         
+        elif current_state == "WAITING_FOR_HUMAN":
+            # Still waiting for human
+            pass
+        
         else:
-            # Still waiting (WAITING_FOR_HUMAN)
+            # Other states (COMPLETED, TERMINATED, etc.)
             pass
 
 def main():

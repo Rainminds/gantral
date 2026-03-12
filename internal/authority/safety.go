@@ -17,17 +17,17 @@ var (
 
 // ConsistencyGuard safeguards transitions by verifying evidence existence.
 type ConsistencyGuard struct {
-	store artifact.Store
+	store artifact.ImmutableStore
 }
 
 // NewConsistencyGuard creates a guard with access to the immutable evidence store.
-func NewConsistencyGuard(store artifact.Store) *ConsistencyGuard {
+func NewConsistencyGuard(store artifact.ImmutableStore) *ConsistencyGuard {
 	return &ConsistencyGuard{store: store}
 }
 
 // EnsureStateConsistency verifies that a claimed artifact actually exists in the WORM store
 // before allowing any side-effect or state transition dependent on it.
-func (g *ConsistencyGuard) EnsureStateConsistency(ctx context.Context, instanceID string, artifactID string) error {
+func (g *ConsistencyGuard) EnsureStateConsistency(ctx context.Context, teamID string, instanceID string, artifactID string) error {
 	if artifactID == "" {
 		// If no artifact is claimed (e.g. Genesis), strictly validate if that is allowed.
 		// For now, if caller claims "no artifact", we assume they know what they are doing (e.g. start)
@@ -36,7 +36,7 @@ func (g *ConsistencyGuard) EnsureStateConsistency(ctx context.Context, instanceI
 	}
 
 	// 1. Check Store
-	art, err := g.store.Get(ctx, artifactID)
+	art, err := g.store.GetArtifact(ctx, teamID, artifactID)
 
 	// 2. Strict Error Handling
 	if err != nil {

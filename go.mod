@@ -1,3 +1,4 @@
+// Kernel packages are internal implementation details. Example code must use sdk and specs only.
 module github.com/Rainminds/gantral
 
 go 1.24.0

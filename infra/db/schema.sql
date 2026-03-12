@@ -1,5 +1,6 @@
 CREATE TABLE instances (
     id TEXT PRIMARY KEY,
+    team_id TEXT NOT NULL DEFAULT '',
     workflow_id TEXT NOT NULL,
     state TEXT NOT NULL,
     trigger_context JSONB NOT NULL,

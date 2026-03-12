@@ -33,8 +33,8 @@ func Test_Offline_Verification(t *testing.T) {
 	defer os.Remove(binPath)
 
 	// 1. Create a valid artifact JSON
-	art := models.NewCommitmentArtifact("inst-valid", "prev", "APPROVED", "v1", "ctx", "auditor")
-	if err := art.CalculateHashAndSetID(); err != nil {
+	art := models.NewCommitmentArtifact("inst-valid", "wf-v1", "prev", "APPROVED", "v1", "ctx", "auditor", "just")
+	if err := art.CalculateHash(); err != nil {
 		t.Fatal(err)
 	}
 
@@ -69,8 +69,8 @@ func Test_Tampered_File(t *testing.T) {
 	defer os.Remove(binPath)
 
 	// 1. Create a valid artifact
-	art := models.NewCommitmentArtifact("inst-tampered", "prev", "APPROVED", "v1", "ctx", "attacker")
-	if err := art.CalculateHashAndSetID(); err != nil {
+	art := models.NewCommitmentArtifact("inst-tampered", "wf-v1", "prev", "APPROVED", "v1", "ctx", "attacker", "just")
+	if err := art.CalculateHash(); err != nil {
 		t.Fatal(err)
 	}
 
@@ -114,20 +114,20 @@ func Test_Chain_Verification(t *testing.T) {
 	// Models sets timestamp to Now(). We sleep slightly to ensure order.
 
 	// A
-	artA := models.NewCommitmentArtifact("inst", models.GenesisHash, "RUNNING", "v1", "ctxA", "sys")
-	_ = artA.CalculateHashAndSetID()
+	artA := models.NewCommitmentArtifact("inst", "wf-v1", models.GenesisHash, "RUNNING", "v1", "ctxA", "sys", "started")
+	_ = artA.CalculateHash()
 	_ = os.WriteFile(filepath.Join(tmpDir, "1_A.json"), mustMarshal(artA), 0644)
 	time.Sleep(10 * time.Millisecond)
 
 	// B
-	artB := models.NewCommitmentArtifact("inst", artA.ArtifactID, "APPROVED", "v1", "ctxB", "sys")
-	_ = artB.CalculateHashAndSetID()
+	artB := models.NewCommitmentArtifact("inst", "wf-v1", artA.ArtifactHash, "WAITING_FOR_HUMAN", "v1", "ctxB", "sys", "waiting")
+	_ = artB.CalculateHash()
 	_ = os.WriteFile(filepath.Join(tmpDir, "2_B.json"), mustMarshal(artB), 0644)
 	time.Sleep(10 * time.Millisecond)
 
 	// C
-	artC := models.NewCommitmentArtifact("inst", artB.ArtifactID, "COMPLETED", "v1", "ctxC", "sys")
-	_ = artC.CalculateHashAndSetID()
+	artC := models.NewCommitmentArtifact("inst", "wf-v1", artB.ArtifactHash, "APPROVED", "v1", "ctxC", "sys", "approved")
+	_ = artC.CalculateHash()
 	_ = os.WriteFile(filepath.Join(tmpDir, "3_C.json"), mustMarshal(artC), 0644)
 
 	// Run Verify Chain

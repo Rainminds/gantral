@@ -6,145 +6,189 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"time"
+
+	"github.com/google/uuid"
 )
 
-// SchemaVersionV1 defines the current schema version for commitment artifacts.
-const SchemaVersionV1 = "v1"
+const (
+	// ArtifactVersionV1 represents the initial v1 schema.
+	ArtifactVersionV1 = "v1"
+	// ArtifactVersionV1_0 represents the v1.0 schema version for backward compatibility.
+	ArtifactVersionV1_0 = "v1.0"
+	// CurrentArtifactVersion defines the current schema version for new commitment artifacts.
+	CurrentArtifactVersion = ArtifactVersionV1
+)
+
+// IsSupportedVersion checks if the given artifact version is supported by the system.
+func IsSupportedVersion(version string) bool {
+	switch version {
+	case ArtifactVersionV1, ArtifactVersionV1_0:
+		return true
+	default:
+		return false
+	}
+}
+
+// ErrUnsupportedArtifactVersion indicates that the artifact version is unknown or no longer supported.
+var ErrUnsupportedArtifactVersion = errors.New("unsupported artifact version")
 
 // GenesisHash is the SHA-256 hash of comparable length (64 chars) consisting of zeros.
-// It is used as the PrevArtifactHash for the first artifact in a chain.
 const GenesisHash = "0000000000000000000000000000000000000000000000000000000000000000"
 
+// Attestation represents a cryptographic extension to an artifact.
+type Attestation struct {
+	Type    string      `json:"type"`
+	Payload interface{} `json:"payload"`
+}
+
 // CommitmentArtifact represents the immutable proof of an execution authority transition.
-// It serves as the root of trust for auditability and verification.
-//
-// "EmitArtifact generates a non-repudiable proof of authorization bound to execution state."
 type CommitmentArtifact struct {
-	// ArtifactVersion is the schema version (e.g., "v1").
-	ArtifactVersion string `json:"artifact_version"`
-
-	// ArtifactID is the unique identifier of this artifact (usually the hash of its content).
-	ArtifactID string `json:"artifact_id"`
-
-	// InstanceID is the UUID of the execution instance.
-	InstanceID string `json:"instance_id"`
-
-	// PrevArtifactHash is the hash of the previous artifact in the chain.
-	// This links artifacts together into an immutable log.
-	PrevArtifactHash string `json:"prev_artifact_hash"`
-
-	// AuthorityState is the state being transitioned to (e.g., APPROVED, REJECTED).
-	AuthorityState string `json:"authority_state"`
-
-	// PolicyVersionID is the version of the policy used for evaluation.
-	PolicyVersionID string `json:"policy_version_id"`
-
-	// ContextHash is the SHA256 hash of the execution context snapshot.
-	ContextHash string `json:"context_hash"`
-
-	// HumanActorID is the identity of the human/system authorizing the transition.
-	HumanActorID string `json:"human_actor_id"`
-
-	// Timestamp is the exact time of emission (RFC3339).
-	Timestamp string `json:"timestamp"`
+	ArtifactVersion     string        `json:"artifact_version"`
+	ArtifactID          string        `json:"artifact_id"`
+	InstanceID          string        `json:"instance_id"`
+	WorkflowVersionID   string        `json:"workflow_version_id"`
+	PolicyVersionID     string        `json:"policy_version_id"`
+	AuthorityState      string        `json:"authority_state"`
+	ContextSnapshotHash string        `json:"context_snapshot_hash"`
+	HumanActorID        string        `json:"human_actor_id"`
+	Justification       string        `json:"justification"`
+	PrevArtifactHash    interface{}   `json:"prev_artifact_hash"` // Explicitly handle null for genesis
+	ArtifactHash        string        `json:"artifact_hash"`
+	CryptoProfile       string        `json:"crypto_profile"`
+	ArtifactSignature   string        `json:"artifact_signature"`
+	SignatureAlgorithm  string        `json:"signature_algorithm"`
+	TimestampToken      string        `json:"timestamp_token"`
+	TimestampAlgorithm  string        `json:"timestamp_algorithm"`
+	Attestations        []Attestation `json:"attestations"` // Explicitly handle null if empty
 }
 
 // NewCommitmentArtifact creates a new artifact with the given fields.
-// It automatically sets the SchemaVersion and Timestamp.
-// It does NOT calculate the ID/Hash; that must be done via CalculateHashAndSetID.
+// It automatically generates a UUIDv4 for ArtifactID and sets Timestamp.
 func NewCommitmentArtifact(
 	instanceID string,
+	workflowVersionID string,
 	prevArtifactHash string,
 	authorityState string,
 	policyVersionID string,
-	contextHash string,
+	contextSnapshotHash string,
 	humanActorID string,
+	justification string,
 ) *CommitmentArtifact {
+	var prevHash interface{} = prevArtifactHash
+	if prevArtifactHash == GenesisHash || prevArtifactHash == "" {
+		prevHash = nil
+	}
+
 	return &CommitmentArtifact{
-		ArtifactVersion:  SchemaVersionV1,
-		InstanceID:       instanceID,
-		PrevArtifactHash: prevArtifactHash,
-		AuthorityState:   authorityState,
-		PolicyVersionID:  policyVersionID,
-		ContextHash:      contextHash,
-		HumanActorID:     humanActorID,
-		Timestamp:        time.Now().UTC().Format(time.RFC3339),
+		ArtifactVersion:     CurrentArtifactVersion,
+		ArtifactID:          uuid.New().String(),
+		InstanceID:          instanceID,
+		WorkflowVersionID:   workflowVersionID,
+		PolicyVersionID:     policyVersionID,
+		AuthorityState:      authorityState,
+		ContextSnapshotHash: contextSnapshotHash,
+		HumanActorID:        humanActorID,
+		Justification:       justification,
+		PrevArtifactHash:    prevHash,
+		CryptoProfile:       "standard-v1",
+		Attestations:        nil,
 	}
 }
 
-// CalculateHashAndSetID computes the SHA256 hash of the canonical payload
-// and sets both ArtifactHash and ArtifactID.
-// It returns an error if serialization fails.
-func (a *CommitmentArtifact) CalculateHashAndSetID() error {
-	payloadBytes, err := a.CanonicalPayload()
+// CalculateHash computes the SHA256 hash of the canonical payload
+// as defined in TRD A.3 and A.11, and sets artifacts.ArtifactHash.
+// It explicitly excludes signature and timestamp fields.
+func (a *CommitmentArtifact) CalculateHash() error {
+	payload, err := a.PayloadForHashing()
 	if err != nil {
-		return fmt.Errorf("failed to generate canonical payload: %w", err)
+		return err
 	}
 
-	hash := sha256.Sum256(payloadBytes)
-	hashString := hex.EncodeToString(hash[:])
+	canonicalBytes, err := CanonicalSerialize(payload)
+	if err != nil {
+		return fmt.Errorf("canonical serialization failed: %w", err)
+	}
 
-	a.ArtifactID = hashString
+	var hash [32]byte
+	if a.PrevArtifactHash != nil && a.PrevArtifactHash != "" {
+		prevHashStr, ok := a.PrevArtifactHash.(string)
+		if ok && prevHashStr != "" {
+			// TRD A.11: SHA256(canonical_json_bytes || prev_artifact_hash)
+			combined := append(canonicalBytes, []byte(prevHashStr)...)
+			hash = sha256.Sum256(combined)
+		} else {
+			hash = sha256.Sum256(canonicalBytes)
+		}
+	} else {
+		hash = sha256.Sum256(canonicalBytes)
+	}
+
+	a.ArtifactHash = hex.EncodeToString(hash[:])
 	return nil
 }
 
-// CanonicalPayload returns the strictly deterministic JSON bytes used for hashing.
-// It uses a map to ensure keys are sorted alphabetically by encoding/json,
-// guaranteeing a stable hash regardless of struct field order.
-func (a *CommitmentArtifact) CanonicalPayload() ([]byte, error) {
+// PayloadForHashing returns the strictly deterministic map used for hashing,
+// omitting the signature, timestamp, attestations, and artifact_hash per TRD A.3.
+func (a *CommitmentArtifact) PayloadForHashing() (map[string]interface{}, error) {
 	// 1. Validate required fields (Fail-Closed)
+	if !IsSupportedVersion(a.ArtifactVersion) {
+		return nil, fmt.Errorf("%w: %s", ErrUnsupportedArtifactVersion, a.ArtifactVersion)
+	}
 	if a.InstanceID == "" {
 		return nil, errors.New("canonical payload: missing instance_id")
 	}
 	if a.AuthorityState == "" {
 		return nil, errors.New("canonical payload: missing authority_state")
 	}
-	if a.ContextHash == "" {
-		return nil, errors.New("canonical payload: missing context_hash")
-	}
-	if a.Timestamp == "" {
-		return nil, errors.New("canonical payload: missing timestamp")
-	}
-	// Note: PrevArtifactHash can be empty for the first artifact (Genesis),
-	// but strictly speaking, explicit nil handling should be done by caller.
-	// We allow empty string or GenesisHash. Ideally, use models.GenesisHash.
-	// For now, we allow it but ensure it's included in the map.
-
-	// 2. Construct map for sorted keys
-	msg := map[string]string{
-		"artifact_version":   a.ArtifactVersion,
-		"instance_id":        a.InstanceID,
-		"prev_artifact_hash": a.PrevArtifactHash,
-		"authority_state":    a.AuthorityState,
-		"policy_version_id":  a.PolicyVersionID,
-		"context_hash":       a.ContextHash,
-		"human_actor_id":     a.HumanActorID,
-		"timestamp":          a.Timestamp,
+	if a.ContextSnapshotHash == "" {
+		return nil, errors.New("canonical payload: missing context_snapshot_hash")
 	}
 
-	// 3. Marshal with standard library (sorts map keys)
-	return json.Marshal(msg)
+	// 2. Construct map per schema
+	msg := map[string]interface{}{
+		"artifact_version":      a.ArtifactVersion,
+		"artifact_id":           a.ArtifactID,
+		"instance_id":           a.InstanceID,
+		"workflow_version_id":   a.WorkflowVersionID,
+		"policy_version_id":     a.PolicyVersionID,
+		"authority_state":       a.AuthorityState,
+		"context_snapshot_hash": a.ContextSnapshotHash,
+		"human_actor_id":        a.HumanActorID,
+		"justification":         a.Justification,
+		"prev_artifact_hash":    a.PrevArtifactHash,
+		"crypto_profile":        a.CryptoProfile,
+	}
+
+	return msg, nil
 }
 
-// MarshalJSON implements the json.Marshaler interface to ensure
-// the full object handles 0-values correctly and adheres to schema.
-// We force the standard struct marshaling but could enforce order if needed.
-// Since typical consumers parse JSON into objects, key order in the OUTER object
-// is less critical than the HASH payload order. But to be safe, we can reuse
-// the map approach for the outer object too, adding the ID fields.
+// MarshalJSON implements the json.Marshaler interface.
 func (a *CommitmentArtifact) MarshalJSON() ([]byte, error) {
-	// Construct map to ensure complete representation including ID/Hash
-	msg := map[string]string{
-		"artifact_version":   a.ArtifactVersion,
-		"artifact_id":        a.ArtifactID,
-		"instance_id":        a.InstanceID,
-		"prev_artifact_hash": a.PrevArtifactHash,
-		"authority_state":    a.AuthorityState,
-		"policy_version_id":  a.PolicyVersionID,
-		"context_hash":       a.ContextHash,
-		"human_actor_id":     a.HumanActorID,
-		"timestamp":          a.Timestamp,
+	msg := map[string]interface{}{
+		"artifact_version":      a.ArtifactVersion,
+		"artifact_id":           a.ArtifactID,
+		"instance_id":           a.InstanceID,
+		"workflow_version_id":   a.WorkflowVersionID,
+		"policy_version_id":     a.PolicyVersionID,
+		"authority_state":       a.AuthorityState,
+		"context_snapshot_hash": a.ContextSnapshotHash,
+		"human_actor_id":        a.HumanActorID,
+		"justification":         a.Justification,
+		"prev_artifact_hash":    a.PrevArtifactHash,
+		"artifact_hash":         a.ArtifactHash,
+		"crypto_profile":        a.CryptoProfile,
+		"artifact_signature":    a.ArtifactSignature,
+		"signature_algorithm":   a.SignatureAlgorithm,
+		"timestamp_token":       a.TimestampToken,
+		"timestamp_algorithm":   a.TimestampAlgorithm,
 	}
+
+	// Handle optional attestations
+	if len(a.Attestations) == 0 {
+		msg["attestations"] = nil
+	} else {
+		msg["attestations"] = a.Attestations
+	}
+
 	return json.Marshal(msg)
 }

@@ -22,12 +22,17 @@ func (m *MockArtifactStore) Write(ctx context.Context, art *models.CommitmentArt
 	return args.Error(0)
 }
 
-func (m *MockArtifactStore) Get(ctx context.Context, id string) (*models.CommitmentArtifact, error) {
-	args := m.Called(ctx, id)
+func (m *MockArtifactStore) GetArtifact(ctx context.Context, teamID string, id string) (*models.CommitmentArtifact, error) {
+	args := m.Called(ctx, teamID, id)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*models.CommitmentArtifact), args.Error(1)
+}
+
+func (m *MockArtifactStore) WriteArtifact(ctx context.Context, teamID string, art *models.CommitmentArtifact) error {
+	args := m.Called(ctx, teamID, art)
+	return args.Error(0)
 }
 
 // Since Engine is a struct, we can't mock it directly easily unless we interface it.
@@ -53,9 +58,9 @@ func Test_Phantom_Artifact_Panic(t *testing.T) {
 	ctx := context.Background()
 
 	// Case: Artifact Missing
-	mockStore.On("Get", ctx, "phantom-123").Return(nil, artifact.ErrArtifactNotFound)
+	mockStore.On("GetArtifact", ctx, "team-1", "phantom-123").Return(nil, artifact.ErrArtifactNotFound)
 
-	err := guard.EnsureStateConsistency(ctx, "inst-1", "phantom-123")
+	err := guard.EnsureStateConsistency(ctx, "team-1", "inst-1", "phantom-123")
 
 	assert.Error(t, err)
 	assert.True(t, errors.Is(err, ErrStateAmbiguous))
@@ -72,9 +77,9 @@ func Test_Cross_Instance_Contamination(t *testing.T) {
 		ArtifactID: "leak-123",
 		InstanceID: "other-inst",
 	}
-	mockStore.On("Get", ctx, "leak-123").Return(art, nil)
+	mockStore.On("GetArtifact", ctx, "team-1", "leak-123").Return(art, nil)
 
-	err := guard.EnsureStateConsistency(ctx, "inst-1", "leak-123")
+	err := guard.EnsureStateConsistency(ctx, "team-1", "inst-1", "leak-123")
 
 	assert.Error(t, err)
 	assert.True(t, errors.Is(err, ErrStateAmbiguous))
@@ -91,9 +96,9 @@ func Test_Valid_Consistency(t *testing.T) {
 		ArtifactID: "valid-123",
 		InstanceID: "inst-1",
 	}
-	mockStore.On("Get", ctx, "valid-123").Return(art, nil)
+	mockStore.On("GetArtifact", ctx, "team-1", "valid-123").Return(art, nil)
 
-	err := guard.EnsureStateConsistency(ctx, "inst-1", "valid-123")
+	err := guard.EnsureStateConsistency(ctx, "team-1", "inst-1", "valid-123")
 
 	assert.NoError(t, err)
 }

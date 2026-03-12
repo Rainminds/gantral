@@ -25,11 +25,14 @@ type ArtifactEmitter interface {
 	//   - error: If any step fails (serialization, IO, etc.). Fail-Closed.
 	EmitArtifact(
 		ctx context.Context,
+		teamID string,
 		instanceID string,
+		workflowVersionID string,
 		prevHash string,
 		state string,
 		policyVer string,
 		contextHash string,
 		actorID string,
+		justification string,
 	) (*models.CommitmentArtifact, error)
 }

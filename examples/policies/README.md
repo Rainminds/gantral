@@ -51,18 +51,15 @@ opa eval -i input.json -d basic_approval.rego "data.gantral.policies"
       "expressions": [
         {
           "value": {
-            "allow": true,
-            "requires_human_approval": true,
+            "decision": "REQUIRE_HUMAN",
             "reason": "High Materiality workflow requires human approval"
           },
           "text": "data.gantral.policies",
-          "location": {
-            "row": 1,
-            "col": 1
-          }
+          ...
         }
       ]
     }
   ]
 }
 ```
+

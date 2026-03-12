@@ -22,6 +22,7 @@ const (
 
 // WorkflowInput defines strict inputs for the execution workflow.
 type WorkflowInput struct {
+	TeamID         string
 	WorkflowID     string
 	TriggerContext map[string]interface{}
 	Policy         policy.Policy
@@ -69,6 +70,7 @@ func GantralExecutionWorkflow(ctx workflow.Context, input WorkflowInput) (Workfl
 	// C. Persist Instance (Create)
 	var inst *engine.Instance
 	persistInput := activities.PersistInstanceInput{
+		TeamID:          input.TeamID,
 		InstanceID:      workflow.GetInfo(ctx).WorkflowExecution.ID,
 		WorkflowID:      input.WorkflowID,
 		TriggerContext:  input.TriggerContext,
@@ -112,6 +114,7 @@ func GantralExecutionWorkflow(ctx workflow.Context, input WorkflowInput) (Workfl
 			msg = "HITL Timeout Exceeded"
 			// Construct System Rejection
 			decisionInput = activities.RecordDecisionInput{
+				TeamID:        input.TeamID,
 				InstanceID:    inst.ID,
 				DecisionType:  engine.DecisionReject,
 				ActorID:       "SYSTEM",
@@ -142,6 +145,9 @@ func GantralExecutionWorkflow(ctx workflow.Context, input WorkflowInput) (Workfl
 		// Ensure InstanceID is set for Timeout case if it wasn't
 		if decisionInput.InstanceID == "" {
 			decisionInput.InstanceID = inst.ID
+		}
+		if decisionInput.TeamID == "" {
+			decisionInput.TeamID = input.TeamID
 		}
 
 		// Record Decision via Activity

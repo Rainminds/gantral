@@ -31,29 +31,27 @@ func Test_Adversarial_Overwrite(t *testing.T) {
 	ctx := context.Background()
 
 	// 1. Write Artifact A (ID: "123")
-	artA := models.NewCommitmentArtifact("inst-1", models.GenesisHash, "APPROVED", "v1", "ctx-A", "user")
-	artA.ArtifactID = "123" // Force ID for collision testing
-	// artA.ArtifactHash removed
-
-	if err := store.Write(ctx, artA); err != nil {
+	artA := models.NewCommitmentArtifact("inst-1", "wf-1", models.GenesisHash, "APPROVED", "v1", "ctx-A", "user", "j")
+	artA.ArtifactHash = "aeebf84acd3705fc5508a55338aae686d17ef026d805c9e6d428835a37387731" // Valid hash format
+	
+	if err := store.WriteArtifact(ctx, "team-1", artA); err != nil {
 		t.Fatalf("Failed first write: %v", err)
 	}
 
-	// 2. Create a *different* Artifact B with the same ID ("123")
-	artB := models.NewCommitmentArtifact("inst-1", models.GenesisHash, "REJECTED", "v1", "ctx-B", "attacker")
-	artB.ArtifactID = "123" // Same ID
-	// artB.ArtifactHash removed
+	// 2. Create a *different* Artifact B with the same hash
+	artB := models.NewCommitmentArtifact("inst-1", "wf-1", models.GenesisHash, "REJECTED", "v1", "ctx-B", "attacker", "j")
+	artB.ArtifactHash = artA.ArtifactHash
 
 	// 3. Attempt to Write Artifact B
-	err := store.Write(ctx, artB)
+	err := store.WriteArtifact(ctx, "team-1", artB)
 
-	// 4. ASSERT: Error is ErrArtifactAlreadyExists
-	if err != artifact.ErrArtifactAlreadyExists {
-		t.Errorf("Expected ErrArtifactAlreadyExists, got: %v", err)
+	// 4. ASSERT: Error is ErrImmutableViolation
+	if err != artifact.ErrImmutableViolation {
+		t.Errorf("Expected ErrImmutableViolation, got: %v", err)
 	}
 
-	// 5. ASSERT: Read "123" from disk -> It must still match Artifact A (First write wins)
-	readArt, err := store.Get(ctx, "123")
+	// 5. ASSERT: Read from disk -> It must still match Artifact A (First write wins)
+	readArt, err := store.GetArtifact(ctx, "team-1", artA.ArtifactHash)
 	if err != nil {
 		t.Fatalf("Failed to read artifact: %v", err)
 	}
@@ -72,15 +70,14 @@ func Test_Survival_After_DB_Wipe(t *testing.T) {
 
 	// Phase 1: Operational
 	store1, _ := NewStore(tmpDir)
-	art := models.NewCommitmentArtifact("inst-db-wipe", "prev", "APPROVED", "v1", "ctx", "actor")
-	if err := art.CalculateHashAndSetID(); err != nil {
+	art := models.NewCommitmentArtifact("inst-db-wipe", "w", "prev", "APPROVED", "v1", "ctx", "actor", "j")
+	if err := art.CalculateHash(); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := store1.Write(context.Background(), art); err != nil {
+	if err := store1.WriteArtifact(context.Background(), "team-1", art); err != nil {
 		t.Fatal(err)
 	}
-	targetID := art.ArtifactID
 
 	// 2. Simulate DB Loss / Crash
 	store1 = nil // discard memory reference
@@ -92,14 +89,14 @@ func Test_Survival_After_DB_Wipe(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// 4. Call Get(id)
-	retrievedArt, err := store2.Get(context.Background(), targetID)
+	// 4. Call Get(hash)
+	retrievedArt, err := store2.GetArtifact(context.Background(), "team-1", art.ArtifactHash)
 	if err != nil {
 		t.Fatalf("Failed to retrieve artifact after 'wipe': %v", err)
 	}
 
 	// 5. ASSERT: Artifact is retrieved and Hash verifies
-	if retrievedArt.ArtifactID != art.ArtifactID {
+	if retrievedArt.ArtifactHash != art.ArtifactHash {
 		t.Error("Hash mismatch on retrieval")
 	}
 }
@@ -108,6 +105,10 @@ func Test_Atomic_Failure(t *testing.T) {
 	// 1. Use a read-only directory to simulate write failure
 	// Note: In some containers/OS, chmod might not strictly prevent root writes,
 	// but standard user permissions should fail.
+	// NOTE: GitLab CI runners might run as root, which ignores these permissions.
+	if os.Getuid() == 0 {
+		t.Skip("Skipping atomicity failure test: Running as root ignores directory permissions")
+	}
 
 	tmpDir, err := os.MkdirTemp("", "gantral-readonly-*")
 	if err != nil {
@@ -122,24 +123,27 @@ func Test_Atomic_Failure(t *testing.T) {
 	} // Read + Execute only, No Write
 
 	store, _ := NewStore(readOnlyDir)
-	art := models.NewCommitmentArtifact("inst-fail", "0000", "APPROVED", "v1", "ctx", "act")
-	if err := art.CalculateHashAndSetID(); err != nil {
+	art := models.NewCommitmentArtifact("inst-fail", "w", "0000", "APPROVED", "v1", "ctx", "act", "j")
+	if err := art.CalculateHash(); err != nil {
 		t.Fatal(err)
 	}
 
 	// 2. Attempt write
-	// Expected to fail because we can't create the underlying file
-	err = store.Write(context.Background(), art)
+	// Expected to fail because we can't create the underlying team directory or file
+	err = store.WriteArtifact(context.Background(), "team-1", art)
 	if err == nil {
 		// If it succeeded, check if the file actually exists (maybe running as root?)
-		// Ideally we skip this test if we are root/can write.
-		t.Log("Write succeeded (unexpected permissions?), verifying content consistency at least.")
+		targetPath := filepath.Join(readOnlyDir, "team-1", art.ArtifactHash+".json")
+		if _, statErr := os.Stat(targetPath); statErr == nil {
+			t.Skip("Skipping atomicity failure test: Directory permissions were bypassed (running as root or special capabilities)")
+		}
+		t.Errorf("Expected write to fail in read-only directory, but it succeeded")
 	} else {
 		t.Logf("Got expected write error: %v", err)
 	}
 
-	// 3. ASSERT: No partial/empty file exists at the target path "locked/ID.json"
-	targetPath := filepath.Join(readOnlyDir, art.ArtifactID+".json")
+	// 3. ASSERT: No partial/empty file exists at the target path "locked/team-1/HASH.json"
+	targetPath := filepath.Join(readOnlyDir, "team-1", art.ArtifactHash+".json")
 	if _, err := os.Stat(targetPath); !os.IsNotExist(err) {
 		t.Error("Atomicity Failure: Partial or empty file exists after failed write")
 	}

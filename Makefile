@@ -1,4 +1,4 @@
-.PHONY: all test build clean docs build-ui build-ui
+.PHONY: all test build clean docs docs-install docs-build build-ui lint
 
 all: build
 
@@ -14,8 +14,11 @@ testbuild: build-ui
 
 test-tier1:
 	@echo "Running Tier 1 Tests (Scope: Unit, StateMachine, Artifact, Replay, Core, Pkg)..."
-	@go test -v -count=1 ./tests/unit/... ./tests/statemachine/... ./tests/artifact/... ./tests/replay/... ./core/... ./pkg/... ./adapters/... ./cmd/... | grep -v "no test files" || true
+	@go test -v -count=1 ./tests/unit/... ./tests/statemachine/... ./tests/artifact/... ./tests/replay/... ./internal/... ./core/... ./pkg/... ./adapters/... ./cmd/... | grep -v "no test files" || true
 	@echo "Tier 1 Tests Completed."
+
+check-coverage:
+	./scripts/check-coverage.sh
 
 test-tier2:
 	@echo "Running Tier 2 Integration Tests..."
@@ -29,6 +32,20 @@ test: test-tier1 test-tier2
 docs:
 	@echo "Starting Docusaurus..."
 	cd docs-site && npm start
+
+docs-install:
+	@echo "Installing specialized dependencies for docs site..."
+	cd docs-site && npm install
+
+docs-build:
+	@echo "Building optimized production version of documentation..."
+	cd docs-site && npm run build
+
+LINT_BIN := $(shell command -v golangci-lint 2>/dev/null || echo "$(shell go env GOPATH)/bin/golangci-lint")
+
+lint:
+	@echo "Running linter ($(LINT_BIN))..."
+	@$(LINT_BIN) run ./...
 
 dev:
 	@echo "Starting Dev Environment..."
@@ -64,5 +81,8 @@ help:
 	@echo "  make test            - Run unit tests"
 	@echo "  make test-integration - Run integration tests (requires DB)"
 	@echo "  make clean           - Remove artifacts"
-	@echo "  make docs            - Start documentation site"
+	@echo "  make docs            - Start documentation site (Dev Mode)"
+	@echo "  make docs-install    - Install documentation dependencies"
+	@echo "  make docs-build      - Build production documentation"
+	@echo "  make lint            - Run golangci-lint (smart path resolution)"
 

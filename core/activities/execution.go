@@ -20,11 +20,13 @@ type ExecutionActivities struct {
 
 // PersistInstanceInput defines the input for PersistInstance activity.
 type PersistInstanceInput struct {
-	InstanceID      string
-	WorkflowID      string
-	TriggerContext  map[string]interface{}
-	Policy          map[string]interface{} // Using generic map to avoid circular deps if needed, but engine.Policy is fine usually.
-	PolicyVersionID string
+	TeamID            string
+	InstanceID        string
+	WorkflowID        string
+	WorkflowVersionID string
+	TriggerContext    map[string]interface{}
+	Policy            map[string]interface{} // Using generic map to avoid circular deps if needed, but engine.Policy is fine usually.
+	PolicyVersionID   string
 	// Pre-evaluated policy result
 	InitialState engine.State
 	PolicyResult map[string]interface{}
@@ -41,12 +43,14 @@ func (a *ExecutionActivities) PersistInstance(ctx context.Context, input Persist
 	}
 
 	inst := &engine.Instance{
-		ID:              id,
-		WorkflowID:      input.WorkflowID,
-		State:           input.InitialState, // Should be RUNNING or WAITING_FOR_HUMAN
-		TriggerContext:  input.TriggerContext,
-		PolicyVersionID: input.PolicyVersionID,
-		PolicyContext:   input.PolicyResult,
+		ID:                id,
+		OwningTeamID:      input.TeamID,
+		WorkflowID:        input.WorkflowID,
+		WorkflowVersionID: input.WorkflowVersionID,
+		State:             input.InitialState, // Should be RUNNING or WAITING_FOR_HUMAN
+		TriggerContext:    input.TriggerContext,
+		PolicyVersionID:   input.PolicyVersionID,
+		PolicyContext:     input.PolicyResult,
 	}
 	err := a.DB.CreateInstance(ctx, inst)
 	if err != nil {
@@ -59,6 +63,7 @@ func (a *ExecutionActivities) PersistInstance(ctx context.Context, input Persist
 
 // RecordDecisionInput defines input for decision recording.
 type RecordDecisionInput struct {
+	TeamID          string                 `json:"team_id"`
 	InstanceID      string                 `json:"instance_id"`
 	DecisionType    engine.DecisionType    `json:"decision_type"`
 	ActorID         string                 `json:"actor_id"`
@@ -106,12 +111,15 @@ func (a *ExecutionActivities) RecordDecision(ctx context.Context, input RecordDe
 
 	art, err := a.ArtifactEmitter.EmitArtifact(
 		ctx,
+		input.TeamID,
 		input.InstanceID,
+		instance.WorkflowVersionID,
 		instance.LastArtifactHash, // Chain Link
 		string(nextState),
 		input.PolicyVersionID,
 		contextHash,
 		input.ActorID,
+		input.Justification,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to emit artifact: %w", err)

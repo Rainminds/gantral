@@ -19,7 +19,7 @@ func TestEngineCRUD(t *testing.T) {
 	ctx := context.Background()
 
 	// 1. List Empty
-	list, err := e.ListInstances(ctx)
+	list, err := e.ListInstances(ctx, "team-1")
 	if err != nil {
 		t.Fatalf("ListInstances failed: %v", err)
 	}
@@ -29,7 +29,7 @@ func TestEngineCRUD(t *testing.T) {
 
 	// 2. Create Instance
 	pol := policy.Policy{ID: "test-policy"}
-	inst, err := e.CreateInstance(ctx, "wf-1", nil, pol)
+	inst, err := e.CreateInstance(ctx, "team-1", "wf-1", nil, pol)
 	if err != nil {
 		t.Fatalf("CreateInstance failed: %v", err)
 	}
@@ -41,7 +41,7 @@ func TestEngineCRUD(t *testing.T) {
 	}
 
 	// 3. Get Instance
-	fetched, err := e.GetInstance(ctx, inst.ID)
+	fetched, err := e.GetInstance(ctx, "team-1", inst.ID)
 	if err != nil {
 		t.Fatalf("GetInstance failed: %v", err)
 	}
@@ -50,13 +50,13 @@ func TestEngineCRUD(t *testing.T) {
 	}
 
 	// 4. Get Non-Existent
-	_, err = e.GetInstance(ctx, "99999")
+	_, err = e.GetInstance(ctx, "team-1", "99999")
 	if err == nil {
 		t.Error("expected error for non-existent instance")
 	}
 
 	// 5. List Populated
-	list, err = e.ListInstances(ctx)
+	list, err = e.ListInstances(ctx, "team-1")
 	if err != nil {
 		t.Fatalf("ListInstances failed: %v", err)
 	}
@@ -71,7 +71,7 @@ func TestRecordDecision_NotFound(t *testing.T) {
 		InstanceID: "missing",
 		Type:       DecisionApprove,
 	}
-	_, err := e.RecordDecision(context.Background(), cmd)
+	_, err := e.RecordDecision(context.Background(), "team-1", cmd)
 	if err == nil {
 		t.Error("expected error for missing instance")
 	}
@@ -80,13 +80,13 @@ func TestRecordDecision_NotFound(t *testing.T) {
 func TestRecordDecision_InvalidState(t *testing.T) {
 	e := NewEngine(NewMemoryStore())
 	// Create running instance (not waiting)
-	inst, _ := e.CreateInstance(context.Background(), "wf-1", nil, policy.Policy{ID: "p1"})
+	inst, _ := e.CreateInstance(context.Background(), "team-1", "wf-1", nil, policy.Policy{ID: "p1"})
 
 	cmd := RecordDecisionCmd{
 		InstanceID: inst.ID,
 		Type:       DecisionApprove,
 	}
-	_, err := e.RecordDecision(context.Background(), cmd)
+	_, err := e.RecordDecision(context.Background(), "team-1", cmd)
 	if err == nil {
 		t.Error("expected error for instance not in WAITING_FOR_HUMAN state")
 	}

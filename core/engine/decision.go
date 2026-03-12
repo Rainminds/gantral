@@ -81,9 +81,9 @@ func ValidateDecision(instance *Instance, cmd RecordDecisionCmd) error {
 }
 
 // RecordDecision records a human decision and updates the instance state accordingly.
-func (e *Engine) RecordDecision(ctx context.Context, cmd RecordDecisionCmd) (*Instance, error) {
+func (e *Engine) RecordDecision(ctx context.Context, teamID string, cmd RecordDecisionCmd) (*Instance, error) {
 	// 1. Fetch Instance
-	instance, err := e.store.GetInstance(ctx, cmd.InstanceID)
+	instance, err := e.GetInstance(ctx, teamID, cmd.InstanceID)
 	if err != nil {
 		return nil, err
 	}

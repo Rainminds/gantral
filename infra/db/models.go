@@ -31,6 +31,7 @@ type Decision struct {
 
 type Instance struct {
 	ID               string
+	TeamID           string
 	WorkflowID       string
 	State            string
 	TriggerContext   []byte

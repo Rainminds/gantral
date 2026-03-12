@@ -6,9 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
-	"github.com/Rainminds/gantral/core/engine"
-	"github.com/Rainminds/gantral/core/policy"
 )
 
 // Client is the Gantral SDK client.
@@ -26,17 +23,15 @@ func NewClient(baseURL string) *Client {
 }
 
 // CreateInstance creates a new execution instance.
-func (c *Client) CreateInstance(ctx context.Context, workflowID string, triggerContext map[string]interface{}, pol policy.Policy) (*engine.Instance, error) {
+func (c *Client) CreateInstance(ctx context.Context, workflowID string, triggerContext map[string]interface{}, pol Policy) (*Instance, error) {
 	// Reconstruct the request body expected by the API
-	reqBody := triggerContext
-	// Note: The API currently expects a generic map and parses "materiality" from it if extracting logic is in handlers.
-	// The handler logic:
-	// if mat, ok := body["materiality"].(string); ok && mat == "HIGH" { pol.Materiality = ... }
-	// So we need to inject materiality into the map if we want to test that.
-	// For Typed SDK, we might want to expose overrides.
-	// For now, let's just pass the context map.
+	reqPayload := map[string]interface{}{
+		"workflow_id":     workflowID,
+		"trigger_context": triggerContext,
+		"policy":          pol,
+	}
 
-	bodyBytes, err := json.Marshal(reqBody)
+	bodyBytes, err := json.Marshal(reqPayload)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal request body: %w", err)
 	}
@@ -55,11 +50,11 @@ func (c *Client) CreateInstance(ctx context.Context, workflowID string, triggerC
 		_ = resp.Body.Close()
 	}()
 
-	if resp.StatusCode != http.StatusCreated {
+	if resp.StatusCode != http.StatusAccepted && resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	var instance engine.Instance
+	var instance Instance
 	if err := json.NewDecoder(resp.Body).Decode(&instance); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
@@ -68,7 +63,7 @@ func (c *Client) CreateInstance(ctx context.Context, workflowID string, triggerC
 }
 
 // RecordDecision records a human decision.
-func (c *Client) RecordDecision(ctx context.Context, instanceID string, decisionType engine.DecisionType, actorID, justification string) (*engine.Instance, error) {
+func (c *Client) RecordDecision(ctx context.Context, instanceID string, decisionType DecisionType, actorID, justification string) (*Instance, error) {
 	reqBody := map[string]string{
 		"type":          string(decisionType),
 		"actor_id":      actorID,
@@ -95,12 +90,41 @@ func (c *Client) RecordDecision(ctx context.Context, instanceID string, decision
 		_ = resp.Body.Close()
 	}()
 
-	// 201 Created from API
-	if resp.StatusCode != http.StatusCreated {
+	if resp.StatusCode != http.StatusAccepted && resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	var instance engine.Instance
+	var instance Instance
+	if err := json.NewDecoder(resp.Body).Decode(&instance); err != nil {
+		// Note that RecordDecision in the HTTP handler returns {"status": "SIGNAL_SENT"}
+		// but the signature expects *Instance. In a real SDK we might provide a GetInstance long poll.
+		// For now we'll allow decode to fail gracefully or return an empty instance if it's just a status ack.
+		return &instance, nil
+	}
+
+	return &instance, nil
+}
+
+// GetInstance retrieves the current state of an instance.
+func (c *Client) GetInstance(ctx context.Context, instanceID string) (*Instance, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("%s/instances/%s", c.baseURL, instanceID), nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute request: %w", err)
+	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	var instance Instance
 	if err := json.NewDecoder(resp.Body).Decode(&instance); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}

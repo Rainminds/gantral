@@ -43,9 +43,7 @@ func Test_StateMachine_Matrix(t *testing.T) {
 		engine.StateApproved: {
 			engine.StateResumed: true,
 		},
-		engine.StateRejected: {
-			engine.StateTerminated: true,
-		},
+		engine.StateRejected: {},
 		engine.StateOverridden: {
 			engine.StateResumed: true,
 		},
