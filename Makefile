@@ -14,7 +14,7 @@ testbuild: build-ui
 
 test-tier1:
 	@echo "Running Tier 1 Tests (Scope: Unit, StateMachine, Artifact, Replay, Core, Pkg)..."
-	@go test -v -count=1 ./tests/unit/... ./tests/statemachine/... ./tests/artifact/... ./tests/replay/... ./core/... ./pkg/... ./adapters/... ./cmd/... | grep -v "no test files" || true
+	@go test -v -count=1 ./tests/unit/... ./tests/statemachine/... ./tests/artifact/... ./tests/replay/... ./internal/... ./core/... ./pkg/... ./adapters/... ./cmd/... | grep -v "no test files" || true
 	@echo "Tier 1 Tests Completed."
 
 test-tier2:

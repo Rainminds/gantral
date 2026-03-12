@@ -56,7 +56,7 @@ func (g *ReplayGuard) ValidateReplay(ctx context.Context, teamID string, claimed
 	}
 
 	// 2. Fetch Authoritative Artifact (Existence Proof)
-	authoritative, err := g.store.GetArtifact(ctx, teamID, claimedArtifact.ArtifactID)
+	authoritative, err := g.store.GetArtifact(ctx, teamID, claimedArtifact.ArtifactHash)
 	if err != nil {
 		if errors.Is(err, artifact.ErrArtifactNotFound) {
 			slog.Error("SECURITY ALERT: Replay claimed artifact that does not exist",

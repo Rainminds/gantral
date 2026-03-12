@@ -17,7 +17,7 @@ Execute the following steps sequentially and report any failures. Do not proceed
     - Run `./scripts/verify-architecture.sh` to ensure boundary rules are respected.
 
 3.  **Tiered Testing**:
-    - Run `make test-tier1` (Unit, Logic, Artifacts).
+    - Run `make test-tier1` (**Note**: Now covers all `internal/` logic, Unit, and Artifacts).
     - Run `make test-tier2` (Integration, Engine).
     - **Note**: Integration tests must use typed `engine.State` and terminal states for replay.
 
