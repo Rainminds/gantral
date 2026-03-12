@@ -70,7 +70,8 @@ func TestVerifyArtifact_Inconclusive(t *testing.T) {
 		AuthorityState:      "RUNNING", // Non-terminal
 		ContextSnapshotHash: "c",
 	}
-	art.CalculateHash()
+	err := art.CalculateHash()
+	assert.NoError(t, err)
 
 	data, _ := json.Marshal(art)
 	v := verifier.New(nil, nil)
@@ -96,7 +97,8 @@ func TestVerifyChain_Success(t *testing.T) {
 		ContextSnapshotHash: "hash-a",
 		PrevArtifactHash:    nil,
 	}
-	_ = artA.CalculateHash()
+	errA := artA.CalculateHash()
+	assert.NoError(t, errA)
 
 	artB := models.CommitmentArtifact{
 		ArtifactVersion:     models.CurrentArtifactVersion,
@@ -105,7 +107,8 @@ func TestVerifyChain_Success(t *testing.T) {
 		ContextSnapshotHash: "hash-b",
 		PrevArtifactHash:    artA.ArtifactHash,
 	}
-	_ = artB.CalculateHash()
+	errB := artB.CalculateHash()
+	assert.NoError(t, errB)
 
 	chain := []models.CommitmentArtifact{artA, artB}
 
@@ -141,15 +144,18 @@ func TestVerifyChain_InvalidTransition(t *testing.T) {
 		AuthorityState:      "COMPLETED", // Terminal
 		ContextSnapshotHash: "hash-a",
 	}
-	_ = artA.CalculateHash()
+	errA := artA.CalculateHash()
+	assert.NoError(t, errA)
 
 	artB := models.CommitmentArtifact{
 		ArtifactVersion:  models.CurrentArtifactVersion,
 		InstanceID:       "inst-1",
 		AuthorityState:   "RUNNING", // Cannot RUN after COMPLETED
 		PrevArtifactHash: artA.ArtifactHash,
+		ContextSnapshotHash: "hash-b", // Added required field
 	}
-	_ = artB.CalculateHash()
+	errB := artB.CalculateHash()
+	assert.NoError(t, errB)
 
 	chain := []models.CommitmentArtifact{artA, artB}
 	v := verifier.New(nil, nil)
@@ -165,7 +171,8 @@ func TestVerifyChain_InvalidGenesis(t *testing.T) {
 		AuthorityState:      "APPROVED", // Cannot start chain with APPROVED
 		ContextSnapshotHash: "hash-a",
 	}
-	_ = artA.CalculateHash()
+	err := artA.CalculateHash()
+	assert.NoError(t, err)
 
 	chain := []models.CommitmentArtifact{artA}
 	v := verifier.New(nil, nil)
@@ -187,7 +194,9 @@ func TestReplayDeterminism(t *testing.T) {
 			AuthorityState:      "CREATED",
 			ContextSnapshotHash: "h1",
 		}
-		art1.CalculateHash()
+		if err := art1.CalculateHash(); err != nil {
+			t.Fatalf("CalculateHash failed: %v", err)
+		}
 
 		art2 := models.CommitmentArtifact{
 			ArtifactVersion:     models.CurrentArtifactVersion,
@@ -196,7 +205,9 @@ func TestReplayDeterminism(t *testing.T) {
 			PrevArtifactHash:    art1.ArtifactHash,
 			ContextSnapshotHash: "h2",
 		}
-		art2.CalculateHash()
+		if err := art2.CalculateHash(); err != nil {
+			t.Fatalf("CalculateHash failed: %v", err)
+		}
 
 		art3 := models.CommitmentArtifact{
 			ArtifactVersion:     models.CurrentArtifactVersion,
@@ -205,7 +216,9 @@ func TestReplayDeterminism(t *testing.T) {
 			PrevArtifactHash:    art2.ArtifactHash,
 			ContextSnapshotHash: "h3",
 		}
-		art3.CalculateHash()
+		if err := art3.CalculateHash(); err != nil {
+			t.Fatalf("CalculateHash failed: %v", err)
+		}
 
 		chain := []models.CommitmentArtifact{art1, art2, art3}
 		res := v.VerifyChain(chain)
@@ -221,7 +234,8 @@ func TestReplayDeterminism(t *testing.T) {
 			AuthorityState:      "CREATED",
 			ContextSnapshotHash: "h1",
 		}
-		art1.CalculateHash()
+		err := art1.CalculateHash()
+		assert.NoError(t, err)
 		originalHash := art1.ArtifactHash
 
 		// Tamper with payload
@@ -245,7 +259,9 @@ func TestReplayDeterminism(t *testing.T) {
 			AuthorityState:      "APPROVED",
 			ContextSnapshotHash: "h1",
 		}
-		art1.CalculateHash()
+		if err := art1.CalculateHash(); err != nil {
+			t.Fatalf("CalculateHash failed: %v", err)
+		}
 
 		art2 := models.CommitmentArtifact{
 			ArtifactVersion:     models.CurrentArtifactVersion,
@@ -254,7 +270,8 @@ func TestReplayDeterminism(t *testing.T) {
 			PrevArtifactHash:    art1.ArtifactHash,
 			ContextSnapshotHash: "h2",
 		}
-		art2.CalculateHash()
+		err2 := art2.CalculateHash()
+		assert.NoError(t, err2)
 
 		chain := []models.CommitmentArtifact{art1, art2}
 		res := v.VerifyChain(chain)
@@ -271,7 +288,9 @@ func TestReplayDeterminism(t *testing.T) {
 			AuthorityState:      "CREATED",
 			ContextSnapshotHash: "h1",
 		}
-		art1.CalculateHash()
+		if err := art1.CalculateHash(); err != nil {
+			t.Fatalf("CalculateHash failed: %v", err)
+		}
 
 		art2 := models.CommitmentArtifact{
 			ArtifactVersion:     models.CurrentArtifactVersion,
@@ -280,7 +299,9 @@ func TestReplayDeterminism(t *testing.T) {
 			PrevArtifactHash:    art1.ArtifactHash,
 			ContextSnapshotHash: "h2",
 		}
-		art2.CalculateHash()
+		if err := art2.CalculateHash(); err != nil {
+			t.Fatalf("CalculateHash failed: %v", err)
+		}
 
 		art3 := models.CommitmentArtifact{
 			ArtifactVersion:     models.CurrentArtifactVersion,
@@ -289,7 +310,9 @@ func TestReplayDeterminism(t *testing.T) {
 			PrevArtifactHash:    art2.ArtifactHash,
 			ContextSnapshotHash: "h3",
 		}
-		art3.CalculateHash()
+		if err := art3.CalculateHash(); err != nil {
+			t.Fatalf("CalculateHash failed: %v", err)
+		}
 
 		chain := []models.CommitmentArtifact{art1, art2, art3}
 		res := v.VerifyChain(chain)

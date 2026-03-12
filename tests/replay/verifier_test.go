@@ -32,8 +32,12 @@ func Test_Replay_Determinism_SectionE(t *testing.T) {
 	}
 	if !res.Valid {
 		var art models.CommitmentArtifact
-		json.Unmarshal(validJSON, &art)
-		art.CalculateHash()
+		if err := json.Unmarshal(validJSON, &art); err != nil {
+			t.Fatalf("Failed to unmarshal in error path: %v", err)
+		}
+		if err := art.CalculateHash(); err != nil {
+			t.Fatalf("Failed to calculate hash in error path: %v", err)
+		}
 		t.Errorf("Expected Valid=true for golden artifact, got false.\nError: %s\nExpected Hash:\n%s\nGot Hash:\n%s", res.Error, validJSON, art.ArtifactHash)
 	}
 

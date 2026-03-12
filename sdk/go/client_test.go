@@ -38,7 +38,7 @@ func TestClient_AuthorityCheckpoint_Deserialization(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
-		w.Write([]byte(mockAuthorityCheckpointJSON))
+		_, _ = w.Write([]byte(mockAuthorityCheckpointJSON))
 	}))
 	defer ts.Close()
 
