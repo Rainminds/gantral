@@ -70,7 +70,7 @@ func TestAudit_Phase6_LogIndependence(t *testing.T) {
 			ArtifactVersion:     models.CurrentArtifactVersion,
 			ArtifactID:          "audit-phase-6",
 			InstanceID:          "inst-replay-1",
-			AuthorityState:      string(constants.StateApproved),
+			AuthorityState:      string(constants.StateCompleted),
 			ContextSnapshotHash: "0xdeadbeef",
 			HumanActorID:        "auditor-1",
 		}

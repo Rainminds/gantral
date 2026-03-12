@@ -1,4 +1,4 @@
-.PHONY: all test build clean docs docs-install docs-build build-ui
+.PHONY: all test build clean docs docs-install docs-build build-ui lint
 
 all: build
 
@@ -38,6 +38,12 @@ docs-build:
 	@echo "Building optimized production version of documentation..."
 	cd docs-site && npm run build
 
+LINT_BIN := $(shell command -v golangci-lint 2>/dev/null || echo "$(shell go env GOPATH)/bin/golangci-lint")
+
+lint:
+	@echo "Running linter ($(LINT_BIN))..."
+	@$(LINT_BIN) run ./...
+
 dev:
 	@echo "Starting Dev Environment..."
 	docker-compose up -d postgres
@@ -75,4 +81,5 @@ help:
 	@echo "  make docs            - Start documentation site (Dev Mode)"
 	@echo "  make docs-install    - Install documentation dependencies"
 	@echo "  make docs-build      - Build production documentation"
+	@echo "  make lint            - Run golangci-lint (smart path resolution)"
 

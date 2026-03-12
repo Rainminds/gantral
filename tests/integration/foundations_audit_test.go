@@ -22,15 +22,15 @@ func TestAudit_Phase1_CanonicalStateMachine(t *testing.T) {
 		require.Error(t, err)
 		var targetErr engine.ErrInvalidTransition
 		require.ErrorAs(t, err, &targetErr)
-		assert.Equal(t, constants.StateRunning, targetErr.From)
-		assert.Equal(t, constants.StateApproved, targetErr.To)
+		assert.Equal(t, engine.State(constants.StateRunning), targetErr.From)
+		assert.Equal(t, engine.State(constants.StateApproved), targetErr.To)
 	})
 
 	t.Run("TRD 4.2: Allowed Transition RUNNING to WAITING_FOR_HUMAN", func(t *testing.T) {
 		inst := &engine.Instance{State: constants.StateRunning}
 		err := engine.Transition(inst, constants.StateWaitingForHuman)
 		require.NoError(t, err)
-		assert.Equal(t, constants.StateWaitingForHuman, inst.State)
+		assert.Equal(t, engine.State(constants.StateWaitingForHuman), inst.State)
 	})
 }
 
