@@ -69,12 +69,13 @@ func TestRecordDecision(t *testing.T) {
 
 			// Seed the instance
 			instStub := &Instance{
-				ID:    tt.cmd.InstanceID,
-				State: StateWaitingForHuman,
+				ID:           tt.cmd.InstanceID,
+				OwningTeamID: "team-1",
+				State:        StateWaitingForHuman,
 			}
 			_ = store.CreateInstance(ctx, instStub)
 
-			inst, err := engine.RecordDecision(ctx, tt.cmd)
+			inst, err := engine.RecordDecision(ctx, "team-1", tt.cmd)
 
 			if tt.expectError {
 				if err == nil {
@@ -101,8 +102,9 @@ func TestRecordDecision_MissingJustification(t *testing.T) {
 
 	// 1. Create Instance in Waiting State
 	inst := &Instance{
-		ID:    "inst-justification-test",
-		State: StateWaitingForHuman,
+		ID:           "inst-justification-test",
+		OwningTeamID: "team-1",
+		State:        StateWaitingForHuman,
 	}
 	_ = store.CreateInstance(ctx, inst)
 
@@ -113,7 +115,7 @@ func TestRecordDecision_MissingJustification(t *testing.T) {
 		ActorID:       "user-1",
 		Justification: "   ", // Whitespace only
 	}
-	_, err := e.RecordDecision(ctx, cmdApprove)
+	_, err := e.RecordDecision(ctx, "team-1", cmdApprove)
 	if err == nil {
 		t.Fatal("Expected error for APPROVE with empty justification, got nil")
 	}
@@ -125,7 +127,7 @@ func TestRecordDecision_MissingJustification(t *testing.T) {
 		ActorID:       "admin-1",
 		Justification: "",
 	}
-	_, err = e.RecordDecision(ctx, cmdOverride)
+	_, err = e.RecordDecision(ctx, "team-1", cmdOverride)
 	if err == nil {
 		t.Fatal("Expected error for OVERRIDE with empty justification, got nil")
 	}

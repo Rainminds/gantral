@@ -37,28 +37,7 @@ def main():
     with open(HANDOFF_FILE, "w") as f:
         json.dump(context_data, f)
         
-    # 4. Call Gantral to Request Decision
-    # We update the execution context with the risk factor so policy can evaluate it
-    print("[Agent-Pre] Requesting Decision from Gantral...")
-    
-    try:
-        # Call Gantral API to request decision / approval.
-        
-        payload = {
-            "execution_id": EXECUTION_ID,
-            "decision": "REQUEST_APPROVAL", # Signaling intent
-            "context": context_data
-        }
-        res = requests.post(f"{GANTRAL_URL}/api/v1/decisions", json=payload)
-        if res.status_code >= 400:
-             print(f"[Agent-Pre] Warning: Request decision failed: {res.text}")
-        else:
-             print("[Agent-Pre] Decision requested successfully.")
-             
-    except Exception as e:
-        print(f"[Agent-Pre] Failed to contact Gantral: {e}")
-    
-    # 5. Exit success
+    # 4. Exit success (Runner + Policy will handle the pause if configured)
     print("[Agent-Pre] Terminating process.")
     sys.exit(0)
 

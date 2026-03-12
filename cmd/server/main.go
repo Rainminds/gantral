@@ -1,3 +1,15 @@
+/*
+Package main (server) is the entry point for the Gantral HTTP API Server process.
+
+The server is responsible for:
+- Serving as the primary ingress for external clients (such as the UI or CLI).
+- Handling authentication (via local Dev Mode or multi-issuer OIDC) and Role-Based Access Control (RBAC).
+- Enforcing the CQRS (Command Query Responsibility Segregation) pattern:
+  - Writes (Commands): Starts Temporal Workflows or sends Signals for decisions.
+  - Reads (Queries): Connects directly to the Postgres database to fetch instances and audits.
+
+- It does NOT execute the workflow business logic itself; it delegates that to the Temporal Worker.
+*/
 package main
 
 import (

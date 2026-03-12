@@ -1,4 +1,4 @@
-.PHONY: all test build clean docs build-ui build-ui
+.PHONY: all test build clean docs docs-install docs-build build-ui
 
 all: build
 
@@ -29,6 +29,14 @@ test: test-tier1 test-tier2
 docs:
 	@echo "Starting Docusaurus..."
 	cd docs-site && npm start
+
+docs-install:
+	@echo "Installing specialized dependencies for docs site..."
+	cd docs-site && npm install
+
+docs-build:
+	@echo "Building optimized production version of documentation..."
+	cd docs-site && npm run build
 
 dev:
 	@echo "Starting Dev Environment..."
@@ -64,5 +72,7 @@ help:
 	@echo "  make test            - Run unit tests"
 	@echo "  make test-integration - Run integration tests (requires DB)"
 	@echo "  make clean           - Remove artifacts"
-	@echo "  make docs            - Start documentation site"
+	@echo "  make docs            - Start documentation site (Dev Mode)"
+	@echo "  make docs-install    - Install documentation dependencies"
+	@echo "  make docs-build      - Build production documentation"
 

@@ -37,19 +37,24 @@ func NewStore(basePath string) (*Store, error) {
 // 2. Write to temp file.
 // 3. Sync to disk.
 // 4. Atomic Rename.
-func (s *Store) Write(ctx context.Context, art *models.CommitmentArtifact) error {
+func (s *Store) WriteArtifact(ctx context.Context, teamID string, art *models.CommitmentArtifact) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	if !safeIDRegex.MatchString(art.ArtifactID) {
-		return fmt.Errorf("invalid artifact ID format: %s", art.ArtifactID)
+	if !safeIDRegex.MatchString(art.ArtifactHash) {
+		return fmt.Errorf("invalid artifact hash format: %s", art.ArtifactHash)
 	}
 
-	targetPath := filepath.Join(s.basePath, art.ArtifactID+".json")
+	teamDir := filepath.Join(s.basePath, teamID)
+	if err := os.MkdirAll(teamDir, 0755); err != nil {
+		return fmt.Errorf("failed to create team directory: %w", err)
+	}
+
+	targetPath := filepath.Join(teamDir, art.ArtifactHash+".json")
 
 	// 1. Immutability Check (WORM)
 	if _, err := os.Stat(targetPath); err == nil {
-		return artifact.ErrArtifactAlreadyExists
+		return artifact.ErrImmutableViolation
 	} else if !os.IsNotExist(err) {
 		return fmt.Errorf("failed to check artifact existence: %w", err)
 	}
@@ -98,16 +103,16 @@ func (s *Store) Write(ctx context.Context, art *models.CommitmentArtifact) error
 	return nil
 }
 
-// Get retrieves an artifact from disk.
-func (s *Store) Get(ctx context.Context, artifactID string) (*models.CommitmentArtifact, error) {
+// GetArtifact retrieves an artifact from disk.
+func (s *Store) GetArtifact(ctx context.Context, teamID string, artifactHash string) (*models.CommitmentArtifact, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	if !safeIDRegex.MatchString(artifactID) {
-		return nil, fmt.Errorf("invalid artifact ID format: %s", artifactID)
+	if !safeIDRegex.MatchString(artifactHash) {
+		return nil, fmt.Errorf("invalid artifact ID format: %s", artifactHash)
 	}
 
-	targetPath := filepath.Join(s.basePath, artifactID+".json")
+	targetPath := filepath.Join(s.basePath, teamID, artifactHash+".json")
 
 	data, err := os.ReadFile(targetPath)
 	if err != nil {

@@ -42,5 +42,16 @@ services:
     depends_on:
       - temporal
 
+  demo-ui:
+    image: golang:1.22-alpine
+    working_dir: /app/examples/demo-ui
+    volumes:
+      - .:/app
+    ports:
+      - "3000:3000"
+    command: go run main.go
+    environment:
+      - DEMO_UI_PORT=3000
+
 volumes:
   gantral_postgres_data:

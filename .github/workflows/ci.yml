@@ -82,6 +82,9 @@ jobs:
           go-version: '1.25.x'
           cache: false # golangci-lint action handles caching
 
+      - name: Verify architecture boundaries
+        run: ./scripts/verify-architecture.sh
+
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:

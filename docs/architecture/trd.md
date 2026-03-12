@@ -4,10 +4,16 @@ title: Technical Reference Document
 
 # **Technical Reference & Architecture Document (TRD)**
 
-## **Version: v6.1**
+Version: v7.0 — Artifact Specification Edition  
+Status: Authoritative Technical Constitution
 
-Status: Authoritative Technical Constitution  
-Audience: Core contributors, platform engineers, security reviewers, enterprise architects, design partners
+Audience:
+
+* Core contributors  
+* Platform engineers  
+* Security reviewers  
+* Enterprise architects  
+* Design partners
 
 ---
 
@@ -15,14 +21,14 @@ Audience: Core contributors, platform engineers, security reviewers, enterprise 
 
 This document defines the authoritative technical architecture and execution semantics of Gantral.
 
-Gantral is an AI Execution Control Plane that enforces deterministic authority transitions in agentic workflows.
+Gantral is an **AI Execution Control Plane** that enforces deterministic authority transitions in agentic workflows.
 
 This document defines:
 
 * Architectural invariants  
 * Canonical execution model  
 * Authority semantics  
-* Commitment artifact structure  
+* Commitment artifact model  
 * Hash integrity properties  
 * Replay guarantees  
 * Responsibility boundaries  
@@ -30,11 +36,15 @@ This document defines:
 
 If an implementation conflicts with this document, the implementation is incorrect.
 
+The **Commitment Artifact structure is defined in Appendix A — Artifact Specification v1.**
+
+All implementations MUST conform exactly to that specification.
+
 ---
 
 # **1.1 Structural Challenges Addressed**
 
-Enterprise adoption of agentic AI introduces three recurring structural failures that are not solved by agent frameworks or orchestration tools alone.
+Enterprise adoption of agentic AI introduces structural failures not solved by agent frameworks or orchestration tools alone.
 
 ## **Operational Inefficiency**
 
@@ -65,8 +75,6 @@ Authority decisions are often evaluated in one system but enforced in another:
 * Logs capturing events without structural binding to execution progression  
 * Multiple agent frameworks lacking shared authority semantics
 
-In such architectures, authority exists as documentation — not as deterministic execution state.
-
 Gantral represents authority directly as canonical workflow state transitions.
 
 ---
@@ -87,7 +95,7 @@ Without cryptographic binding, reconstruction depends on:
 * Policy version drift  
 * Operator testimony
 
-Gantral emits cryptographically chained commitment artifacts at authority boundaries, enabling deterministic replay independent of logs or runtime access.
+Gantral emits **cryptographically chained commitment artifacts** enabling deterministic replay independent of logs or runtime access.
 
 ---
 
@@ -116,13 +124,13 @@ Gantral does not:
 * Persist agent memory or reasoning traces  
 * Encode domain-specific business logic  
 * Replace workflow runtimes  
-* Replace CI/CD, ITSM, or enterprise ticketing systems  
+* Replace CI/CD or ITSM systems  
 * Act as an identity provider  
 * Store secrets or credentials  
 * Provide autonomous self-approval mechanisms  
 * Guarantee regulatory compliance
 
-Gantral enforces authority transitions only.
+Gantral enforces **authority transitions only**.
 
 ---
 
@@ -132,7 +140,7 @@ The following invariants are non-negotiable.
 
 ## **3.1 Instance-First Semantics**
 
-All authority, audit, replay, and cost semantics attach to immutable execution instances.
+All authority, audit, and replay semantics attach to immutable execution instances.
 
 ---
 
@@ -154,9 +162,9 @@ Authority transition and commitment artifact emission occur atomically.
 
 If artifact persistence fails:
 
-* The authority state transition MUST NOT be observable.  
-* Execution MUST remain in `WAITING_FOR_HUMAN`.  
-* Partial transitions are forbidden.
+* The authority state transition MUST NOT be observable  
+* Execution MUST remain in `WAITING_FOR_HUMAN`  
+* Partial transitions are forbidden
 
 ---
 
@@ -199,19 +207,14 @@ Agent persistence is the responsibility of agent frameworks.
 
 ## **3.9 Determinism & Evidence**
 
-Human authority must produce structured, attributable reasoning.
+Human authority must produce structured reasoning.
 
-The commitment artifact includes:
+Commitment artifacts include:
 
 * `human_actor_id`  
 * `justification`
 
-Deployments MAY configure:
-
-* Empty justification as invalid  
-* Minimum reasoning requirements
-
-Approval without attributable reasoning undermines admissibility and may be rejected.
+Deployments may enforce minimum reasoning requirements.
 
 ---
 
@@ -237,16 +240,16 @@ The canonical state set S consists of:
 
 Allowed transitions:
 
-* (CREATED, RUNNING)  
-* (RUNNING, WAITING\_FOR\_HUMAN)  
-* (WAITING\_FOR\_HUMAN, APPROVED)  
-* (WAITING\_FOR\_HUMAN, REJECTED)  
-* (WAITING\_FOR\_HUMAN, OVERRIDDEN)  
-* (APPROVED, RESUMED)  
-* (OVERRIDDEN, RESUMED)  
-* (RESUMED, RUNNING)  
-* (RUNNING, COMPLETED)  
-* (RUNNING, TERMINATED)
+* CREATED → RUNNING  
+* RUNNING → WAITING\_FOR\_HUMAN  
+* WAITING\_FOR\_HUMAN → APPROVED  
+* WAITING\_FOR\_HUMAN → REJECTED  
+* WAITING\_FOR\_HUMAN → OVERRIDDEN  
+* APPROVED → RESUMED  
+* OVERRIDDEN → RESUMED  
+* RESUMED → RUNNING  
+* RUNNING → COMPLETED  
+* RUNNING → TERMINATED
 
 Transitions not enumerated above are illegal.
 
@@ -258,54 +261,49 @@ Let the state sequence for execution instance E be:
 
 σE \= (s₀, s₁, …, sₙ)
 
-For all i in \[0, n−1\]:
+For all i:
 
 (sᵢ, sᵢ₊₁) must belong to the allowed transition relation.
 
-Otherwise execution is invalid and must terminate.
+Otherwise execution is invalid.
 
 ---
 
-# **5\. Commitment Artifact**
+# **5\. Commitment Artifacts**
 
-## **5.1 Artifact Fields**
+At each authority transition Gantral emits a **Commitment Artifact**.
 
-Each authority transition emits a commitment artifact containing:
+The artifact structure is defined in **Appendix A — Artifact Specification v1**.
 
-* artifact\_version  
-* artifact\_id  
-* instance\_id  
-* workflow\_version\_id  
-* prev\_artifact\_hash  
-* authority\_state  
-* policy\_version\_id  
-* context\_snapshot\_hash  
-* human\_actor\_id  
-* justification  
-* timestamp  
-* artifact\_hash
+Artifacts provide:
+
+* identity binding  
+* policy binding  
+* workflow version binding  
+* context binding  
+* cryptographic ordering
+
+Artifacts form a **tamper-evident hash chain**.
 
 ---
 
-## **5.2 Identity Provenance**
+## **5.1 Identity Provenance**
 
 Identity is validated using federated OIDC.
 
-Gantral verifies the token and records the subject identifier as `human_actor_id`.
+Gantral records the verified subject identifier as `human_actor_id`.
 
-Artifact emission occurs only after identity validation.
-
-Gantral does not operate its own identity directory.
+Gantral does not maintain its own identity directory.
 
 ---
 
-## **5.3 Context Snapshot**
+## **5.2 Context Snapshot**
 
 `context_snapshot_hash` binds:
 
-* Workflow parameters  
-* Policy evaluation inputs  
-* Authority-relevant request payload
+* workflow parameters  
+* policy evaluation inputs  
+* authority-relevant request payload
 
 It does not persist agent memory.
 
@@ -313,26 +311,11 @@ It does not persist agent memory.
 
 # **6\. Hash Integrity Model**
 
-Let H be a collision-resistant cryptographic hash function.
+artifact\_hash computation MUST follow the algorithm defined in Appendix A — Artifact Specification v1.
 
-For artifact i:
+Integrity property:
 
-If i \= 0:  
-artifact\_hash\_i \= H(payload\_i)
-
-If i \> 0:  
-artifact\_hash\_i \= H(payload\_i concatenated with artifact\_hash\_\{i−1\})
-
-Integrity Property:
-
-For any i \> 0, modification of:
-
-* payload\_i  
-* artifact\_hash\_\{i−1\}
-
-causes artifact\_hash\_i to change and invalidates all subsequent artifacts during replay.
-
-Artifacts form a recursive tamper-evident chain.
+Modification of any artifact invalidates the chain from that point forward.
 
 ---
 
@@ -345,21 +328,19 @@ Replay validation MUST verify:
 3. workflow\_version\_id consistency  
 4. policy\_version\_id consistency
 
-Replay reconstructs the authority-state projection of execution.
-
 Replay outcomes:
 
 * VALID  
 * INVALID  
 * INCONCLUSIVE
 
-Replay requires no runtime, database, or log access.
+Replay verification MUST classify artifact chains whose final artifact represents a non-terminal authority state as INCONCLUSIVE rather than VALID.
+
+Replay requires **no runtime, database, or logs**.
 
 ---
 
 # **8\. Reference Architecture**
-
-## **8.1 Layered Model**
 
 Enterprise Systems  
 ↓  
@@ -371,61 +352,23 @@ Execution Systems
 
 Side integrations:
 
-* Policy Engine (e.g., OPA)  
+* Policy Engine (OPA)  
 * Identity Provider (OIDC)  
 * Append-only Artifact Store
 
 ---
 
-## **8.2 Control Plane Responsibilities**
+# **9\. Policy Integration**
 
-Gantral:
-
-* Enforces canonical authority state transitions  
-* Evaluates advisory policy signals  
-* Emits commitment artifacts  
-* Maintains append-only authority history  
-* Provides unified visibility into running and paused workflows  
-* Exposes replay-verification tooling
-
-Gantral is a structural control plane.
-
-It unifies authority semantics across heterogeneous agent frameworks and eliminates forked governance logic embedded in workflow code.
-
----
-
-## **8.3 Runtime Responsibilities**
-
-Deterministic workflow runtime:
-
-* Provides durable timers  
-* Preserves event ordering  
-* Supports long-running execution  
-* Enables deterministic replay of workflow logic
-
-Gantral governs authority.  
-Runtime executes logic.
-
----
-
-# **9\. Policy Integration & Separation**
-
-Policy evaluation may be implemented using Open Policy Agent (OPA).
+Policy evaluation may be implemented using Open Policy Agent.
 
 Policies:
 
-* Are authored in Rego  
-* Are versioned independently from workflow code  
-* May be updated without redeploying agent workflows
+* authored in Rego  
+* versioned independently  
+* evaluated during authority checkpoints
 
-Gantral records `policy_version_id` within each commitment artifact.
-
-Policy updates do not require modifying workflow code.
-
-Policy evaluation is advisory.  
-Authority remains represented exclusively as state transitions.
-
-This separation reduces operational duplication and redeployment risk.
+Gantral records `policy_version_id` within artifacts.
 
 ---
 
@@ -433,116 +376,387 @@ This separation reduces operational duplication and redeployment risk.
 
 Execution indices: PostgreSQL (non-authoritative)
 
-Commitment artifacts: Append-only object storage (authoritative)
+Commitment artifacts: append-only object storage (authoritative)
 
 Artifact store is authoritative for replay.
-
-Write-once configuration is recommended.
 
 ---
 
 # **11\. Security Architecture**
 
-Identity: OAuth 2.0 / OIDC federation  
-Authorization: Policy-driven  
-Secrets: External secret managers only  
-Audit: 100% authority capture via artifacts
+Identity: OAuth2 / OIDC federation  
+Authorization: policy-driven  
+Secrets: external secret managers
 
-Gantral does not store raw secrets.
+Gantral never stores raw secrets.
 
 ---
 
 # **12\. Unified Authority Visibility**
 
-Gantral provides unified visibility into execution instances across teams and domains, including:
+Gantral exposes:
 
-* Running workflows  
-* Paused workflows awaiting authority  
-* Authority progression history
+* running workflows  
+* paused workflows awaiting authority  
+* authority progression history
 
-This reduces governance ambiguity and operational blind spots.
-
-Visibility refers strictly to authority state and execution metadata. Gantral does not provide analytics, dashboards, or cost intelligence.
+Gantral does not provide dashboards or analytics.
 
 ---
 
-# **13\. Non-Functional Characteristics**
+# **13\. Testing & Constitutional Enforcement**
 
-Authority transitions require:
+Testing must enforce:
 
-* Hash computation  
-* Artifact persistence
-
-In human-in-the-loop workflows, human latency dominates pause duration.
-
-Deterministic correctness takes precedence over micro-optimizations.
-
----
-
-# **14\. Enterprise Adoption Considerations**
-
-Gantral is designed for incremental and reversible adoption.
-
-Organizations may:
-
-* Introduce Gantral at high-materiality authority boundaries  
-* Retain existing workflow runtimes  
-* Gradually externalize policy thresholds from workflow code  
-* Maintain agent frameworks without modifying internal memory models
-
-Gantral does not require rewriting agents.  
-It introduces deterministic authority semantics above them.
+* transition correctness  
+* atomic artifact emission  
+* hash integrity  
+* replay determinism  
+* fail-closed behavior
 
 ---
 
-# **15\. Testing & Constitutional Enforcement**
-
-Testing enforces:
-
-* Transition correctness  
-* Atomic artifact emission  
-* Hash integrity  
-* Version consistency  
-* Replay determinism  
-* Fail-closed behavior
-
-Testing is mechanical enforcement of invariants.
-
----
-
-# **16\. Auditor Considerations**
+# **14\. Auditor Considerations**
 
 Gantral provides:
 
-* Cryptographically bound authority transitions  
-* Version-bound policy evaluation  
-* Identity validation at decision time  
-* Deterministic replay independent of logs
+* cryptographically bound authority transitions  
+* version-bound policy evaluation  
+* identity validation at decision time  
+* deterministic replay independent of logs
 
-Gantral does not guarantee regulatory compliance.
+Artifacts are:
 
-It provides verifiable execution-time authority evidence.
+* hash-chained  
+* digitally signed  
+* timestamp-anchored  
+* capable of long-term attestations
 
----
-
-# **17\. Legal Disclaimer**
-
-Gantral is open-source infrastructure provided as-is.
-
-This document does not constitute legal advice or regulatory certification.
-
-Organizations deploying Gantral are responsible for independent security and compliance evaluation.
+This enables durable authority evidence.
 
 ---
 
-# **18\. Foundational Principle**
+# **15\. Foundational Principle**
 
 Gantral is not about what AI can do.
 
-It is about what organizations allow AI to do —  
-and how that authority is structurally enforced and provably replayable.
+It is about **what organizations allow AI to do — and how that authority is structurally enforced and provably replayable.**
 
-This document is authoritative.
+---
+
+# **Appendix A — Artifact Specification v1 (Canonical)**
+
+This appendix defines the **canonical structure for Gantral Commitment Artifacts**.
+
+All implementations MUST conform exactly.
+
+artifact\_hash uniquely identifies the artifact and MAY be used as the storage key in append-only artifact stores.
+
+---
+
+## **A.1 Artifact Purpose**
+
+Artifacts represent cryptographically verifiable authority decisions.
+
+They provide:
+
+* ordering  
+* identity attribution  
+* policy binding  
+* workflow binding  
+* tamper evidence  
+* replay verifiability
+
+---
+
+## **A.2 Artifact Structure**
+
+The following fields constitute the canonical artifact schema.  
+Implementations MUST include all fields unless explicitly marked optional.
+
+artifact\_version  
+artifact\_id
+
+instance\_id  
+workflow\_version\_id  
+policy\_version\_id
+
+authority\_state
+
+context\_snapshot\_hash
+
+human\_actor\_id  
+justification
+
+prev\_artifact\_hash  
+artifact\_hash
+
+crypto\_profile
+
+artifact\_signature  
+signature\_algorithm
+
+timestamp\_token  
+timestamp\_algorithm
+
+attestations\[\] (optional)
+
+---
+
+## **A.3 Hash Model**
+
+The artifact hash commits to the payload and prior artifact hash.
+
+artifact\_hash \=  
+H(payload || prev\_artifact\_hash)
+
+Payload excludes:
+
+* artifact\_hash  
+* artifact\_signature  
+* signature\_algorithm  
+* timestamp\_token  
+* timestamp\_algorithm  
+* attestations
+
+The payload includes all artifact fields except those explicitly excluded above.
+
+---
+
+## **A.4 Signature**
+
+Artifacts are signed by the Gantral control plane.
+
+artifact\_signature \= Sign(private\_key, artifact\_hash)
+
+This proves authorship.
+
+---
+
+## **A.5 Timestamp Token**
+
+Artifacts include a trusted timestamp token proving existence time.
+
+Timestamp tokens MUST bind to `artifact_hash`.
+
+---
+
+## **A.6 Attestations**
+
+Artifacts MAY include additional attestations.
+
+These allow cryptographic upgrades over time without modifying the original artifact.
+
+Example:
+
+* new signature with stronger algorithm  
+* later timestamp authority confirmation
+
+Attestation entries are treated as opaque verification extensions.
+
+Replay verification MUST NOT depend on the internal structure of attestations.
+
+---
+
+## **A.7 Artifact Immutability**
+
+Artifacts MUST be stored in append-only storage.
+
+Mutation invalidates replay.
+
+---
+
+## **A.8 Backward Compatibility**
+
+Once Artifact Specification v1 is published:
+
+* fields cannot be renamed  
+* semantics cannot change  
+* new versions must increment the specification version
+
+---
+
+## **A.9 Canonical Serialization Rule**
+
+Before computing `artifact_hash`, the artifact payload MUST be serialized using **canonical JSON encoding**.
+
+All implementations MUST follow the same serialization rules.
+
+Canonical serialization ensures that independent implementations in Go, Python, Rust, or other languages produce identical byte sequences prior to hashing.
+
+---
+
+## **A.10 Canonical Encoding Requirements**
+
+The canonical encoding MUST satisfy the following rules.
+
+### **1\. UTF-8 Encoding**
+
+Artifacts MUST be serialized as UTF-8.
+
+No alternative encodings are permitted.
+
+---
+
+### **2\. Deterministic Field Ordering**
+
+All JSON object keys MUST be sorted in **lexicographic ascending order**.
+
+Example:
+
+Correct:
+
+\{  
+  "authority\_state": "...",  
+  "context\_snapshot\_hash": "...",  
+  "instance\_id": "...",  
+  "workflow\_version\_id": "..."  
+\}
+
+Incorrect:
+
+\{  
+  "instance\_id": "...",  
+  "authority\_state": "...",  
+  "workflow\_version\_id": "...",  
+  "context\_snapshot\_hash": "..."  
+\}
+
+Sorting ensures deterministic serialization across languages.
+
+---
+
+### **3\. No Whitespace Normalization Variance**
+
+Serialization MUST NOT include:
+
+* trailing spaces  
+* indentation  
+* formatting differences
+
+The payload MUST be serialized as **compact JSON**.
+
+Example:
+
+Correct:
+
+\{"instance\_id":"...","workflow\_version\_id":"..."\}
+
+---
+
+### **4\. Stable Field Inclusion**
+
+Fields MUST NOT be omitted if defined by the schema.
+
+Optional fields MUST appear explicitly as `null` when absent.
+
+Example:
+
+"attestations": null
+
+This prevents differences in hashing between implementations.
+
+---
+
+### **5\. String Normalization**
+
+All strings MUST be UTF-8 encoded without normalization transformations.
+
+Implementations MUST NOT apply locale transformations.
+
+---
+
+### **6\. Boolean Representation**
+
+Booleans MUST use lowercase JSON values:
+
+true  
+false
+
+---
+
+### **7\. Numeric Representation**
+
+If numeric fields exist in future versions:
+
+* they MUST be encoded in base-10  
+* exponential notation MUST NOT be used
+
+---
+
+## **A.11 Artifact Hash Computation**
+
+After canonical serialization, the hash is computed.
+
+artifact\_hash \= SHA256(canonical\_json\_bytes)
+
+If the artifact has a predecessor:
+
+artifact\_hash \=  
+SHA256(canonical\_json\_bytes || prev\_artifact\_hash)
+
+---
+
+## **A.12 Verification Rule**
+
+A verifier MUST:
+
+1. deserialize artifact  
+2. reconstruct canonical JSON  
+3. recompute artifact\_hash  
+4. verify signature  
+5. verify hash chain linkage
+
+Verification MUST NOT depend on:
+
+* runtime logs  
+* database records  
+* workflow runtime state
+
+---
+
+## **Appendix A.13 — Normative Verification Procedure**
+
+An independent verifier MUST validate artifacts using the following procedure.
+
+1\. Deserialize the artifact.
+
+2\. Validate schema completeness.  
+   All fields defined in Artifact Specification v1 MUST be present.
+
+3\. Reconstruct canonical JSON payload  
+   using the canonical serialization rules defined in Section A.10.
+
+4\. Recompute artifact\_hash:  
+      hash \= SHA256(canonical\_payload\_bytes)
+
+5\. If prev\_artifact\_hash is present:  
+      hash \= SHA256(canonical\_payload\_bytes || prev\_artifact\_hash)
+
+6\. Verify that recomputed hash \== artifact\_hash.
+
+7\. Verify artifact\_signature using the public key corresponding to the  
+   Gantral control plane and the declared signature\_algorithm.
+
+8\. Verify timestamp\_token according to timestamp\_algorithm.
+
+9\. Validate state transition correctness using the canonical  
+   transition relation defined in Section 4.2.
+
+10\. Repeat steps 1–9 for each artifact in the chain.
+
+11\. Classify replay result:
+
+   VALID  
+     All checks pass and the final artifact represents a terminal  
+     authority decision.
+
+   INVALID  
+     Any integrity, signature, or transition validation fails.
+
+   INCONCLUSIVE  
+     Chain integrity holds but the final artifact represents a  
+     non-terminal authority state.
 
 ---
 

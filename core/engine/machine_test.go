@@ -58,6 +58,12 @@ func TestTransition(t *testing.T) {
 
 		// Invalid Transitions
 		{
+			name:         "Rejected -> Terminated (Strict Terminal State)",
+			initialState: StateRejected,
+			targetState:  StateTerminated,
+			expectError:  true,
+		},
+		{
 			name:         "Created -> Completed (Skip Running)",
 			initialState: StateCreated,
 			targetState:  StateCompleted,

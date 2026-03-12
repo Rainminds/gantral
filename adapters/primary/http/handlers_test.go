@@ -60,8 +60,8 @@ func (m *MockReadStore) GetInstance(ctx context.Context, id string) (*engine.Ins
 	args := m.Called(ctx, id)
 	return args.Get(0).(*engine.Instance), args.Error(1)
 }
-func (m *MockReadStore) ListInstances(ctx context.Context) ([]*engine.Instance, error) {
-	args := m.Called(ctx)
+func (m *MockReadStore) ListInstances(ctx context.Context, teamID string) ([]*engine.Instance, error) {
+	args := m.Called(ctx, teamID)
 	return args.Get(0).([]*engine.Instance), args.Error(1)
 }
 func (m *MockReadStore) RecordDecision(ctx context.Context, cmd engine.RecordDecisionCmd, nextState engine.State) (*engine.Instance, error) {
@@ -86,6 +86,8 @@ func TestCreateInstance(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		reqBody := `{"workflow_id": "test-wf", "policy": {"id": "p1"}}`
 		req := httptest.NewRequest("POST", "/instances", strings.NewReader(reqBody))
+		ctx := context.WithValue(req.Context(), TeamIDKey, "team-1")
+		req = req.WithContext(ctx)
 		w := httptest.NewRecorder()
 
 		// Expect ExecuteWorkflow
@@ -113,6 +115,8 @@ func TestCreateInstance(t *testing.T) {
 
 	t.Run("Invalid JSON", func(t *testing.T) {
 		req := httptest.NewRequest("POST", "/instances", strings.NewReader("{invalid"))
+		ctx := context.WithValue(req.Context(), TeamIDKey, "team-1")
+		req = req.WithContext(ctx)
 		w := httptest.NewRecorder()
 		handler.CreateInstance(w, req)
 		if w.Code != stdhttp.StatusBadRequest {
@@ -131,6 +135,8 @@ func TestRecordDecision(t *testing.T) {
 		reqBody := `{"type": "APPROVE", "actor_id": "user1", "justification": "LGTM"}`
 		req := httptest.NewRequest("POST", "/instances/inst-1/decisions", strings.NewReader(reqBody))
 		req.SetPathValue("id", "inst-1")
+		ctx := context.WithValue(req.Context(), TeamIDKey, "team-1")
+		req = req.WithContext(ctx)
 		w := httptest.NewRecorder()
 
 		mockTemporal.On("SignalWorkflow",
@@ -156,6 +162,8 @@ func TestRecordDecision(t *testing.T) {
 		reqBody := `{"type": "APPROVE"}`
 		req := httptest.NewRequest("POST", "/instances/missing/decisions", strings.NewReader(reqBody))
 		req.SetPathValue("id", "missing")
+		ctx := context.WithValue(req.Context(), TeamIDKey, "team-1")
+		req = req.WithContext(ctx)
 		w := httptest.NewRecorder()
 
 		// Use the correct type for NotFound error from Temporal SDK
@@ -181,11 +189,16 @@ func TestGetAuditLogs(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		req := httptest.NewRequest("GET", "/instances/inst-1/audit", nil)
 		req.SetPathValue("id", "inst-1")
+		ctx := context.WithValue(req.Context(), TeamIDKey, "team-1")
+		req = req.WithContext(ctx)
 		w := httptest.NewRecorder()
 
 		events := []engine.AuditEvent{
 			{ID: "evt-1", EventType: "CREATED", Timestamp: time.Now()},
 		}
+
+		inst := &engine.Instance{ID: "inst-1", OwningTeamID: "team-1"}
+		mockStore.On("GetInstance", mock.Anything, "inst-1").Return(inst, nil)
 		mockStore.On("GetAuditEvents", mock.Anything, "inst-1").Return(events, nil)
 
 		handler.HandleGetAuditLogs(w, req)
@@ -209,9 +222,11 @@ func TestGetInstance(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		req := httptest.NewRequest("GET", "/instances/inst-1", nil)
 		req.SetPathValue("id", "inst-1")
+		ctx := context.WithValue(req.Context(), TeamIDKey, "team-1")
+		req = req.WithContext(ctx)
 		w := httptest.NewRecorder()
 
-		inst := &engine.Instance{ID: "inst-1"}
+		inst := &engine.Instance{ID: "inst-1", OwningTeamID: "team-1"}
 		mockStore.On("GetInstance", mock.Anything, "inst-1").Return(inst, nil)
 
 		handler.HandleGetInstance(w, req)
@@ -228,10 +243,12 @@ func TestListInstances(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		req := httptest.NewRequest("GET", "/instances", nil)
+		ctx := context.WithValue(req.Context(), TeamIDKey, "team-1")
+		req = req.WithContext(ctx)
 		w := httptest.NewRecorder()
 
 		list := []*engine.Instance{{ID: "inst-1"}, {ID: "inst-2"}}
-		mockStore.On("ListInstances", mock.Anything).Return(list, nil)
+		mockStore.On("ListInstances", mock.Anything, "team-1").Return(list, nil)
 
 		handler.HandleListInstances(w, req)
 

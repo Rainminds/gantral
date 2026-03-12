@@ -64,7 +64,7 @@ func TestIntegration_HITL_Flow(t *testing.T) {
 	// 2. Create High Materiality Instance (expect PAUSE)
 	pol := policy.Policy{ID: "demo-policy", Materiality: policy.MaterialityHigh}
 
-	inst, err := eng.CreateInstance(ctx, "integration-wf", map[string]interface{}{"key": "val"}, pol)
+	inst, err := eng.CreateInstance(ctx, "team-test", "integration-wf", map[string]interface{}{"key": "val"}, pol)
 	if err != nil {
 		t.Fatalf("CreateInstance failed: %v", err)
 	}
@@ -81,7 +81,7 @@ func TestIntegration_HITL_Flow(t *testing.T) {
 		Justification: "Integration Test Approval",
 	}
 
-	updated, err := eng.RecordDecision(ctx, cmd)
+	updated, err := eng.RecordDecision(ctx, "team-test", cmd)
 	if err != nil {
 		t.Fatalf("RecordDecision failed: %v", err)
 	}

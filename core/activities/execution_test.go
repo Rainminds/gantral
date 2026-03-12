@@ -28,8 +28,8 @@ func (m *MockInstanceStore) GetInstance(ctx context.Context, id string) (*engine
 	return args.Get(0).(*engine.Instance), args.Error(1)
 }
 
-func (m *MockInstanceStore) ListInstances(ctx context.Context) ([]*engine.Instance, error) {
-	args := m.Called(ctx)
+func (m *MockInstanceStore) ListInstances(ctx context.Context, teamID string) ([]*engine.Instance, error) {
+	args := m.Called(ctx, teamID)
 	return args.Get(0).([]*engine.Instance), args.Error(1)
 }
 
@@ -47,8 +47,19 @@ type MockArtifactEmitter struct {
 	mock.Mock
 }
 
-func (m *MockArtifactEmitter) EmitArtifact(ctx context.Context, instanceID, prevHash, state, policyVer, contextHash, actorID string) (*models.CommitmentArtifact, error) {
-	args := m.Called(ctx, instanceID, prevHash, state, policyVer, contextHash, actorID)
+func (m *MockArtifactEmitter) EmitArtifact(
+	ctx context.Context,
+	teamID string,
+	instanceID string,
+	workflowVersionID string,
+	prevHash string,
+	state string,
+	policyVersionID string,
+	contextHash string,
+	actorID string,
+	justification string,
+) (*models.CommitmentArtifact, error) {
+	args := m.Called(ctx, teamID, instanceID, workflowVersionID, prevHash, state, policyVersionID, contextHash, actorID, justification)
 	return args.Get(0).(*models.CommitmentArtifact), args.Error(1)
 }
 
@@ -76,9 +87,10 @@ func TestRecordDecision_Chaining(t *testing.T) {
 
 	// 1. Expect GetInstance to return instance with LastArtifactHash
 	mockDB.On("GetInstance", mock.Anything, instanceID).Return(&engine.Instance{
-		ID:               instanceID,
-		State:            engine.StateWaitingForHuman,
-		LastArtifactHash: prevHash,
+		ID:                instanceID,
+		State:             engine.StateWaitingForHuman,
+		LastArtifactHash:  prevHash,
+		WorkflowVersionID: "wfv1",
 	}, nil)
 
 	// 2. Expect EmitArtifact with correct prevHash and contextHash
@@ -86,7 +98,7 @@ func TestRecordDecision_Chaining(t *testing.T) {
 		ArtifactID:     "art-new",
 		AuthorityState: "APPROVED",
 	}
-	mockEmitter.On("EmitArtifact", mock.Anything, instanceID, prevHash, "APPROVED", policyVer, expectedContextHash, "user-1").Return(expectedArtifact, nil)
+	mockEmitter.On("EmitArtifact", mock.Anything, "team-1", instanceID, "wfv1", prevHash, "APPROVED", policyVer, expectedContextHash, "user-1", "Approved via test").Return(expectedArtifact, nil)
 
 	// 3. Expect RecordDecision (DB) with NewArtifactHash
 	expectedCmd := engine.RecordDecisionCmd{
@@ -103,6 +115,7 @@ func TestRecordDecision_Chaining(t *testing.T) {
 
 	// Execute via Env
 	input := RecordDecisionInput{
+		TeamID:          "team-1",
 		InstanceID:      instanceID,
 		DecisionType:    engine.DecisionApprove,
 		ActorID:         "user-1",

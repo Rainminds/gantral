@@ -11,25 +11,40 @@ import (
 // MockStore is a no-op store for testing Manager logic.
 type MockStore struct{}
 
-func (s *MockStore) Write(ctx context.Context, art *models.CommitmentArtifact) error {
+func (s *MockStore) WriteArtifact(ctx context.Context, teamID string, art *models.CommitmentArtifact) error {
 	return nil
 }
 
-func (s *MockStore) Get(ctx context.Context, id string) (*models.CommitmentArtifact, error) {
+func (s *MockStore) GetArtifact(ctx context.Context, teamID string, hash string) (*models.CommitmentArtifact, error) {
 	return nil, nil
 }
 
+type MockSigner struct{}
+
+func (s *MockSigner) Sign(hash []byte) ([]byte, string, error) {
+	return []byte("mock-sig"), "mock-alg", nil
+}
+
+type MockTimeStamper struct{}
+
+func (s *MockTimeStamper) Token(hash []byte) ([]byte, string, error) {
+	return []byte("mock-token"), "mock-alg", nil
+}
+
 func TestEmitArtifact_Success(t *testing.T) {
-	m := NewManager(&MockStore{})
+	m := NewManager(&MockStore{}, &MockSigner{}, &MockTimeStamper{})
 
 	art, err := m.EmitArtifact(
 		context.Background(),
+		"team-1",
 		"inst-123",
+		"wf-v1",
 		"prev-hash-abc",
 		"APPROVED",
 		"policy-v1",
 		"ctx-hash-xyz",
 		"actor-bob",
+		"justification",
 	)
 
 	if err != nil {
@@ -42,9 +57,8 @@ func TestEmitArtifact_Success(t *testing.T) {
 	if art.ArtifactID == "" {
 		t.Error("ArtifactID should be populated")
 	}
-	// ArtifactHash removed in v1model
-	if art.ArtifactVersion != "v1" {
-		t.Errorf("Expected version v1, got %s", art.ArtifactVersion)
+	if art.ArtifactVersion != models.CurrentArtifactVersion {
+		t.Errorf("Expected version %s, got %s", models.CurrentArtifactVersion, art.ArtifactVersion)
 	}
 }
 
@@ -74,37 +88,35 @@ func TestEmitArtifact_Determinism(t *testing.T) {
 
 	// Let's test the core hashing determinism which is the critical part.
 
-	ts := "2023-10-27T10:00:00Z"
 	// Create two identical models manually
-	art1 := models.NewCommitmentArtifact("i1", "p1", "s1", "pv1", "c1", "a1")
-	art1.Timestamp = ts
+	art1 := models.NewCommitmentArtifact("i1", "wfv1", "p1", "s1", "pv1", "c1", "a1", "just")
 
-	art2 := models.NewCommitmentArtifact("i1", "p1", "s1", "pv1", "c1", "a1")
-	art2.Timestamp = ts
+	art2 := models.NewCommitmentArtifact("i1", "wfv1", "p1", "s1", "pv1", "c1", "a1", "just")
+	art2.ArtifactID = art1.ArtifactID
 
-	if err := art1.CalculateHashAndSetID(); err != nil {
+	if err := art1.CalculateHash(); err != nil {
 		t.Fatal(err)
 	}
-	if err := art2.CalculateHashAndSetID(); err != nil {
+	if err := art2.CalculateHash(); err != nil {
 		t.Fatal(err)
 	}
 
-	if art1.ArtifactID != art2.ArtifactID {
-		t.Errorf("Determinism failure: %s != %s", art1.ArtifactID, art2.ArtifactID)
+	if art1.ArtifactHash != art2.ArtifactHash {
+		t.Errorf("Determinism failure: %s != %s", art1.ArtifactHash, art2.ArtifactHash)
 	}
 }
 
 func TestEmitArtifact_InvalidInput(t *testing.T) {
-	m := NewManager(&MockStore{})
+	m := NewManager(&MockStore{}, &MockSigner{}, &MockTimeStamper{})
 
 	// Missing InstanceID
-	_, err := m.EmitArtifact(context.Background(), "", "prev", "STATE", "pol", "ctx", "act")
+	_, err := m.EmitArtifact(context.Background(), "team-1", "", "w", "prev", "STATE", "pol", "ctx", "act", "j")
 	if err == nil {
 		t.Error("Expected error for empty InstanceID, got nil")
 	}
 
 	// Missing ContextHash
-	_, err = m.EmitArtifact(context.Background(), "inst", "prev", "STATE", "pol", "", "act")
+	_, err = m.EmitArtifact(context.Background(), "team-1", "inst", "w", "prev", "STATE", "pol", "", "act", "j")
 	if err == nil {
 		t.Error("Expected error for empty ContextHash, got nil")
 	}
@@ -112,8 +124,8 @@ func TestEmitArtifact_InvalidInput(t *testing.T) {
 
 func TestArtifact_JSONStructure(t *testing.T) {
 	// Verify that MarshalJSON includes all fields and flattened structure
-	m := NewManager(&MockStore{})
-	art, _ := m.EmitArtifact(context.Background(), "inst", "prev", "APPROVED", "pol", "ctx", "act")
+	m := NewManager(&MockStore{}, &MockSigner{}, &MockTimeStamper{})
+	art, _ := m.EmitArtifact(context.Background(), "team-1", "inst", "w", "prev", "APPROVED", "pol", "ctx", "act", "j")
 
 	bytes, _ := json.Marshal(art)
 	var asMap map[string]interface{}
@@ -124,7 +136,7 @@ func TestArtifact_JSONStructure(t *testing.T) {
 	required := []string{
 		"artifact_version", "artifact_id", "instance_id",
 		"prev_artifact_hash", "authority_state", "policy_version_id",
-		"context_hash", "human_actor_id", "timestamp",
+		"context_snapshot_hash", "human_actor_id", "artifact_hash", "workflow_version_id", "justification",
 	}
 
 	for _, field := range required {

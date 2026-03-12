@@ -25,12 +25,16 @@ func Test_Replay_Determinism_SectionE(t *testing.T) {
 	validJSON := loadGoldenJSON(t)
 
 	// 1. Valid Replay -> Valid
-	res, err := verifier.VerifyArtifact(validJSON)
+	v := verifier.New(nil, nil)
+	res, err := v.VerifyArtifact(validJSON)
 	if err != nil {
 		t.Fatalf("Golden artifact failed verification: %v", err)
 	}
 	if !res.Valid {
-		t.Errorf("Expected Valid=true for golden artifact, got false. Error: %s", res.Error)
+		var art models.CommitmentArtifact
+		json.Unmarshal(validJSON, &art)
+		art.CalculateHash()
+		t.Errorf("Expected Valid=true for golden artifact, got false.\nError: %s\nExpected Hash:\n%s\nGot Hash:\n%s", res.Error, validJSON, art.ArtifactHash)
 	}
 
 	// 2. Replay ignoring noise (proven by passing strictly valid JSON, logic doesn't look at external DB/logs)
@@ -41,7 +45,8 @@ func Test_Replay_FailClosed_CorruptJSON_SectionF(t *testing.T) {
 	t.Parallel()
 
 	// 1. Malformed JSON
-	res, err := verifier.VerifyArtifact([]byte("{ not valid json }"))
+	v := verifier.New(nil, nil)
+	res, err := v.VerifyArtifact([]byte("{ not valid json }"))
 	if err == nil {
 		// VerifyArtifact returns error for json syntax error usually
 		// If it returns result with Valid=false, that's also fine.
@@ -51,7 +56,7 @@ func Test_Replay_FailClosed_CorruptJSON_SectionF(t *testing.T) {
 	}
 
 	// 2. Missing ID
-	res, _ = verifier.VerifyArtifact([]byte(`{"authority_state":"APPROVED"}`))
+	res, _ = v.VerifyArtifact([]byte(`{"authority_state":"APPROVED"}`))
 	if res.Valid {
 		t.Error("Artifact without ID marked as valid!")
 	}
@@ -72,7 +77,8 @@ func Test_Replay_FailClosed_HashMismatch_SectionF(t *testing.T) {
 	art.AuthorityState = "REJECTED"
 	tamperedJSON, _ := json.Marshal(art)
 
-	res, _ := verifier.VerifyArtifact(tamperedJSON)
+	v := verifier.New(nil, nil)
+	res, _ := v.VerifyArtifact(tamperedJSON)
 	if res.Valid {
 		t.Error("Tampered content (hash mismatch) marked as valid!")
 	}
@@ -88,27 +94,28 @@ func Test_Replay_Chain_Linking_SectionE(t *testing.T) {
 	// Art1 (Genesis) -> Art2 -> Art3
 
 	// 1. Genesis
-	art1 := models.NewCommitmentArtifact("inst-1", models.GenesisHash, "CREATED", "v1", "ctx1", "user1")
-	if err := art1.CalculateHashAndSetID(); err != nil {
+	art1 := models.NewCommitmentArtifact("inst-1", "wf", models.GenesisHash, "CREATED", "v1", "ctx1", "user1", "just")
+	if err := art1.CalculateHash(); err != nil {
 		t.Fatalf("Failed to calculate hash: %v", err)
 	}
 
 	// 2. Running
-	art2 := models.NewCommitmentArtifact("inst-1", art1.ArtifactID, "RUNNING", "v1", "ctx2", "user1")
-	if err := art2.CalculateHashAndSetID(); err != nil {
+	art2 := models.NewCommitmentArtifact("inst-1", "wf", art1.ArtifactHash, "RUNNING", "v1", "ctx2", "user1", "just")
+	if err := art2.CalculateHash(); err != nil {
 		t.Fatalf("Failed to calculate hash: %v", err)
 	}
 
 	// 3. Waiting
-	art3 := models.NewCommitmentArtifact("inst-1", art2.ArtifactID, "WAITING", "v1", "ctx3", "user1")
-	if err := art3.CalculateHashAndSetID(); err != nil {
+	art3 := models.NewCommitmentArtifact("inst-1", "wf", art2.ArtifactHash, "WAITING_FOR_HUMAN", "v1", "ctx3", "user1", "just")
+	if err := art3.CalculateHash(); err != nil {
 		t.Fatalf("Failed to calculate hash: %v", err)
 	}
 
 	chain := []models.CommitmentArtifact{*art1, *art2, *art3}
 
 	// Verify Valid Chain
-	res := verifier.VerifyChain(chain)
+	v := verifier.New(nil, nil)
+	res := v.VerifyChain(chain)
 	if !res.Valid {
 		t.Errorf("Valid chain failed: %s at index %d", res.BrokenReason, res.BrokenIndex)
 	}
@@ -118,7 +125,7 @@ func Test_Replay_Chain_Linking_SectionE(t *testing.T) {
 	art3.PrevArtifactHash = "broken-hash"
 	brokenChain := []models.CommitmentArtifact{*art1, *art2, *art3}
 
-	resBroken := verifier.VerifyChain(brokenChain)
+	resBroken := v.VerifyChain(brokenChain)
 	if resBroken.Valid {
 		t.Error("Broken chain marked as valid")
 	}
@@ -135,15 +142,14 @@ func Test_Schema_Version_Check_SectionL(t *testing.T) {
 	// pkg/models/artifact.go has ArtifactVersion string `json:"artifact_version"`
 
 	// If we omit artifact_version?
-	art := models.NewCommitmentArtifact("inst", models.GenesisHash, "S", "v", "c", "u")
+	art := models.NewCommitmentArtifact("inst", "wf", models.GenesisHash, "S", "v", "c", "u", "j")
 	art.ArtifactVersion = "" // Clear it
-	// Calculate ID will include empty version
-	if err := art.CalculateHashAndSetID(); err != nil {
-		t.Fatalf("Failed to calculate hash: %v", err)
-	}
-	_ = art // Mark as used for now if not further tested
 
-	// Note: Currently `VerifyArtifact` doesn't explicitly check `ArtifactVersion != ""` inside the function in the snippet I saw.
+	// Calculate hash will fail for invalid version
+	if err := art.CalculateHash(); err == nil {
+		t.Fatalf("Expected error for calculating hash with invalid version")
+	}
+	_ = art
 	// It checks ArtifactID != "".
 	// However, `CanonicalPayload` might error if required fields are missing?
 	// Let's check `CanonicalPayload` in `pkg/models/artifact.go`.
@@ -165,7 +171,7 @@ func Test_Schema_Version_Check_SectionL(t *testing.T) {
 	*/
 	// If it's missing, it's just empty string in hash.
 	// If the requirement is strict, I should add a test that asserts it (and maybe FAIL if the code doesn't enforce it, marking it TODO).
-	// But `NewCommitmentArtifact` sets it to `SchemaVersionV1`.
+	// But `NewCommitmentArtifact` sets it to `CurrentArtifactVersion`.
 
 	// I will write a test that creates an artifact with empty version and checks if it's "Valid" (technically it is valid structurally).
 	// If the requirement "required version fields present" implies explicit validation, I might need to add validation to `CanonicalPayload` or `VerifyArtifact`?

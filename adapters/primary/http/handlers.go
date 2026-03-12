@@ -18,6 +18,19 @@ import (
 	"go.temporal.io/sdk/client"
 )
 
+type contextKey string
+
+const TeamIDKey contextKey = "team_id"
+
+// Helper to extract teamID or error
+func getTeamID(r *http.Request) (string, error) {
+	teamID, ok := r.Context().Value(TeamIDKey).(string)
+	if !ok || teamID == "" {
+		return "", fmt.Errorf("missing or invalid team_id in context")
+	}
+	return teamID, nil
+}
+
 // Handler holds dependencies for HTTP handlers.
 type Handler struct {
 	TemporalClient client.Client
@@ -47,6 +60,12 @@ func (h *Handler) CreateInstance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	teamID, err := getTeamID(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
+
 	// Generate Instance ID (Execution ID)
 	instanceID := fmt.Sprintf("inst-%s", uuid.New().String())
 
@@ -56,6 +75,7 @@ func (h *Handler) CreateInstance(w http.ResponseWriter, r *http.Request) {
 	}
 
 	input := workflows.WorkflowInput{
+		TeamID:         teamID,
 		WorkflowID:     req.WorkflowID,
 		TriggerContext: req.TriggerContext,
 		Policy:         req.Policy,
@@ -99,6 +119,12 @@ func (h *Handler) RecordDecision(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	teamID, err := getTeamID(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
+
 	var req RecordDecisionRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
@@ -114,11 +140,11 @@ func (h *Handler) RecordDecision(w http.ResponseWriter, r *http.Request) {
 	// Map to Signal Input
 	var dType engine.DecisionType
 	switch req.Type {
-	case "APPROVE":
+	case string(engine.DecisionApprove):
 		dType = engine.DecisionApprove
-	case "REJECT":
+	case string(engine.DecisionReject):
 		dType = engine.DecisionReject
-	case "OVERRIDE":
+	case string(engine.DecisionOverride):
 		dType = engine.DecisionOverride
 	default:
 		http.Error(w, "invalid decision type", http.StatusBadRequest)
@@ -126,6 +152,7 @@ func (h *Handler) RecordDecision(w http.ResponseWriter, r *http.Request) {
 	}
 
 	signalArg := activities.RecordDecisionInput{
+		TeamID:          teamID,
 		InstanceID:      instanceID,
 		DecisionType:    dType,
 		ActorID:         req.ActorID,
@@ -135,7 +162,7 @@ func (h *Handler) RecordDecision(w http.ResponseWriter, r *http.Request) {
 		ContextSnapshot: req.ContextSnapshot,
 	}
 
-	err := h.TemporalClient.SignalWorkflow(r.Context(), instanceID, "", workflows.SignalHumanDecision, signalArg)
+	err = h.TemporalClient.SignalWorkflow(r.Context(), instanceID, "", workflows.SignalHumanDecision, signalArg)
 	if err != nil {
 		if _, ok := err.(*serviceerror.NotFound); ok {
 			http.Error(w, "instance not found or completed", http.StatusNotFound)
@@ -152,9 +179,26 @@ func (h *Handler) RecordDecision(w http.ResponseWriter, r *http.Request) {
 
 // HandleGetAuditLogs retrieves audit logs for an instance.
 func (h *Handler) HandleGetAuditLogs(w http.ResponseWriter, r *http.Request) {
+	teamID, err := getTeamID(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
+
 	instanceID := r.PathValue("id")
 	if instanceID == "" {
 		http.Error(w, "instance id required", http.StatusBadRequest)
+		return
+	}
+
+	inst, err := h.ReadStore.GetInstance(r.Context(), instanceID)
+	if err != nil {
+		slog.Error("failed to get instance", "error", err)
+		http.Error(w, "instance not found", http.StatusNotFound)
+		return
+	}
+	if inst.OwningTeamID != teamID {
+		http.Error(w, engine.ErrCrossTenantViolation.Error(), http.StatusForbidden)
 		return
 	}
 
@@ -173,6 +217,12 @@ func (h *Handler) HandleGetAuditLogs(w http.ResponseWriter, r *http.Request) {
 
 // HandleGetInstance retrieves a single instance by ID.
 func (h *Handler) HandleGetInstance(w http.ResponseWriter, r *http.Request) {
+	teamID, err := getTeamID(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
+
 	instanceID := r.PathValue("id")
 	if instanceID == "" {
 		http.Error(w, "instance id required", http.StatusBadRequest)
@@ -185,6 +235,10 @@ func (h *Handler) HandleGetInstance(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "instance not found", http.StatusNotFound)
 		return
 	}
+	if inst.OwningTeamID != teamID {
+		http.Error(w, engine.ErrCrossTenantViolation.Error(), http.StatusForbidden)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(inst)
@@ -192,7 +246,13 @@ func (h *Handler) HandleGetInstance(w http.ResponseWriter, r *http.Request) {
 
 // HandleListInstances retrieves all instances.
 func (h *Handler) HandleListInstances(w http.ResponseWriter, r *http.Request) {
-	instances, err := h.ReadStore.ListInstances(r.Context())
+	teamID, err := getTeamID(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
+
+	instances, err := h.ReadStore.ListInstances(r.Context(), teamID)
 	if err != nil {
 		slog.Error("failed to list instances", "error", err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)

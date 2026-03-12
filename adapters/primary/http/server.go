@@ -1,13 +1,11 @@
 package http
 
 import (
-	"io/fs"
 	"log/slog"
 	"net/http"
 	"time"
 
 	"github.com/Rainminds/gantral/core/ports"
-	"github.com/Rainminds/gantral/web"
 	"go.temporal.io/sdk/client"
 )
 
@@ -38,13 +36,6 @@ func (s *Server) Routes() *http.ServeMux {
 	mux.HandleFunc("GET /instances/{id}", s.handler.HandleGetInstance)
 	mux.HandleFunc("GET /instances", s.handler.HandleListInstances)
 	mux.HandleFunc("GET /healthz", s.handler.HealthCheck)
-
-	// Serve Static Files
-	staticFS, err := fs.Sub(web.StaticFS, "static")
-	if err != nil {
-		panic(err)
-	}
-	mux.Handle("GET /", http.FileServer(http.FS(staticFS)))
 
 	return mux
 }

@@ -18,11 +18,11 @@ var (
 // ReplayGuard enforces that all authority transitions in the workflow history
 // are backed by valid, immutable commitment artifacts.
 type ReplayGuard struct {
-	store artifact.Store
+	store artifact.ImmutableStore
 }
 
 // NewReplayGuard creates a new ReplayGuard.
-func NewReplayGuard(store artifact.Store) *ReplayGuard {
+func NewReplayGuard(store artifact.ImmutableStore) *ReplayGuard {
 	return &ReplayGuard{store: store}
 }
 
@@ -36,7 +36,7 @@ func NewReplayGuard(store artifact.Store) *ReplayGuard {
 //   - Fetches the authoritative artifact from the Store using claimedArtifact.ID.
 //   - Compares critical fields (State, ContextHash, ActorID).
 //   - Returns ErrReplayTampered if missing or mismatched.
-func (g *ReplayGuard) ValidateReplay(ctx context.Context, claimedArtifact *models.CommitmentArtifact) error {
+func (g *ReplayGuard) ValidateReplay(ctx context.Context, teamID string, claimedArtifact *models.CommitmentArtifact) error {
 	if claimedArtifact == nil {
 		return nil // No artifact claimed, nothing to validate (e.g. non-authority event)
 	}
@@ -45,18 +45,18 @@ func (g *ReplayGuard) ValidateReplay(ctx context.Context, claimedArtifact *model
 	// Ensure the history record hasn't been tampered with to mismatch its own ID.
 	// We clone it to avoid mutating the input when calculating hash.
 	check := *claimedArtifact
-	if err := check.CalculateHashAndSetID(); err != nil {
+	if err := check.CalculateHash(); err != nil {
 		return fmt.Errorf("failed to calculate hash: %w", err)
 	}
-	if check.ArtifactID != claimedArtifact.ArtifactID {
+	if check.ArtifactHash != claimedArtifact.ArtifactHash {
 		slog.Error("SECURITY ALERT: Replay history tampered (hash mismatch)",
-			"claimed_id", claimedArtifact.ArtifactID,
-			"calculated_id", check.ArtifactID)
+			"claimed_hash", claimedArtifact.ArtifactHash,
+			"calculated_hash", check.ArtifactHash)
 		return fmt.Errorf("%w: history integrity compromised", ErrReplayTampered)
 	}
 
 	// 2. Fetch Authoritative Artifact (Existence Proof)
-	authoritative, err := g.store.Get(ctx, claimedArtifact.ArtifactID)
+	authoritative, err := g.store.GetArtifact(ctx, teamID, claimedArtifact.ArtifactID)
 	if err != nil {
 		if errors.Is(err, artifact.ErrArtifactNotFound) {
 			slog.Error("SECURITY ALERT: Replay claimed artifact that does not exist",

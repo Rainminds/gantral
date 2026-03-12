@@ -1,6 +1,7 @@
 -- name: CreateInstance :one
 INSERT INTO instances (
     id,
+    team_id,
     workflow_id,
     state,
     trigger_context,
@@ -8,7 +9,7 @@ INSERT INTO instances (
     policy_version_id,
     last_artifact_hash
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7
+    $1, $2, $3, $4, $5, $6, $7, $8
 )
 RETURNING *;
 
@@ -35,6 +36,7 @@ WHERE instance_id = $1;
 
 -- name: ListInstances :many
 SELECT * FROM instances
+WHERE team_id = $1
 ORDER BY created_at DESC;
 
 -- name: CreateAuditEvent :one

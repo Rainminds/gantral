@@ -14,42 +14,37 @@ func TestNewCommitmentArtifact(t *testing.T) {
 	ctxHash := "ctx-hash-123"
 	actor := "human-1"
 
-	art := NewCommitmentArtifact(instanceID, prevHash, state, policy, ctxHash, actor)
+	art := NewCommitmentArtifact(instanceID, "wf-v1", prevHash, state, policy, ctxHash, actor, "justification")
 
-	if art.ArtifactVersion != SchemaVersionV1 {
-		t.Errorf("expected version %s, got %s", SchemaVersionV1, art.ArtifactVersion)
+	if art.ArtifactVersion != CurrentArtifactVersion {
+		t.Errorf("expected version %s, got %s", CurrentArtifactVersion, art.ArtifactVersion)
 	}
 	if art.InstanceID != instanceID {
 		t.Errorf("expected instance %s, got %s", instanceID, art.InstanceID)
 	}
-	if art.Timestamp == "" {
-		t.Fatal("expected timestamp to be set")
-	}
+	// Note: Timestamp is removed in v7.0, replaced by TimestampToken generated later.
 }
 
-func TestArtifact_CanonicalPayload(t *testing.T) {
+func TestArtifact_PayloadForHashing(t *testing.T) {
 	art := &CommitmentArtifact{
-		ArtifactVersion:  SchemaVersionV1,
-		InstanceID:       "inst-1",
-		PrevArtifactHash: GenesisHash,
-		AuthorityState:   "APPROVED",
-		PolicyVersionID:  "v1",
-		ContextHash:      "ctx-1",
-		HumanActorID:     "user-1",
-		Timestamp:        "2024-01-01T00:00:00Z",
+		ArtifactVersion:     CurrentArtifactVersion,
+		InstanceID:          "inst-1",
+		PrevArtifactHash:    GenesisHash,
+		AuthorityState:      "APPROVED",
+		PolicyVersionID:     "v1",
+		ContextSnapshotHash: "ctx-1",
+		HumanActorID:        "user-1",
+		CryptoProfile:       "standard-v1",
+		// Timestamp is no longer in the payload
 	}
 
 	t.Run("Valid Payload", func(t *testing.T) {
-		payload, err := art.CanonicalPayload()
+		payload, err := art.PayloadForHashing()
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		var m map[string]string
-		if err := json.Unmarshal(payload, &m); err != nil {
-			t.Fatalf("failed to unmarshal payload: %v", err)
-		}
-		if m["instance_id"] != "inst-1" {
-			t.Errorf("expected inst-1, got %s", m["instance_id"])
+		if payload["instance_id"] != "inst-1" {
+			t.Errorf("expected inst-1, got %v", payload["instance_id"])
 		}
 	})
 
@@ -61,15 +56,14 @@ func TestArtifact_CanonicalPayload(t *testing.T) {
 		}{
 			{"Missing InstanceID", func(a *CommitmentArtifact) { a.InstanceID = "" }, "missing instance_id"},
 			{"Missing AuthorityState", func(a *CommitmentArtifact) { a.AuthorityState = "" }, "missing authority_state"},
-			{"Missing ContextHash", func(a *CommitmentArtifact) { a.ContextHash = "" }, "missing context_hash"},
-			{"Missing Timestamp", func(a *CommitmentArtifact) { a.Timestamp = "" }, "missing timestamp"},
+			{"Missing ContextSnapshotHash", func(a *CommitmentArtifact) { a.ContextSnapshotHash = "" }, "missing context_snapshot_hash"},
 		}
 
 		for _, tc := range cases {
 			t.Run(tc.name, func(t *testing.T) {
 				cp := *art
 				tc.modify(&cp)
-				_, err := cp.CanonicalPayload()
+				_, err := cp.PayloadForHashing()
 				if err == nil {
 					t.Fatal("expected error, got nil")
 				}
@@ -82,19 +76,19 @@ func TestArtifact_CanonicalPayload(t *testing.T) {
 }
 
 func TestArtifact_CalculateHashAndSetID(t *testing.T) {
-	art := NewCommitmentArtifact("inst-1", GenesisHash, "APPROVED", "v1", "ctx-1", "user-1")
-	err := art.CalculateHashAndSetID()
+	art := NewCommitmentArtifact("inst-1", "wfv1", GenesisHash, "APPROVED", "v1", "ctx-1", "user-1", "just")
+	err := art.CalculateHash()
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if len(art.ArtifactID) != 64 {
-		t.Errorf("expected 64-char hex hash, got len %d", len(art.ArtifactID))
+	if len(art.ArtifactHash) != 64 {
+		t.Errorf("expected 64-char hex hash, got len %d", len(art.ArtifactHash))
 	}
 }
 
 func TestArtifact_MarshalJSON(t *testing.T) {
-	art := NewCommitmentArtifact("inst-1", GenesisHash, "APPROVED", "v1", "ctx-1", "user-1")
-	if err := art.CalculateHashAndSetID(); err != nil {
+	art := NewCommitmentArtifact("inst-1", "wf1", GenesisHash, "APPROVED", "v1", "ctx-1", "user-1", "just")
+	if err := art.CalculateHash(); err != nil {
 		t.Fatalf("failed to calculate hash: %v", err)
 	}
 
@@ -103,14 +97,14 @@ func TestArtifact_MarshalJSON(t *testing.T) {
 		t.Fatalf("failed to marshal: %v", err)
 	}
 
-	var m map[string]string
+	var m map[string]interface{}
 	if err := json.Unmarshal(data, &m); err != nil {
 		t.Fatalf("failed to unmarshal: %v", err)
 	}
 
-	required := []string{"artifact_version", "artifact_id", "instance_id", "timestamp"}
+	required := []string{"artifact_version", "artifact_id", "instance_id"}
 	for _, f := range required {
-		if m[f] == "" {
+		if m[f] == "" || m[f] == nil {
 			t.Errorf("missing field %s in JSON", f)
 		}
 	}

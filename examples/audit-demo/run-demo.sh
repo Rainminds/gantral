@@ -65,12 +65,40 @@ import (
     "github.com/Rainminds/gantral/pkg/models"
 )
 func main() {
-    // Create Genesis
-    art := models.NewCommitmentArtifact("inst-demo-1", "", "APPROVED", "v1", "sha256-hash-of-evidence", "admin-alice")
-    art.CalculateHashAndSetID()
-    bytes, _ := json.MarshalIndent(art, "", "  ")
-    os.WriteFile("$ARTIFACTS_DIR/" + art.ArtifactID + ".json", bytes, 0644)
-    fmt.Println(art.ArtifactID)
+    // 1. Block A (Genesis -> RUNNING)
+    artA := models.NewCommitmentArtifact(
+        "inst-demo-1",         // instanceID
+        "v1.0.0",              // workflowVersionID
+        "",                    // prevArtifactHash
+        "RUNNING",             // authorityState
+        "policy-v1",           // policyVersionID
+        "hash-A",              // contextSnapshotHash
+        "system",              // actorID
+        "Workflow started",    // justification
+    )
+    if err := artA.CalculateHash(); err != nil { os.Exit(1) }
+    
+    // 2. Block B (RUNNING -> COMPLETED)
+    artB := models.NewCommitmentArtifact(
+        "inst-demo-1",
+        "v1.0.0",
+        artA.ArtifactHash,     // Link to A
+        "COMPLETED",
+        "policy-v1",
+        "hash-B",
+        "system",
+        "Workflow finished",
+    )
+    if err := artB.CalculateHash(); err != nil { os.Exit(1) }
+
+    // Save both
+    save := func(art *models.CommitmentArtifact, name string) {
+        b, _ := json.MarshalIndent(art, "", "  ")
+        os.WriteFile("$ARTIFACTS_DIR/" + name + ".json", b, 0644)
+    }
+    save(artA, "1_start")
+    save(artB, "2_end")
+    fmt.Println(artB.ArtifactID)
 }
 EOF
 go run gen_artifact.go

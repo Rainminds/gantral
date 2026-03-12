@@ -23,18 +23,18 @@ func Test_Replay_Gaslight(t *testing.T) {
 
 	// 1. Establish Ground Truth (Legitimate Artifact)
 	validArt := models.NewCommitmentArtifact(
-		"inst-1", "prev", "APPROVED", "v1", "ctx-hash", "admin",
+		"inst-1", "w", "prev", "APPROVED", "v1", "ctx-hash", "admin", "j",
 	)
-	if err := validArt.CalculateHashAndSetID(); err != nil {
+	if err := validArt.CalculateHash(); err != nil {
 		t.Fatal(err)
 	}
-	if err := store.Write(ctx, validArt); err != nil {
+	if err := store.WriteArtifact(ctx, "team-1", validArt); err != nil {
 		t.Fatal(err)
 	}
 
 	// 2. Scenario A: Honest Replay (Matches Ground Truth)
 	// The workflow history claims "Artifact X" execution. Guard checks Store.
-	if err := guard.ValidateReplay(ctx, validArt); err != nil {
+	if err := guard.ValidateReplay(ctx, "team-1", validArt); err != nil {
 		t.Errorf("Honest replay failed: %v", err)
 	}
 
@@ -42,11 +42,11 @@ func Test_Replay_Gaslight(t *testing.T) {
 	// Attacker injects an event into history saying "Attacker Approved",
 	// but NO such artifact exists in the store.
 	fakeArt := models.NewCommitmentArtifact(
-		"inst-1", "prev", "APPROVED", "v1", "ctx-hash", "attacker",
+		"inst-1", "w", "prev", "APPROVED", "v1", "ctx-hash", "attacker", "j",
 	)
-	_ = fakeArt.CalculateHashAndSetID()
+	_ = fakeArt.CalculateHash()
 
-	err = guard.ValidateReplay(ctx, fakeArt)
+	err = guard.ValidateReplay(ctx, "team-1", fakeArt)
 	if err == nil {
 		t.Error("Guard accepted fabricated artifact (should fail-closed on missing evidence)")
 	} else if !strings.Contains(err.Error(), "missing from store") {
@@ -59,7 +59,7 @@ func Test_Replay_Gaslight(t *testing.T) {
 	tamperedArt := *validArt
 	tamperedArt.AuthorityState = "REJECTED" // Content changed, but ID kept same
 
-	err = guard.ValidateReplay(ctx, &tamperedArt)
+	err = guard.ValidateReplay(ctx, "team-1", &tamperedArt)
 	if err == nil {
 		t.Error("Guard accepted tampered artifact (integrity check failed)")
 	} else if !strings.Contains(err.Error(), "history integrity compromised") {

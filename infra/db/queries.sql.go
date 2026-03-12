@@ -95,6 +95,7 @@ func (q *Queries) CreateDecision(ctx context.Context, arg CreateDecisionParams) 
 const createInstance = `-- name: CreateInstance :one
 INSERT INTO instances (
     id,
+    team_id,
     workflow_id,
     state,
     trigger_context,
@@ -102,13 +103,14 @@ INSERT INTO instances (
     policy_version_id,
     last_artifact_hash
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7
+    $1, $2, $3, $4, $5, $6, $7, $8
 )
-RETURNING id, workflow_id, state, trigger_context, policy_context, policy_version_id, last_artifact_hash, created_at, updated_at
+RETURNING id, team_id, workflow_id, state, trigger_context, policy_context, policy_version_id, last_artifact_hash, created_at, updated_at
 `
 
 type CreateInstanceParams struct {
 	ID               string
+	TeamID           string
 	WorkflowID       string
 	State            string
 	TriggerContext   []byte
@@ -120,6 +122,7 @@ type CreateInstanceParams struct {
 func (q *Queries) CreateInstance(ctx context.Context, arg CreateInstanceParams) (Instance, error) {
 	row := q.db.QueryRow(ctx, createInstance,
 		arg.ID,
+		arg.TeamID,
 		arg.WorkflowID,
 		arg.State,
 		arg.TriggerContext,
@@ -130,6 +133,7 @@ func (q *Queries) CreateInstance(ctx context.Context, arg CreateInstanceParams) 
 	var i Instance
 	err := row.Scan(
 		&i.ID,
+		&i.TeamID,
 		&i.WorkflowID,
 		&i.State,
 		&i.TriggerContext,
@@ -211,7 +215,7 @@ func (q *Queries) GetDecisionsByInstance(ctx context.Context, instanceID string)
 }
 
 const getInstance = `-- name: GetInstance :one
-SELECT id, workflow_id, state, trigger_context, policy_context, policy_version_id, last_artifact_hash, created_at, updated_at FROM instances
+SELECT id, team_id, workflow_id, state, trigger_context, policy_context, policy_version_id, last_artifact_hash, created_at, updated_at FROM instances
 WHERE id = $1 LIMIT 1
 `
 
@@ -220,6 +224,7 @@ func (q *Queries) GetInstance(ctx context.Context, id string) (Instance, error) 
 	var i Instance
 	err := row.Scan(
 		&i.ID,
+		&i.TeamID,
 		&i.WorkflowID,
 		&i.State,
 		&i.TriggerContext,
@@ -233,12 +238,13 @@ func (q *Queries) GetInstance(ctx context.Context, id string) (Instance, error) 
 }
 
 const listInstances = `-- name: ListInstances :many
-SELECT id, workflow_id, state, trigger_context, policy_context, policy_version_id, last_artifact_hash, created_at, updated_at FROM instances
+SELECT id, team_id, workflow_id, state, trigger_context, policy_context, policy_version_id, last_artifact_hash, created_at, updated_at FROM instances
+WHERE team_id = $1
 ORDER BY created_at DESC
 `
 
-func (q *Queries) ListInstances(ctx context.Context) ([]Instance, error) {
-	rows, err := q.db.Query(ctx, listInstances)
+func (q *Queries) ListInstances(ctx context.Context, teamID string) ([]Instance, error) {
+	rows, err := q.db.Query(ctx, listInstances, teamID)
 	if err != nil {
 		return nil, err
 	}
@@ -248,6 +254,7 @@ func (q *Queries) ListInstances(ctx context.Context) ([]Instance, error) {
 		var i Instance
 		if err := rows.Scan(
 			&i.ID,
+			&i.TeamID,
 			&i.WorkflowID,
 			&i.State,
 			&i.TriggerContext,

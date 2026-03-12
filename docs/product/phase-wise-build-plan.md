@@ -7,8 +7,9 @@ sidebar_label: Roadmap
 # Gantral Roadmap & Build Status
 
 
-**Current Status:** Phase 4 Complete (Developer Experience Verified)
-**Next Milestone:** Phase 5 (Federated Execution) & Phase 6 (Verifiability)
+**Current Status:** Phase 7 Complete 
+
+**Next Milestone:** Phase 8 (Determinism Assurance)
 
 
 This document outlines the authoritative build plan for Gantral. We follow a strict "Authority-First" architecture.
@@ -58,7 +59,7 @@ This document outlines the authoritative build plan for Gantral. We follow a str
 ---
 
 
-## 🚧 Phase 5: Federated Execution (In Progress)
+## ✅ Phase 5: Federated Execution 
 *Goal: Enable secure, multi-team execution with zero trust.*
 
 
@@ -66,13 +67,6 @@ This document outlines the authoritative build plan for Gantral. We follow a str
 - [x] **5.2 Service Identity**: Implemented Multi-Verifier (Chain) and RBAC Middleware. Runners restricted to Polling; Users restricted to Decisions.
 - [x] **5.3 Runner Protocol**: Pull-based task queues for network isolation.
 - [x] **5.4 Secret Resolution**: Just-In-Time (JIT) secret fetching at the edge.
-- [ ] **5.5 Evidence Capture & Tool Mediation (Non-Authoritative)**  
-  Optional runner-side capability to capture execution evidence:
-  - Tool inputs/outputs captured at the runner boundary  
-  - Evidence stored externally and immutably  
-  - Gantral stores **references only**, never raw payloads  
-  - Evidence may be required by policy, but **never interpreted by Gantral**  
-
 
   **Constraints:**  
   - Must not introduce new execution states  
@@ -84,7 +78,7 @@ This document outlines the authoritative build plan for Gantral. We follow a str
 ---
 
 
-## 🚧 Phase 6: Verifiability & Admissibility
+## ✅ Phase 6: Verifiability & Admissibility
 *Goal: Transform documented guarantees into mechanically verifiable artifacts that survive hostile audit.*
 *Note: This phase MUST NOT alter execution semantics, state machines, or authority rules.*
 
@@ -92,10 +86,8 @@ This document outlines the authoritative build plan for Gantral. We follow a str
 - [x] **6.1 Commitment Artifact Implementation**: Implemented a concrete, inspectable commitment artifact emitted atomically with authority transitions.
 - [x] **6.2 Artifact Storage & Log Independence**: Ensured artifacts are independent of operational logs and databases; deleting the DB must not invalidate artifacts.
 - [x] **6.3 Offline Verification Tooling**: Enabled third-party verification without Gantral access via a standalone CLI/library (`gantral-verify`).
-- [ ] **6.4 Authority-Only Replay Enforcement**: Guarantee replay depends solely on authority artifacts, excluding agent memory and logs.
-- [ ] **6.5 Fail-Closed Guarantees**: Eliminate ambiguous execution paths; execution must terminate on missing/partial artifacts or hash mismatches.
-- [ ] **6.6 Auditor Verification Demo**: Demonstrate offline verification from an auditor’s perspective (shut down Gantral → verify artifact).
-
+- [x] **6.4 Authority-Only Replay Enforcement**: Guarantee replay depends solely on authority artifacts, excluding agent memory and logs.
+- [x] **6.5 Fail-Closed Guarantees**: Eliminate ambiguous execution paths; execution must terminate on missing/partial artifacts or hash mismatches.
 
 **Stop Conditions (Non-Negotiable):**
 - Artifact emission is non-atomic
@@ -103,27 +95,21 @@ This document outlines the authoritative build plan for Gantral. We follow a str
 - Logs or dashboards are treated as evidence
 - Execution continues under ambiguity
 
-
 ---
 
+## ✅ Phase 7: Production Hardening
+*Goal: Production-grade artifact durability.*
 
-## 🔮 Future: Gantrio (Commercial Layer)
-*Note: These features are explicit non-goals for Gantral OSS.*
-
-
-- [ ] Enterprise SSO (SAML)
-- [ ] Role-Based Access Control (RBAC) UI
-- [ ] Approval inboxes and escalation UX
-- [ ] Cost attribution dashboards
-- [ ] Compliance reporting and exports
-- [ ] Managed hosting and support
-
+- [x] **7.1 Immutable Artifact Storage**: Enforce write-once storage immutability for all authority commitment artifacts.
+- [x] **7.2 Deterministic Upgrade Protocol**: Ensure that structural changes to the artifact schema or hashing logic do not invalidate the historical artifact chain during replay, guaranteeing backward compatibility.
+- [x] **7.3 Multi-Tenant Isolation**: Bind `teamid` immutably to all execution instances and commitment artifacts, and enforce hard rejection of any cross-tenant artifact access or mixing.
+- [x] **7.4 Replay Determinism Validation**: Prove that the Replay Verifier strictly matches the TRD output states (`VALID`, `INVALID`, `INCONCLUSIVE`)
+- [x] **7.5 Fail-Closed Chaos Validation**: Prove that Gantral's core execution and artifact emission pipelines strictly fail-closed under infrastructure chaos or data corruption
+- [x] **7.6 Example Architecture Hardening**: Prove that external users (and our own examples) interact with Gantral *only* through the official SDK, without ever leaking internal kernel dependencies (`core`, `internal`, `adapters`, `pkg`) into external integration code.
 
 ---
-
 
 ## Final Reminder
-
 
 Gantral is an **execution authority layer**, not:
 - A workflow engine

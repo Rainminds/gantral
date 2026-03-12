@@ -11,8 +11,8 @@ import (
 type InstanceStore interface {
 	CreateInstance(ctx context.Context, inst *engine.Instance) error
 	GetInstance(ctx context.Context, id string) (*engine.Instance, error)
-	// ListInstances retrieves all instances.
-	ListInstances(ctx context.Context) ([]*engine.Instance, error)
+	// ListInstances retrieves all instances for a team.
+	ListInstances(ctx context.Context, teamID string) ([]*engine.Instance, error)
 
 	// GetAuditEvents retrieves the immutable event log for an instance.
 	GetAuditEvents(ctx context.Context, instanceID string) ([]engine.AuditEvent, error)
