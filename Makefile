@@ -17,6 +17,9 @@ test-tier1:
 	@go test -v -count=1 ./tests/unit/... ./tests/statemachine/... ./tests/artifact/... ./tests/replay/... ./internal/... ./core/... ./pkg/... ./adapters/... ./cmd/... | grep -v "no test files" || true
 	@echo "Tier 1 Tests Completed."
 
+check-coverage:
+	./scripts/check-coverage.sh
+
 test-tier2:
 	@echo "Running Tier 2 Integration Tests..."
 	@go test -tags=integration -v ./tests/integration/...

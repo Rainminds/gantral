@@ -125,15 +125,7 @@ test_core:
       make test-tier2
 
       # 4. Coverage Check
-      go test -tags=integration -coverpkg=./... -coverprofile=coverage.raw.out ./...
-      grep -v -E "infra/|cmd/|pkg/logger/|pkg/config/|sdk/|github.com/Rainminds/gantral/main.go" coverage.raw.out > coverage.out
-      TOTAL=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//')
-      echo "Total Coverage (Filtered): $TOTAL%"
-
-      if (( $(echo "$TOTAL < 70.0" | bc -l) )); then
-        echo "Coverage below 70%"
-        exit 1
-      fi
+      make check-coverage
   artifacts:
     reports:
       coverage_report:

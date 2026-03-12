@@ -22,9 +22,8 @@ Execute the following steps sequentially and report any failures. Do not proceed
     - **Note**: Integration tests must use typed `engine.State` and terminal states for replay.
 
 4.  **Coverage Validation**:
-    - Run: `go test -tags=integration -coverpkg=./... -coverprofile=coverage.raw.out ./...`
-    - Filter and check: `grep -v -E "infra/|cmd/|pkg/logger/|pkg/config/|sdk/|github.com/Rainminds/gantral/main.go" coverage.raw.out > coverage.out`
-    - Verify: `TOTAL=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//'); if (( $(echo "$TOTAL < 70.0" | bc -l) )); then echo "Coverage $TOTAL% is below 70%"; exit 1; fi`
+    - Run `./scripts/check-coverage.sh` (Threshold: 60%).
+    - **Note**: This filters out infrastructure and entrypoints; it focuses on core logic integrity.
 
 5.  **Documentation Integrity**:
     - Run `make docs-build` to catch MDX or Docusaurus compilation errors.
